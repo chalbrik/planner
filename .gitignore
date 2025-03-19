@@ -1,0 +1,100 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+.env
+
+# Database
+*.sqlite3
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Cached files
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Angular
+/dist/
+/tmp/
+/out-tsc/
+/bazel-out/
+
+# Node
+/node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage/
+/libpeerconnection.log
+testem.log
+/typings/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# e2e
+/e2e/*.js
+/e2e/*.map
+
+# Compiled output
+*.js.map
+*.css.map
+
+# Environment files
+/src/environments/*.js
