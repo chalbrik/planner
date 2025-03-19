@@ -1,7 +1,7 @@
 from pydantic import BaseSettings, PostgresDsn, validator
 from typing import Optional, Dict, Any
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenvnvm install-latest-npm
 
 load_dotenv()  # ładuje zmienne środowiskowe z pliku .env
 
