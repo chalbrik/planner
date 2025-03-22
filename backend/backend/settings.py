@@ -43,10 +43,15 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'authentication',
+
+    'silk',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -186,3 +191,49 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
+
+# Konfiguracja Silk
+SILKY_PYTHON_PROFILER = True
+SILKY_PYTHON_PROFILER_BINARY = True
+SILKY_META = True
+SILKY_INTERCEPT_PERCENT = 100  # Rejestruj wszystkie zapytania (100%)
+SILKY_ANALYZE_QUERIES = True
+
+# Opcjonalnie, możesz ograniczyć dostęp tylko do zalogowanych użytkowników
+SILKY_AUTHENTICATION = False
+SILKY_AUTHORISATION = False
+
+# Tylko użytkownicy z uprawnieniami staff mają dostęp
+# def SILKY_PERMISSIONS(user):
+#     return user.is_staff
+
+# Konfiguracja Django Debug Toolbar
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True,  # Zawsze pokazuj pasek (możesz zmienić na własną funkcję)
+    'SHOW_COLLAPSED': True,  # Pasek jest początkowo zwinięty
+    'SHOW_TEMPLATE_CONTEXT': True,  # Pokazuj kontekst szablonów
+    'ENABLE_STACKTRACES': True,  # Pokazuj stack trace dla zapytań SQL
+
+}
+
+# Możesz dostosować panele, które mają być wyświetlane
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.versions.VersionsPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.cache.CachePanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.logging.LoggingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+]
+
+# Django Debug Toolbar
+INTERNAL_IPS = [
+    '127.0.0.1',
+]

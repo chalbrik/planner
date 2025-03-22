@@ -26,6 +26,12 @@ export class AuthService {
   }
 
   checkAuth(): void {
+    // Jeśli nie ma tokenu dostępu, nie próbuj sprawdzać autoryzacji
+    if (!this.accessToken) {
+      this.currentUserSubject.next(null);
+      return;
+    }
+
     this.http.get<User>(`${this.apiUrl}user/`, {withCredentials: true}).subscribe({
       next: (user: User) => {
         this.currentUserSubject.next(user);
