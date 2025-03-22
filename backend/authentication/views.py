@@ -46,16 +46,11 @@ class TokenObtainPairWithCookieView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Próba uwierzytelnienia
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return Response(
-                {'detail': 'Nieprawidłowa nazwa użytkownika lub hasło.'},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
+        # Używaj Django authenticate zamiast ręcznego wyszukiwania
+        from django.contrib.auth import authenticate
+        user = authenticate(username=username, password=password)
 
-        if not user.check_password(password):
+        if user is None:
             return Response(
                 {'detail': 'Nieprawidłowa nazwa użytkownika lub hasło.'},
                 status=status.HTTP_401_UNAUTHORIZED
@@ -65,7 +60,7 @@ class TokenObtainPairWithCookieView(APIView):
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
 
-        # Ustawianie HttpOnly cookie dla refresh tokena
+        # Ustawianie odpowiedzi
         response = Response({'access': access_token})
 
         # Obliczamy czas wygaśnięcia cookie
@@ -76,10 +71,10 @@ class TokenObtainPairWithCookieView(APIView):
             key='refresh_token',
             value=str(refresh),
             httponly=True,
-            secure=True,  # wymaga HTTPS w produkcji
+            secure=settings.SESSION_COOKIE_SECURE,  # Używaj wartości z konfiguracji Django
             samesite='Strict',
             expires=expires.timestamp(),
-            path='/api/auth/token/refresh/'  # ograniczamy scope cookie
+            path='/api/auth/token/refresh/'
         )
 
         return response
@@ -89,7 +84,7 @@ class TokenRefreshWithCookieView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        # Pobieramy refresh token z cookie zamiast z body
+        # Pobieramy refresh token z cookie
         refresh_token = request.COOKIES.get('refresh_token')
 
         if not refresh_token:
@@ -102,8 +97,12 @@ class TokenRefreshWithCookieView(APIView):
             refresh = RefreshToken(refresh_token)
             access_token = str(refresh.access_token)
 
-            # Generujemy nowy refresh token (rotacja tokenów)
-            new_refresh = RefreshToken.for_user(request.user)
+            # Pobierz użytkownika z tokenu
+            user_id = refresh.payload.get('user_id')
+            user = User.objects.get(id=user_id)
+
+            # Generujemy nowy refresh token
+            new_refresh = RefreshToken.for_user(user)
 
             # Tworzymy odpowiedź z nowym access tokenem
             response = Response({'access': access_token})
@@ -116,7 +115,7 @@ class TokenRefreshWithCookieView(APIView):
                 key='refresh_token',
                 value=str(new_refresh),
                 httponly=True,
-                secure=True,
+                secure=settings.SESSION_COOKIE_SECURE,
                 samesite='Strict',
                 expires=expires.timestamp(),
                 path='/api/auth/token/refresh/'
@@ -132,11 +131,9 @@ class TokenRefreshWithCookieView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        # Usuwamy cookie z refresh tokenem
         response = Response({'detail': 'Wylogowano pomyślnie.'})
-        response.delete_cookie('refresh_token')
-
+        response.delete_cookie('refresh_token', path='/api/auth/token/refresh/')
         return response

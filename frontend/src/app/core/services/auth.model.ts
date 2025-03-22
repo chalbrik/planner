@@ -7,5 +7,5 @@ export interface User {
 }
 
 export interface AuthTokens {
-  accessToken: string;
+  access: string;
 }

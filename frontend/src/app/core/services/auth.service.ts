@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import {Observable, BehaviorSubject, throwError, catchError, of} from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { User, AuthTokens} from './auth.model';
 
@@ -16,9 +16,11 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser = this.currentUserSubject.asObservable();
 
+  private isRefreshing = false;
 
+  constructor(private http: HttpClient) {}
 
-  constructor(private http: HttpClient) {
+  init(): void {
     //Sprawdzenie autentykacji użytkownika
     this.checkAuth();
   }
@@ -36,15 +38,15 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post<AuthTokens>(`${this.apiUrl}token/`,
+    return this.http.post<{access: string}>(`${this.apiUrl}token/`,
       { username, password },
-      { withCredentials: true } //pozwala na akceptowanie cookies
+      { withCredentials: true }
     ).pipe(
-        tap(response => {
-          this.accessToken = response.accessToken;
-          this.loadUserProfile();
-        })
-      );
+      tap(response => {
+        this.accessToken = response.access;
+        this.loadUserProfile();
+      })
+    );
   }
 
   register(userData: any): Observable<any> {
@@ -52,19 +54,36 @@ export class AuthService {
   }
 
   refreshToken(): Observable<any> {
-    // Refresh token jest już w cookie, więc nie trzeba go przesyłać
-    return this.http.post<AuthTokens>(`${this.apiUrl}token/refresh/`,
+    if (this.isRefreshing) {
+      return throwError(() => new Error('Odświeżanie tokenu już w toku'));
+    }
+
+    this.isRefreshing = true;
+
+    return this.http.post<{access: string}>(`${this.apiUrl}token/refresh/`,
       {},
       {withCredentials: true}
     ).pipe(
-        tap(response => {
-          this.accessToken = response.accessToken;
-        })
-      );
+      tap(response => {
+        this.accessToken = response.access;
+        this.isRefreshing = false;
+      }),
+      catchError(error => {
+        this.isRefreshing = false;
+        this.accessToken = null;
+        this.currentUserSubject.next(null);
+        return throwError(() => error);
+      })
+    );
   }
 
   logout(): Observable<any> {
     //Wysyłamy żądanie do backendu, żeby wyczyścił cookie z refresh token
+    if (!this.accessToken) {
+      this.accessToken = null;
+      this.currentUserSubject.next(null);
+      return of({ detail: 'Wylogowano pomyślnie' });
+    }
 
     return this.http.post<any>(`${this.apiUrl}logout/`,
       {},
@@ -73,6 +92,11 @@ export class AuthService {
       tap(() => {
         this.accessToken = null;
         this.currentUserSubject.next(null);
+      }),
+      catchError(() => {
+        this.accessToken = null;
+        this.currentUserSubject.next(null);
+        return of({ detail: 'Wylogowano pomyślnie' });
       })
     );
   }
