@@ -7,7 +7,12 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
   const authService = inject(AuthService);
 
   // Dodaj token tylko jeśli jest dostępny
-  const token = localStorage.getItem('access_token');
+  const token = authService.getAccessToken();
+
+  //Zawsze dodajemy withCredentials:true dla zapytań API, aby cookies były wysyłane
+  req = req.clone({
+    withCredentials: true
+  });
 
   if (token) {
     req = req.clone({
@@ -41,7 +46,7 @@ function handleUnauthorized(req: HttpRequest<unknown>, next: HttpHandlerFn, auth
     }),
     catchError(refreshError => {
       // Jeśli odświeżenie się nie powiedzie, wyloguj użytkownika
-      authService.logout();
+      authService.logout().subscribe();
       return throwError(() => refreshError);
     })
   );

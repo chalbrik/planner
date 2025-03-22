@@ -140,10 +140,14 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",  # Dla Angular dev server
 ]
 
+# Bardzo ważne! Pozwala na przesyłanie cookies w żądaniach CORS
+CORS_ALLOW_CREDENTIALS = True
+
+# Konfiguracja Simple JWT
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
+    'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
@@ -154,3 +158,11 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+# Ustawienia cookie
+SESSION_COOKIE_SECURE = True  # Wymaga HTTPS w produkcji
+CSRF_COOKIE_SECURE = True     # Wymaga HTTPS w produkcji
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
