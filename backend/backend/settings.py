@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -193,8 +193,8 @@ CSRF_COOKIE_SAMESITE = 'Strict'
 SESSION_COOKIE_SAMESITE = 'Strict'
 
 # Konfiguracja Silk
-SILKY_PYTHON_PROFILER = True
-SILKY_PYTHON_PROFILER_BINARY = True
+SILKY_PYTHON_PROFILER = False
+SILKY_PYTHON_PROFILER_BINARY = False
 SILKY_META = True
 SILKY_INTERCEPT_PERCENT = 100  # Rejestruj wszystkie zapytania (100%)
 SILKY_ANALYZE_QUERIES = True
@@ -202,6 +202,10 @@ SILKY_ANALYZE_QUERIES = True
 # Opcjonalnie, możesz ograniczyć dostęp tylko do zalogowanych użytkowników
 SILKY_AUTHENTICATION = False
 SILKY_AUTHORISATION = False
+
+# Ścieżka do folderu na pliki profilowania - to cos nie dziala prawidlowo
+SILKY_PYTHON_PROFILER_ROOT = os.path.join(BASE_DIR, 'profiling_data')
+
 
 # Tylko użytkownicy z uprawnieniami staff mają dostęp
 # def SILKY_PERMISSIONS(user):
@@ -236,4 +240,5 @@ DEBUG_TOOLBAR_PANELS = [
 # Django Debug Toolbar
 INTERNAL_IPS = [
     '127.0.0.1',
+    'localhost',
 ]
