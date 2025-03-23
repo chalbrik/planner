@@ -19,6 +19,11 @@ export const routes: Routes = [
         canActivate: [AuthGuard]
       },
       {
+        path: 'schedule',
+        loadComponent: () => import('./features/schedule/schedule.component').then(m => m.ScheduleComponent),
+        canActivate: [AuthGuard]
+      },
+      {
         path: '',
         redirectTo: '/dashboard',
         pathMatch: 'full',

@@ -6,7 +6,8 @@
           <h1 class="text-xl font-bold text-indigo-600">Planner</h1>
         </div>
         <nav class="ml-6 flex space-x-8">
-          <!-- Możesz dodać tutaj elementy menu -->
+          <a routerLink="/dashboard" routerLinkActive="text-indigo-600" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Dashboard</a>
+          <a routerLink="/schedule" routerLinkActive="text-indigo-600" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium">Harmonogram</a>
         </nav>
       </div>
       <div class="flex items-center" *ngIf="currentUser">
