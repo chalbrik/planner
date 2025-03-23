@@ -22,6 +22,8 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
+    path('api/schedule/', include('schedule.urls')),
+
     path('silk/', include('silk.urls', namespace='silk')),
 ]
 
