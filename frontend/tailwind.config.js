@@ -7,6 +7,7 @@ module.exports = {
     extend: {
       fontFamily: {
         'rubik': ['Rubik', 'sans-serif'],
+        'geist': ['Geist', 'sans-serif'],
       },
       colors: {
         'true-gray': {

@@ -1,16 +1,17 @@
-<header class="bg-warm-gray-200">
-  <div class="flex flex-row justify-between items-center">
-    <div #logo>
-      <h1 class="font-rubik text-xl font-bold text-true-gray-600">Planner</h1>
+<header class="font-geist bg-warm-gray-200 fixed top-0 left-0 right-0 h-24 flex item-center">
+  <div class="w-full mx-8 flex flex-row justify-between items-center">
+    <div #logo class="w-52">
+      <h1 class="text-xl font-bold text-true-gray-600 text-center">Planner</h1>
     </div>
-    <nav #navigation class="w-full flex justify-around">
+    <nav #navigation class="w-full flex justify-start">
       <a routerLink="/dashboard" routerLinkActive="font-bold" class="text-true-gray-600 px-2">User dashboard</a>
       <a routerLink="/schedule" routerLinkActive="font-bold" class="text-true-gray-600 px-2">Grafik</a>
     </nav>
     @if (currentUser) {
-      <div #userOptions class="flex justify-around">
-        <span class="text-true-gray-600">{{ currentUser.username }}</span>
+      <div #userOptions class="flex justify-around items-center">
+        <span class="text-true-gray-600 px-2">{{ currentUser.username }}</span>
         <button mat-flat-button
+                class="px-2"
                 (click)="logout()"
         >Wyloguj</button>
       </div>
