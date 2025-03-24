@@ -1,19 +1,19 @@
 <header class="bg-warm-gray-200">
-    <div class="flex flex-row justify-between items-center">
-        <div #logo>
-            <h1 class="font-rubik text-xl font-bold text-true-gray-600">Planner</h1>
-        </div>
-        <nav #navigation class="w-full flex justify-around">
-            <a routerLink="/dashboard" routerLinkActive="font-bold" class="text-true-gray-600 px-2">User dashboard</a>
-            <a routerLink="/schedule" routerLinkActive="font-bold" class="text-true-gray-600 px-2">Grafik</a>
-        </nav>
-        @if(currentUser){
-            <div #userOptions class="flex justify-around">
-            <span class="text-true-gray-600">{{currentUser.username}}</span>
-            <button mat-flat-button
-                    (click)="logout()"
-            >Wylogwwwujww</button>
-            </div>
-        }
+  <div class="flex flex-row justify-between items-center">
+    <div #logo>
+      <h1 class="font-rubik text-xl font-bold text-true-gray-600">Planner</h1>
     </div>
+    <nav #navigation class="w-full flex justify-around">
+      <a routerLink="/dashboard" routerLinkActive="font-bold" class="text-true-gray-600 px-2">User dashboard</a>
+      <a routerLink="/schedule" routerLinkActive="font-bold" class="text-true-gray-600 px-2">Grafik</a>
+    </nav>
+    @if (currentUser) {
+      <div #userOptions class="flex justify-around">
+        <span class="text-true-gray-600">{{ currentUser.username }}</span>
+        <button mat-flat-button
+                (click)="logout()"
+        >Wyloguj</button>
+      </div>
+    }
+  </div>
 </header>

@@ -16,6 +16,8 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
 
+  autoLogin = true;
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -27,6 +29,21 @@ export class LoginComponent implements OnInit {
       username: ['', [Validators.required]],
       password: ['', [Validators.required]]
     });
+
+    // Sprawdź, czy jesteśmy w trybie deweloperskim
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && this.autoLogin) {
+      // Ustaw dane dla trybu deweloperskiego
+      this.loginForm.setValue({
+        username: 'chalbrik',  // Zmień na własne dane testowe
+        password: 'alpachino'  // Zmień na własne dane testowe
+      });
+
+      // Automatyczne logowanie po krótkim opóźnieniu
+      setTimeout(() => {
+        this.onSubmit();
+      }, 500);
+    }
+
   }
 
   onSubmit(): void {
@@ -42,7 +59,7 @@ export class LoginComponent implements OnInit {
     this.authService.login(username, password).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/schedule']);
       },
       error: (err) => {
         this.isLoading = false;

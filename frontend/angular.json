@@ -73,7 +73,7 @@
           },
           "defaultConfiguration": "development",
           "options" : {
-            "hmr": true
+            "hmr": false
           }
         },
         "extract-i18n": {

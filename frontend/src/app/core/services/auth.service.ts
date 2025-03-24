@@ -21,6 +21,10 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   init(): void {
+    //na moment pracy developerskiej
+    this.accessToken = localStorage.getItem('access_token');
+    //
+
     //Sprawdzenie autentykacji użytkownika
     this.checkAuth();
   }
@@ -49,6 +53,10 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       tap(response => {
+        //na moment pracy developerskiej
+        localStorage.setItem('access_token', response.access);
+        //
+
         this.accessToken = response.access;
         this.loadUserProfile();
       })
@@ -84,6 +92,11 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
+
+    //na moment pracy developerskiej
+    localStorage.removeItem('access_token');
+    //
+
     //Wysyłamy żądanie do backendu, żeby wyczyścił cookie z refresh token
     if (!this.accessToken) {
       this.accessToken = null;

@@ -3,6 +3,9 @@ import { AuthGuard } from './core/guards/auth.guard';
 import {DashboardComponent} from './features/dashboard/dashboard.component';
 import {DashboardLayoutComponent} from './layout/dashboard-layout/dashboard-layout.component';
 
+//trzeba bedzie dodac pozniej te linike do poszczegolnych patch zeby logowanie dzialalo
+//canActivate: [AuthGuard],
+
 export const routes: Routes = [
   {
     path: 'auth',
@@ -16,16 +19,16 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: 'schedule',
         loadComponent: () => import('./features/schedule/schedule.component').then(m => m.ScheduleComponent),
-        canActivate: [AuthGuard]
+        canActivate: [AuthGuard],
       },
       {
         path: '',
-        redirectTo: '/dashboard',
+        redirectTo: '/schedule',
         pathMatch: 'full',
       }
     ]
