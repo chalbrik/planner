@@ -1,7 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {ScheduleService} from '../../core/services/schedule.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+
+interface Day {
+  date: Date;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  isWeekend: boolean;
+}
 
 @Component({
   selector: 'app-schedule',
@@ -15,6 +22,9 @@ export class ScheduleComponent implements OnInit {
   workHours: any[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+
+  currentMonth = signal<Date>(new Date());
+  days = signal<Day[]>([]);
 
   constructor(private scheduleService: ScheduleService) {}
 

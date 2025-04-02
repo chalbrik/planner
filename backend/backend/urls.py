@@ -24,7 +24,7 @@ urlpatterns = [
     path('api/auth/', include('authentication.urls')),
     path('api/schedule/', include('schedule.urls')),
 
-    path('silk/', include('silk.urls', namespace='silk')),
+    # path('silk/', include('silk.urls', namespace='silk')),
 ]
 
 if settings.DEBUG:
