@@ -6,7 +6,7 @@
   </div>
 
 <!--  Kontener, ktory zawiera główny grafik-->
-  <div class="flex flex-row">
+  <div class="flex flex-col">
 <!--    Pracownicy-->
 <!--    <ng-container [ngTemplateOutlet]="Employees"></ng-container>-->
 
@@ -56,10 +56,10 @@
 
   <div>
     Sticky Columns:
-    <mat-button-toggle-group multiple [value]="['position', 'symbol']"
+    <mat-button-toggle-group multiple [value]="['employees', 'symbol']"
                              #stickyColumns="matButtonToggleGroup"
                              class="example-sticky-toggle-group">
-      <mat-button-toggle value="position"> Position </mat-button-toggle>
+      <mat-button-toggle value="employees"> Employees </mat-button-toggle>
       <mat-button-toggle value="name"> Name </mat-button-toggle>
       <mat-button-toggle value="weight"> Weight </mat-button-toggle>
       <mat-button-toggle value="symbol"> Symbol </mat-button-toggle>
@@ -69,10 +69,10 @@
   <section class="example-container mat-elevation-z8" tabindex="0">
     @for (table of tables; track table) {
       <mat-table [dataSource]="dataSource">
-        <ng-container matColumnDef="position" [sticky]="isSticky(stickyColumns, 'position')">
-          <mat-header-cell *matHeaderCellDef> Position </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{element.position}} </mat-cell>
-          <mat-footer-cell *matFooterCellDef> Position Footer </mat-footer-cell>
+        <ng-container matColumnDef="employees" [sticky]="isSticky(stickyColumns, 'employees')">
+          <mat-header-cell *matHeaderCellDef> Employees </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{element.employees}} </mat-cell>
+          <mat-footer-cell *matFooterCellDef> Employees Footer </mat-footer-cell>
         </ng-container>
 
         <ng-container matColumnDef="name" [sticky]="isSticky(stickyColumns, 'name')">
