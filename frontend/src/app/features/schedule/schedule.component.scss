@@ -18,9 +18,12 @@
   text-align: center;
 }
 
-::ng-deep .mat-column-position {
+::ng-deep .mat-column-employees {
   width: 400px !important;
-  left: 0px !important;  // <-- TO JEST KLUCZOWE dla sticky!
+  min-width: 400px !important;
+  max-width: 400px !important;
+  flex: 0 0 400px !important; // Dla mat-table w trybie flex
+  left: 0px !important;  // Dla sticky pozycjonowania
 }
 
 .mat-mdc-header-cell, .mat-mdc-footer-cell, .mat-mdc-cell {
