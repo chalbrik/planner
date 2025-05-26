@@ -3,7 +3,7 @@ import {ScheduleService} from '../../core/services/schedule.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
-  MatCell,
+  MatCell, MatColumnDef,
   MatFooterCell,
   MatFooterRow,
   MatHeaderCell,
@@ -11,6 +11,7 @@ import {
   MatRow,
   MatTable
 } from '@angular/material/table';
+import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 
 interface Day {
   date: Date;
@@ -21,7 +22,21 @@ interface Day {
 
 @Component({
   selector: 'app-schedule',
-  imports: [FormsModule, ReactiveFormsModule, CommonModule, MatTable, MatHeaderCell, MatCell, MatFooterCell, MatHeaderRow, MatRow, MatFooterRow, MatButtonToggleGroup, MatButtonToggle],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    CommonModule,
+    MatTable,
+    MatHeaderCell,
+    MatCell,
+    MatFooterCell,
+    MatHeaderRow,
+    MatRow,
+    MatFooterRow,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    MatColumnDef
+  ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
   standalone: true,
@@ -61,11 +76,8 @@ export class ScheduleComponent implements OnInit {
     this.displayedColumns[22] = 'weight';
     this.displayedColumns[23] = 'symbol';
 
-    /** Whether the button toggle group contains the id as an active value. */
-    isSticky(buttonToggleGroup: MatButtonToggleGroup, id: string) {
-      return (buttonToggleGroup.value || []).indexOf(id) !== -1;
-    }
   }
+
 
   loadEmployees(){
     this.isLoading = true;
@@ -95,6 +107,11 @@ export class ScheduleComponent implements OnInit {
         console.error('Błąd ładowania harmonogramu:', error);
       }
     });
+  }
+
+  /** Whether the button toggle group contains the id as an active value. */
+  isSticky(buttonToggleGroup: MatButtonToggleGroup, id: string) {
+    return (buttonToggleGroup.value || []).indexOf(id) !== -1;
   }
 }
 
