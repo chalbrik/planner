@@ -79,11 +79,9 @@ export class ScheduleComponent implements OnInit {
     this.displayedColumns.length = 10;
     this.displayedColumns.fill('filler');
 
-    // The first two columns should be employees and name; the last two columns: weight, symbol
+    // The first two columns should be employees and name; the last two columns: hoursSum
     this.displayedColumns[0] = 'employees';
-    this.displayedColumns[1] = 'name';
-    this.displayedColumns[6] = 'weight';
-    this.displayedColumns[9] = 'symbol';
+    this.displayedColumns[9] = 'hoursSum';
 
   }
 
@@ -125,21 +123,19 @@ export class ScheduleComponent implements OnInit {
 }
 
 export interface PeriodicElement {
-  name: string;
   employees: string;
-  weight: number;
-  symbol: string;
+  hoursSum: number;
 }
 
 const ELEMENT_DATA: PeriodicElement[] = [
-  {employees: "Jan Kowalski", name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-  {employees: "Jan Kowalski", name: 'Helium', weight: 4.0026, symbol: 'He'},
-  {employees: "Jan Kowalski", name: 'Lithium', weight: 6.941, symbol: 'Li'},
-  {employees: "Jan Kowalski", name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-  {employees: "Jan Kowalski", name: 'Boron', weight: 10.811, symbol: 'B'},
-  {employees: "Jan Kowalski", name: 'Carbon', weight: 12.0107, symbol: 'C'},
-  {employees: "Jan Kowalski", name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-  {employees: "Jan Kowalski", name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-  {employees: "Jan Kowalski", name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-  {employees: "Jan Kowalski", name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
+  {employees: "Jan Kowalski", hoursSum: 98},
 ];

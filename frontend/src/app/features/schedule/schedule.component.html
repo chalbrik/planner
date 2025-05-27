@@ -56,13 +56,11 @@
 
   <div>
     Sticky Columns:
-    <mat-button-toggle-group multiple [value]="['employees', 'symbol']"
+    <mat-button-toggle-group multiple [value]="['employees', 'hoursSum']"
                              #stickyColumns="matButtonToggleGroup"
                              class="example-sticky-toggle-group">
       <mat-button-toggle value="employees"> Employees </mat-button-toggle>
-      <mat-button-toggle value="name"> Name </mat-button-toggle>
-      <mat-button-toggle value="weight"> Weight </mat-button-toggle>
-      <mat-button-toggle value="symbol"> Symbol </mat-button-toggle>
+      <mat-button-toggle value="hoursSum"> Symbol </mat-button-toggle>
     </mat-button-toggle-group>
   </div>
 
@@ -75,22 +73,10 @@
           <mat-footer-cell *matFooterCellDef> Employees Footer </mat-footer-cell>
         </ng-container>
 
-        <ng-container matColumnDef="name" [sticky]="isSticky(stickyColumns, 'name')">
-          <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
-          <mat-footer-cell *matFooterCellDef> Name Footer </mat-footer-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="weight" [stickyEnd]="isSticky(stickyColumns, 'weight')">
-          <mat-header-cell *matHeaderCellDef> Weight </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{element.weight}} </mat-cell>
-          <mat-footer-cell *matFooterCellDef> Weight Footer </mat-footer-cell>
-        </ng-container>
-
-        <ng-container matColumnDef="symbol" [stickyEnd]="isSticky(stickyColumns, 'symbol')">
-          <mat-header-cell *matHeaderCellDef> Symbol </mat-header-cell>
-          <mat-cell *matCellDef="let element"> {{element.symbol}} </mat-cell>
-          <mat-footer-cell *matFooterCellDef> Symbol Footer </mat-footer-cell>
+        <ng-container matColumnDef="hoursSum" [stickyEnd]="isSticky(stickyColumns, 'hoursSum')">
+          <mat-header-cell *matHeaderCellDef> Suma godzin </mat-header-cell>
+          <mat-cell *matCellDef="let element"> {{element.hoursSum}} </mat-cell>
+          <mat-footer-cell *matFooterCellDef> hoursSum Footer </mat-footer-cell>
         </ng-container>
 
         <ng-container matColumnDef="filler">
