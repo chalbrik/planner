@@ -18,18 +18,25 @@
   text-align: center;
 }
 
-.mat-column-employees {
-  //width: 400px !important;
+mat-table .mat-column-employees {
+  width: 400px !important;
   min-width: 250px ;
-  //max-width: 400px !important;
+  max-width: 400px !important;
   //flex: 0 0 400px !important; // Dla mat-table w trybie flex
   //left: 0px !important;  // Dla sticky pozycjonowania
 }
 
-.mat-column-hoursSum {
-  width: 50px;
-  min-width: 50px !important;
+mat-table .mat-column-hoursSum {
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
 }
+
+//mat-table .mat-column-hoursSum {
+//  width: 50px !important;
+//  min-width: 50px !important;
+//  max-width: 50px !important;
+//}
 
 .mat-mdc-header-cell, .mat-mdc-footer-cell, .mat-mdc-cell {
   //min-width: 80px;

@@ -1,4 +1,4 @@
-import {Component, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {Component, OnInit, signal, computed, ViewEncapsulation} from '@angular/core';
 import {ScheduleService} from '../../core/services/schedule.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -16,9 +16,16 @@ import {MatButton} from '@angular/material/button';
 
 interface Day {
   date: Date;
+  dayNumber: number;
   isCurrentMonth: boolean;
   isToday: boolean;
   isWeekend: boolean;
+}
+
+interface EmployeeRow {
+  id: number;
+  name: string;
+  workHours: { [key: string]: string }; // klucz to data w formacie YYYY-MM-DD, wartość to godziny pracy
 }
 
 @Component({
@@ -56,43 +63,68 @@ export class ScheduleComponent implements OnInit {
   isLoading = false;
   errorMessage: string | null = null;
 
+  // Sygnały dla zarządzania datami
   currentMonth = signal<Date>(new Date());
-  days = signal<Day[]>([]);
 
-  // Zmienne tabeli
-  displayedColumns: string[] = [];
-  dataSource = ELEMENT_DATA;
+  // Obliczony sygnał dla dni miesiąca
+  monthDays = computed(() => {
+    const currentDate = this.currentMonth();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    // Pierwszy dzień miesiąca
+    const firstDay = new Date(year, month, 1);
+    // Ostatni dzień miesiąca
+    const lastDay = new Date(year, month + 1, 0);
+
+    const days: Day[] = [];
+    const today = new Date();
+
+    // Generuj wszystkie dni miesiąca
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay(); // 0 = niedziela, 6 = sobota
+
+      days.push({
+        date: date,
+        dayNumber: day,
+        isCurrentMonth: true,
+        isToday: date.toDateString() === today.toDateString(),
+        isWeekend: dayOfWeek === 0 || dayOfWeek === 6
+      });
+    }
+
+    return days;
+  });
+
+  // Obliczony sygnał dla kolumn tabeli
+  displayedColumns = computed(() => {
+    const days = this.monthDays();
+    const dayColumns = days.map(day => `day-${day.dayNumber}`);
+    return ['employees', ...dayColumns, 'hoursSum'];
+  });
+
+  // Przygotowane dane dla tabeli
+  dataSource: EmployeeRow[] = [];
 
   tables = [0];
 
   constructor(private scheduleService: ScheduleService) {}
 
   ngOnInit() {
-  this.loadEmployees();
-  this.loadWorkHours();
-
-    console.log("Pracownicy: ", this.employees);
-    console.log("Godziny pracy: ", this.workHours);
-
-
-    // Zmienne do tabeli
-    this.displayedColumns.length = 10;
-    this.displayedColumns.fill('filler');
-
-    // The first two columns should be employees and name; the last two columns: hoursSum
-    this.displayedColumns[0] = 'employees';
-    this.displayedColumns[9] = 'hoursSum';
+    this.loadEmployees();
+    this.loadWorkHours();
 
   }
 
-
-  loadEmployees(){
+  loadEmployees() {
     this.isLoading = true;
     this.scheduleService.getEmployees().subscribe({
-        next: (data) => {
-          this.employees = data;
-          this.isLoading = false;
-        },
+      next: (data) => {
+        this.employees = data;
+        this.prepareTableData();
+        this.isLoading = false;
+      },
       error: (error) => {
         this.errorMessage = 'Nie udało się załadować pracowników';
         this.isLoading = false;
@@ -103,9 +135,16 @@ export class ScheduleComponent implements OnInit {
 
   loadWorkHours(): void {
     this.isLoading = true;
-    this.scheduleService.getWorkHours().subscribe({
+    const currentDate = this.currentMonth();
+    const filters = {
+      month: currentDate.getMonth() + 1,
+      year: currentDate.getFullYear()
+    };
+
+    this.scheduleService.getWorkHours(filters).subscribe({
       next: (data) => {
         this.workHours = data;
+        this.prepareTableData();
         this.isLoading = false;
       },
       error: (error) => {
@@ -116,26 +155,76 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
+  prepareTableData() {
+    if (this.employees.length === 0) return;
+
+    this.dataSource = this.employees.map(employee => {
+      const workHoursMap: { [key: string]: string } = {};
+
+      // Znajdź godziny pracy dla tego pracownika
+      const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+
+      employeeWorkHours.forEach(wh => {
+        workHoursMap[wh.date] = wh.hours;
+      });
+
+      return {
+        id: employee.id,
+        name: `${employee.first_name} ${employee.last_name}`,
+        workHours: workHoursMap
+      };
+    });
+  }
+
+  // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
+  getWorkHoursForDay(employee: EmployeeRow, dayNumber: number): string {
+    const currentDate = this.currentMonth();
+    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    return employee.workHours[dateString] || '';
+  }
+
+  // Metoda do obliczania sumy godzin dla pracownika (uproszczona)
+  getTotalHoursForEmployee(employee: EmployeeRow): number {
+    const hours = Object.values(employee.workHours);
+    // To jest uproszczona logika - możesz ją rozbudować
+    return hours.length * 8; // Przykład: każdy dzień pracy = 8 godzin
+  }
+
+  // Metoda do zmiany miesiąca
+  changeMonth(direction: number) {
+    const current = this.currentMonth();
+    const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 1);
+    this.currentMonth.set(newDate);
+    this.loadWorkHours(); // Przeładuj dane dla nowego miesiąca
+  }
+
+  getMonthName(): string {
+    const months = [
+      'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
+      'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
+    ];
+    const currentDate = this.currentMonth();
+    return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+  }
+
   /** Whether the button toggle group contains the id as an active value. */
   isSticky(buttonToggleGroup: MatButtonToggleGroup, id: string) {
     return (buttonToggleGroup.value || []).indexOf(id) !== -1;
   }
-}
 
-export interface PeriodicElement {
-  employees: string;
-  hoursSum: number;
-}
+  // Metoda pomocnicza do sprawdzania czy dzień jest weekendem
+  isDayWeekend(dayNumber: number): boolean {
+    const currentDate = this.currentMonth();
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
+    const dayOfWeek = date.getDay();
+    return dayOfWeek === 0 || dayOfWeek === 6;
+  }
 
-const ELEMENT_DATA: PeriodicElement[] = [
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-  {employees: "Jan Kowalski", hoursSum: 98},
-];
+  // Metoda pomocnicza do sprawdzania czy dzień jest dzisiaj
+  isDayToday(dayNumber: number): boolean {
+    const currentDate = this.currentMonth();
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  }
+}
