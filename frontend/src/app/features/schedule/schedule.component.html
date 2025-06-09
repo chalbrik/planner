@@ -125,10 +125,10 @@
 
 <ng-template #Schedule>
 
-  <div class="mb-4">
-    <button mat-raised-button (click)="tables.push(tables.length)">Dodaj tabelę</button>
-    <button mat-raised-button (click)="tables.pop()">Usuń tabelę</button>
-  </div>
+<!--  <div class="mb-4">-->
+<!--    <button mat-raised-button (click)="tables.push(tables.length)">Dodaj tabelę</button>-->
+<!--    <button mat-raised-button (click)="tables.pop()">Usuń tabelę</button>-->
+<!--  </div>-->
 
   <div class="mb-4">
     Sticky Headers:
@@ -207,15 +207,14 @@
 
         <!-- Wiersze nagłówka -->
         <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: isSticky(stickyHeaders, 'header-1')"></mat-header-row>
-        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: isSticky(stickyHeaders, 'header-2')"
-                        class="secondary-header"></mat-header-row>
+<!--        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: isSticky(stickyHeaders, 'header-2')" class="secondary-header"></mat-header-row>-->
 
         <!-- Wiersze danych -->
         <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
 
         <!-- Wiersze stopki -->
-        <mat-footer-row *matFooterRowDef="displayedColumns(); sticky: isSticky(stickyFooters, 'footer-1')"></mat-footer-row>
-        <mat-footer-row *matFooterRowDef="displayedColumns(); sticky: isSticky(stickyFooters, 'footer-2')"></mat-footer-row>
+<!--        <mat-footer-row *matFooterRowDef="displayedColumns(); sticky: isSticky(stickyFooters, 'footer-1')"></mat-footer-row>-->
+<!--        <mat-footer-row *matFooterRowDef="displayedColumns(); sticky: isSticky(stickyFooters, 'footer-2')"></mat-footer-row>-->
       </mat-table>
     }
   </section>
