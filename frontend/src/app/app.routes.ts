@@ -27,6 +27,11 @@ export const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
+        path: 'employees',
+        loadComponent: () => import('./features/employees/employees.component').then(m => m.EmployeesComponent),
+        canActivate: [AuthGuard],
+      },
+      {
         path: '',
         redirectTo: '/schedule',
         pathMatch: 'full',
