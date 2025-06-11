@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import {DashboardComponent} from './features/dashboard/dashboard.component';
 import {DashboardLayoutComponent} from './layout/dashboard-layout/dashboard-layout.component';
+import {EmployeesRoutes} from './features/employees/employees.routes';
 
 //trzeba bedzie dodac pozniej te linike do poszczegolnych patch zeby logowanie dzialalo
 //canActivate: [AuthGuard],
@@ -28,7 +29,7 @@ export const routes: Routes = [
       },
       {
         path: 'employees',
-        loadComponent: () => import('./features/employees/employees.component').then(m => m.EmployeesComponent),
+        loadChildren: () => import('./features/employees/employees.routes').then(m => m.EmployeesRoutes),
         canActivate: [AuthGuard],
       },
       {

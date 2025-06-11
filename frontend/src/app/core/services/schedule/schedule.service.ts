@@ -10,10 +10,6 @@ export class ScheduleService {
 
   constructor(private http: HttpClient) { }
 
-  getEmployees(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}employees`);
-  }
-
   getWorkHours(filters?: any): Observable<any[]> {
     let url = `${this.apiUrl}work-hours/`;
     if(filters){
@@ -28,10 +24,6 @@ export class ScheduleService {
     }
 
     return this.http.get<any[]>(url);
-  }
-
-  addEmployee(employee: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}employees/`, employee);
   }
 
   addWorkHours(workHours: any): Observable<any> {

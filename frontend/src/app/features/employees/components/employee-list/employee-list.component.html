@@ -1,1 +1,10 @@
-<p>employee-list works!</p>
+@if(employees.length){
+  <div class="">
+    @for(employee of employees; track employee){
+      <div>{{employee.firstName}}</div>
+    }
+
+
+  </div>
+}
+

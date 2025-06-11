@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {Employee} from '../../../../core/services/employees/employee.types';
+
 
 @Component({
   selector: 'app-employee-list',
@@ -6,6 +8,13 @@ import { Component } from '@angular/core';
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
 })
-export class EmployeeListComponent {
+export class EmployeeListComponent implements OnInit {
+  @Input() employees: Employee[] = [];
+
+  ngOnInit () {
+    console.log(this.employees);
+  }
+
+
 
 }

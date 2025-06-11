@@ -1,5 +1,5 @@
 import {Component, OnInit, signal, computed, ViewEncapsulation} from '@angular/core';
-import {ScheduleService} from '../../core/services/schedule.service';
+import {ScheduleService} from '../../core/services/schedule/schedule.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@angular/material/table';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {MatButton} from '@angular/material/button';
+import {EmployeesService} from '../../core/services/employees/employees.service';
 
 interface Day {
   date: Date;
@@ -109,7 +110,10 @@ export class ScheduleComponent implements OnInit {
 
   tables = [0];
 
-  constructor(private scheduleService: ScheduleService) {}
+  constructor(
+    private scheduleService: ScheduleService,
+    private employeesService: EmployeesService,
+  ) {}
 
   ngOnInit() {
     this.loadEmployees();
@@ -119,7 +123,7 @@ export class ScheduleComponent implements OnInit {
 
   loadEmployees() {
     this.isLoading = true;
-    this.scheduleService.getEmployees().subscribe({
+    this.employeesService.getEmployees().subscribe({
       next: (data) => {
         this.employees = data;
         this.prepareTableData();
