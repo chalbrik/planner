@@ -7,7 +7,6 @@ import {EmployeeListComponent} from './components/employee-list/employee-list.co
 @Component({
   selector: 'app-employees',
   imports: [
-    RouterOutlet,
     EmployeeListComponent
   ],
   templateUrl: './employees.component.html',

@@ -1,10 +1,11 @@
-@if(employees.length){
-  <div class="">
+@if(employees.length > 0){
+  <div class="h-full w-full rounded-xl bg-gray-300 p-4">
     @for(employee of employees; track employee){
-      <div>{{employee.firstName}}</div>
+      <div class="font-rubik font-normal">{{employee.first_name}} {{employee.last_name}}</div>
     }
-
-
+    <button mat-button (click)="openAddEmployeeDialog('0ms', '0ms')">Add</button>
   </div>
+
+
 }
 
