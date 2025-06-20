@@ -1,5 +1,11 @@
-import { Component } from '@angular/core';
-import {MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle} from '@angular/material/dialog';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle
+} from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
 import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 
@@ -16,8 +22,10 @@ import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
     MatInput,
   ],
   templateUrl: './employee-form-dialog.component.html',
-  styleUrl: './employee-form-dialog.component.scss'
+  styleUrl: './employee-form-dialog.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeeFormDialogComponent {
+  readonly dialogRef = inject(MatDialogRef<EmployeeFormDialogComponent>);
 
 }

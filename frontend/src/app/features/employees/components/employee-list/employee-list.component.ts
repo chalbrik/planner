@@ -10,7 +10,7 @@ import {EmployeeFormDialogComponent} from '../employee-form-dialog/employee-form
   selector: 'app-employee-list',
   imports: [
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
   ],
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
@@ -25,11 +25,10 @@ export class EmployeeListComponent implements OnInit {
   }
 
 
-  openAddEmployeeDialog(enterAnimationDuration: string, exitAnimationDuration: string): void {
-    this.addEmployeeDialog.open(EmployeeFormDialogComponent, {
-      width: '1000px',
-      enterAnimationDuration,
-      exitAnimationDuration,
+  openAddEmployeeDialog(): void {
+    const dialogRef = this.addEmployeeDialog.open(EmployeeFormDialogComponent, {
+      width: '1200px',
+      data: { message: 'Witaj w dialogu!' }
     });
   }
 
