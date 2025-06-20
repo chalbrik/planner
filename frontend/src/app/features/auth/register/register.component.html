@@ -4,14 +4,18 @@
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4">
       <!-- Alert o błędach -->
-      <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        {{ error }}
-      </div>
+      @if (error) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {{ error }}
+        </div>
+      }
 
       <!-- Alert o sukcesie -->
-      <div *ngIf="success" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-        {{ success }}
-      </div>
+      @if (success) {
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {{ success }}
+        </div>
+      }
 
       <!-- Pole nazwy użytkownika -->
       <div>
@@ -22,10 +26,16 @@
           type="text"
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           required>
-        <div *ngIf="registerForm.get('username')?.invalid && (registerForm.get('username')?.dirty || registerForm.get('username')?.touched)" class="text-red-500 text-sm mt-1">
-          <div *ngIf="registerForm.get('username')?.errors?.['required']">Nazwa użytkownika jest wymagana</div>
-          <div *ngIf="registerForm.get('username')?.errors?.['minlength']">Nazwa użytkownika musi mieć co najmniej 3 znaki</div>
-        </div>
+        @if (registerForm.get('username')?.invalid && (registerForm.get('username')?.dirty || registerForm.get('username')?.touched)) {
+          <div class="text-red-500 text-sm mt-1">
+            @if (registerForm.get('username')?.errors?.['required']) {
+              <div>Nazwa użytkownika jest wymagana</div>
+            }
+            @if (registerForm.get('username')?.errors?.['minlength']) {
+              <div>Nazwa użytkownika musi mieć co najmniej 3 znaki</div>
+            }
+          </div>
+        }
       </div>
 
       <!-- Pole email -->
@@ -37,10 +47,16 @@
           type="email"
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           required>
-        <div *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)" class="text-red-500 text-sm mt-1">
-          <div *ngIf="registerForm.get('email')?.errors?.['required']">Email jest wymagany</div>
-          <div *ngIf="registerForm.get('email')?.errors?.['email']">Podaj prawidłowy adres email</div>
-        </div>
+        @if (registerForm.get('email')?.invalid && (registerForm.get('email')?.dirty || registerForm.get('email')?.touched)) {
+          <div class="text-red-500 text-sm mt-1">
+            @if (registerForm.get('email')?.errors?.['required']) {
+              <div>Email jest wymagany</div>
+            }
+            @if (registerForm.get('email')?.errors?.['email']) {
+              <div>Podaj prawidłowy adres email</div>
+            }
+          </div>
+        }
       </div>
 
       <!-- Pole imię -->
@@ -72,10 +88,16 @@
           type="password"
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           required>
-        <div *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)" class="text-red-500 text-sm mt-1">
-          <div *ngIf="registerForm.get('password')?.errors?.['required']">Hasło jest wymagane</div>
-          <div *ngIf="registerForm.get('password')?.errors?.['minlength']">Hasło musi mieć co najmniej 8 znaków</div>
-        </div>
+        @if (registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)) {
+          <div class="text-red-500 text-sm mt-1">
+            @if (registerForm.get('password')?.errors?.['required']) {
+              <div>Hasło jest wymagane</div>
+            }
+            @if (registerForm.get('password')?.errors?.['minlength']) {
+              <div>Hasło musi mieć co najmniej 8 znaków</div>
+            }
+          </div>
+        }
       </div>
 
       <!-- Przycisk rejestracji -->
@@ -84,8 +106,12 @@
           type="submit"
           [disabled]="registerForm.invalid || isLoading"
           class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300">
-          <span *ngIf="isLoading">Rejestracja...</span>
-          <span *ngIf="!isLoading">Zarejestruj się</span>
+          @if (isLoading) {
+            <span>Rejestracja...</span>
+          }
+          @if (!isLoading) {
+            <span>Zarejestruj się</span>
+          }
         </button>
       </div>
 

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -7,7 +7,7 @@ import { AuthService } from '../../core/services/auth.service';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   standalone: true,
-  imports: [CommonModule]
+  imports: []
 })
 export class DashboardComponent implements OnInit {
   currentUser: any = null;

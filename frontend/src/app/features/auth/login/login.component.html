@@ -4,9 +4,11 @@
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
       <!-- Alert o błędach -->
-      <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        {{ error }}
-      </div>
+      @if (error) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {{ error }}
+        </div>
+      }
 
       <!-- Pole nazwy użytkownika -->
       <div>
@@ -17,9 +19,11 @@
           type="text"
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           required>
-        <div *ngIf="loginForm.get('username')?.invalid && (loginForm.get('username')?.dirty || loginForm.get('username')?.touched)" class="text-red-500 text-sm mt-1">
-          Nazwa użytkownika jest wymagana
-        </div>
+        @if (loginForm.get('username')?.invalid && (loginForm.get('username')?.dirty || loginForm.get('username')?.touched)) {
+          <div class="text-red-500 text-sm mt-1">
+            Nazwa użytkownika jest wymagana
+          </div>
+        }
       </div>
 
       <!-- Pole hasła -->
@@ -31,9 +35,11 @@
           type="password"
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           required>
-        <div *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)" class="text-red-500 text-sm mt-1">
-          Hasło jest wymagane
-        </div>
+        @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
+          <div class="text-red-500 text-sm mt-1">
+            Hasło jest wymagane
+          </div>
+        }
       </div>
 
       <!-- Przycisk logowania -->
@@ -42,8 +48,12 @@
           type="submit"
           [disabled]="loginForm.invalid || isLoading"
           class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300">
-          <span *ngIf="isLoading">Logowanie...</span>
-          <span *ngIf="!isLoading">Zaloguj się</span>
+          @if (isLoading) {
+            <span>Logowanie...</span>
+          }
+          @if (!isLoading) {
+            <span>Zaloguj się</span>
+          }
         </button>
       </div>
 
