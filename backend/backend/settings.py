@@ -46,14 +46,14 @@ INSTALLED_APPS = [
     'authentication',
     'schedule',
 
-    # 'silk',
+    'silk',
     # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
-    # 'silk.middleware.SilkyMiddleware',
+    'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

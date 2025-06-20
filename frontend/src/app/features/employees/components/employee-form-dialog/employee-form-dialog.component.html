@@ -3,15 +3,15 @@
   info
 </mat-dialog-content>
 
-<form class="p-10">
+<form class="p-10" [formGroup]="addEmployeeForm">
 
   <div class="flex flex-col">
-    <mat-form-field class="example-full-width">
+    <mat-form-field class="example-full-width" formControlName="firstName">
       <mat-label>Imię</mat-label>
       <input matInput>
     </mat-form-field>
 
-    <mat-form-field class="example-full-width">
+    <mat-form-field class="example-full-width" formControlName="lastName">
       <mat-label>Nazwisko</mat-label>
       <input matInput>
     </mat-form-field>
@@ -21,7 +21,7 @@
 </form>
 
 <mat-dialog-actions>
-  <button mat-button mat-dialog-close>No</button>
-  <button mat-button mat-dialog-close>Ok</button>
+  <button mat-button mat-dialog-close>Anuluj</button>
+  <button mat-button (click)="onAddEmployee()">Dodaj</button>
 </mat-dialog-actions>
 

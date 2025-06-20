@@ -4,6 +4,7 @@ import {MatIcon, MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
 import {EmployeeFormDialogComponent} from '../employee-form-dialog/employee-form-dialog.component';
+import {EmployeesService} from '../../../../core/services/employees/employees.service';
 
 
 @Component({
@@ -20,6 +21,9 @@ export class EmployeeListComponent implements OnInit {
 
   readonly addEmployeeDialog = inject(MatDialog);
 
+  constructor(private employeeService: EmployeesService) {
+  }
+
   ngOnInit () {
     console.log(this.employees);
   }
@@ -29,6 +33,12 @@ export class EmployeeListComponent implements OnInit {
     const dialogRef = this.addEmployeeDialog.open(EmployeeFormDialogComponent, {
       width: '1500px',
     });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.employeeService.addEmployee(result)
+      }
+    })
   }
 
 
