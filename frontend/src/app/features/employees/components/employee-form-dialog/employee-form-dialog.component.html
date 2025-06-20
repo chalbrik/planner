@@ -1,26 +1,27 @@
-<div style="background: red;">
-
-
 <h2 mat-dialog-title>Dodaj nowego pracownika</h2>
 <mat-dialog-content>
   info
 </mat-dialog-content>
 
-<form class="example-form">
+<form class="p-10">
 
-  <mat-form-field class="example-full-width">
-  <mat-label>First name</mat-label>
-  <input matInput>
-  </mat-form-field>
+  <div class="flex flex-col">
+    <mat-form-field class="example-full-width">
+      <mat-label>Imię</mat-label>
+      <input matInput>
+    </mat-form-field>
 
-  <mat-form-field class="example-full-width">
-    <mat-label>Long Last Name That Will Be Truncated</mat-label>
-    <input matInput>
-  </mat-form-field>
+    <mat-form-field class="example-full-width">
+      <mat-label>Nazwisko</mat-label>
+      <input matInput>
+    </mat-form-field>
+  </div>
 
-  <mat-dialog-actions>
-    <button mat-button mat-dialog-close>No</button>
-    <button mat-button mat-dialog-close>Ok</button>
-  </mat-dialog-actions>
+
 </form>
-</div>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>No</button>
+  <button mat-button mat-dialog-close>Ok</button>
+</mat-dialog-actions>
+
