@@ -1,4 +1,4 @@
-import {Component, computed, Input, signal} from '@angular/core';
+import {Component, computed, Input, OnInit, signal} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatTimepickerModule, MatTimepickerOption} from '@angular/material/timepicker';
@@ -22,9 +22,14 @@ import {Employee} from '../../../../core/services/employees/employee.types';
   templateUrl: './edit-schedule-component.component.html',
   styleUrl: './edit-schedule-component.component.scss'
 })
-export class EditScheduleComponentComponent {
-  @Input() employee?: Employee;
-  @Input() workHours?: any;
+export class EditScheduleComponentComponent implements OnInit {
+  @Input() selectedCell: {
+    employee: any;
+    day: number;
+    date: Date;
+    workHours: string;
+  } | null = null;
+
   editScheduleForm!: FormGroup;
 
   timeFrom = signal<string>('')
@@ -41,6 +46,8 @@ export class EditScheduleComponentComponent {
     this.editScheduleForm = this.formBuilder.group({
       hours: this.formattedTime,
     })
+
+    console.log(this.selectedCell)
   }
 
   formattedTime = computed(() => {
@@ -56,7 +63,7 @@ export class EditScheduleComponentComponent {
 
   onEditPanelSave(){
     if(this.editScheduleForm.valid) {
-      this.scheduleService.updateWorkHours()
+      // this.scheduleService.updateWorkHours()
     }
   }
 

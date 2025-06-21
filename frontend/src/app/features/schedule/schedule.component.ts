@@ -65,11 +65,11 @@ export class ScheduleComponent implements OnInit {
   errorMessage: string | null = null;
 
   // Sygnały dla zarządzania datami
-  currentMonth = signal<Date>(new Date());
+  currentMonthDate = signal<Date>(new Date());
 
   // Obliczony sygnał dla dni miesiąca
   monthDays = computed(() => {
-    const currentDate = this.currentMonth();
+    const currentDate = this.currentMonthDate();
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
@@ -110,6 +110,13 @@ export class ScheduleComponent implements OnInit {
 
   tables = [0];
 
+  selectedCell = signal<{
+    employee: any;
+    day: number;
+    date: Date;
+    workHours: string;
+  } | null>(null);
+
   constructor(
     private scheduleService: ScheduleService,
     private employeesService: EmployeesService,
@@ -139,7 +146,7 @@ export class ScheduleComponent implements OnInit {
 
   loadWorkHours(): void {
     this.isLoading = true;
-    const currentDate = this.currentMonth();
+    const currentDate = this.currentMonthDate();
     const filters = {
       month: currentDate.getMonth() + 1,
       year: currentDate.getFullYear()
@@ -184,7 +191,7 @@ export class ScheduleComponent implements OnInit {
 
   // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
   getWorkHoursForDay(employee: EmployeeRow, dayNumber: number): string {
-    const currentDate = this.currentMonth();
+    const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
     return employee.workHours[dateString] || '';
   }
@@ -198,9 +205,9 @@ export class ScheduleComponent implements OnInit {
 
   // Metoda do zmiany miesiąca
   changeMonth(direction: number) {
-    const current = this.currentMonth();
+    const current = this.currentMonthDate();
     const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 1);
-    this.currentMonth.set(newDate);
+    this.currentMonthDate.set(newDate);
     this.loadWorkHours(); // Przeładuj dane dla nowego miesiąca
   }
 
@@ -209,7 +216,7 @@ export class ScheduleComponent implements OnInit {
       'Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
       'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'
     ];
-    const currentDate = this.currentMonth();
+    const currentDate = this.currentMonthDate();
     return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   }
 
@@ -220,7 +227,7 @@ export class ScheduleComponent implements OnInit {
 
   // Metoda pomocnicza do sprawdzania czy dzień jest weekendem
   isDayWeekend(dayNumber: number): boolean {
-    const currentDate = this.currentMonth();
+    const currentDate = this.currentMonthDate();
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
     const dayOfWeek = date.getDay();
     return dayOfWeek === 0 || dayOfWeek === 6;
@@ -228,19 +235,22 @@ export class ScheduleComponent implements OnInit {
 
   // Metoda pomocnicza do sprawdzania czy dzień jest dzisiaj
   isDayToday(dayNumber: number): boolean {
-    const currentDate = this.currentMonth();
+    const currentDate = this.currentMonthDate();
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
     const today = new Date();
     return date.toDateString() === today.toDateString();
   }
 
-  onClickedScheduleBox(flag: string){
-    if(flag === 'employee'){
-      return 
-    }
-    if(flag === 'workHours'){
+  onCellClick(employee: EmployeeRow, dayNumber: number) {
+    const currentDate = this.currentMonthDate();
+    const dateObject = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
 
-    }
-}
+    this.selectedCell.set({
+      employee: employee,
+      day: dayNumber,
+      date: dateObject,
+      workHours: this.getWorkHoursForDay(employee, dayNumber)
+    });
+  }
 
 }

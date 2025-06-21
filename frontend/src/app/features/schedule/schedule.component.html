@@ -1,8 +1,7 @@
 <div class="bg-white">
 
   <app-edit-schedule-component
-    [employee]="onClickedScheduleBox('employee')"
-    [workHours]="onClickedScheduleBox('workHours')"
+    [selectedCell]="selectedCell()"
   ></app-edit-schedule-component>
 
   <!-- Kontener do wyboru miesiąca -->
@@ -89,7 +88,8 @@
 
             <mat-cell *matCellDef="let element"
                       [class.weekend-cell]="day.isWeekend"
-                      [class.today-cell]="day.isToday">
+                      [class.today-cell]="day.isToday"
+                      (click)="onCellClick(element, day.dayNumber)">
               <div class="work-hours-cell">
                 {{ getWorkHoursForDay(element, day.dayNumber) }}
               </div>
