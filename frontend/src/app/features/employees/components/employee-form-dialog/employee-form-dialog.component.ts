@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {
   MatDialogActions,
   MatDialogClose,
@@ -49,5 +49,6 @@ export class EmployeeFormDialogComponent implements OnInit {
       this.dialogRef.close(this.addEmployeeForm.value);
     }
   }
+
 
 }

@@ -14,6 +14,7 @@ import {
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {MatButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
+import {EditScheduleComponentComponent} from './components/edit-schedule-component/edit-schedule-component.component';
 
 interface Day {
   date: Date;
@@ -49,7 +50,8 @@ interface EmployeeRow {
     MatFooterCellDef,
     MatRowDef,
     MatHeaderRowDef,
-    MatButton
+    MatButton,
+    EditScheduleComponentComponent
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -163,6 +165,8 @@ export class ScheduleComponent implements OnInit {
     this.dataSource = this.employees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
 
+      console.log('Dane z API - workHours:', this.workHours);
+
       // Znajdź godziny pracy dla tego pracownika
       const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
 
@@ -229,4 +233,14 @@ export class ScheduleComponent implements OnInit {
     const today = new Date();
     return date.toDateString() === today.toDateString();
   }
+
+  onClickedScheduleBox(flag: string){
+    if(flag === 'employee'){
+      return 
+    }
+    if(flag === 'workHours'){
+
+    }
+}
+
 }
