@@ -1,38 +1,55 @@
-<mat-card appearance="outlined">
-  <mat-card-header>
-    <mat-card-title>Edytuj grafik</mat-card-title>
-    <mat-card-subtitle>Herding group</mat-card-subtitle>
-  </mat-card-header>
+@if(selectedCell){
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Edytuj grafik</mat-card-title>
+      <mat-card-subtitle>Herding group</mat-card-subtitle>
+    </mat-card-header>
 
-  <mat-card-content>
-    <div>
-      <div class="flex flex-row gap-2">
-        <mat-form-field>
-          <mat-label>Od</mat-label>
-          <input matInput
-                 [matTimepicker]="fromTimePicker"
-                 (valueChange)="timeFrom.set($event.target.value)"
-          >
-          <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>
-          <mat-timepicker interval="15min" #fromTimePicker/>
-        </mat-form-field>
+    <mat-card-content>
+      <div>
+        <div class="flex flex-row gap-2">
+          <mat-form-field>
+            <mat-label>Od</mat-label>
+            <input matInput
+                   [matTimepicker]="fromTimePicker"
+                   (valueChange)="timeFrom.set($event)"
+                   [value]="timeFrom()"
+            >
+            <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>
+            <mat-timepicker interval="15min" #fromTimePicker/>
+          </mat-form-field>
 
-        <mat-form-field>
-          <mat-label>Do</mat-label>
-          <input matInput
-                 [matTimepicker]="toTimePicker"
-                 (valueChange)="timeTo.set($event.target.value)"
-          >
-          <mat-timepicker-toggle matIconSuffix [for]="toTimePicker"/>
-          <mat-timepicker interval="15min" #toTimePicker/>
-        </mat-form-field>
+          <mat-form-field>
+            <mat-label>Do</mat-label>
+            <input matInput
+                   [matTimepicker]="toTimePicker"
+                   (valueChange)="timeTo.set($event)"
+            >
+            <mat-timepicker-toggle matIconSuffix [for]="toTimePicker"/>
+            <mat-timepicker interval="15min" #toTimePicker/>
+          </mat-form-field>
+        </div>
       </div>
-    </div>
-  </mat-card-content>
+    </mat-card-content>
 
-  <mat-card-actions>
-    <button matButton
-            (click)="onEditPanelSave()"
-    >Zapisz</button>
-  </mat-card-actions>
-</mat-card>
+    <mat-card-actions>
+      <button matButton
+              (click)="onEditPanelSave()"
+      >Zapisz</button>
+
+      <button matButton
+              (click)="onEditPanelCancel()"
+      >Anuluj</button>
+    </mat-card-actions>
+  </mat-card>
+} @else {
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Wybierz pole grafiku do edycji</mat-card-title>
+      <mat-card-subtitle>Herding group</mat-card-subtitle>
+    </mat-card-header>
+
+  </mat-card>
+}
+
+

@@ -1,10 +1,10 @@
-import {Component, computed, Input, OnInit, signal, SimpleChanges} from '@angular/core';
+import {Component, computed, EventEmitter, inject, Input, OnInit, Output, signal, SimpleChanges} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatTimepickerModule, MatTimepickerOption} from '@angular/material/timepicker';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {provideNativeDateAdapter} from '@angular/material/core';
+import {DateAdapter, provideNativeDateAdapter} from '@angular/material/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ScheduleService} from '../../../../core/services/schedule/schedule.service';
 import {Employee} from '../../../../core/services/employees/employee.types';
@@ -26,16 +26,20 @@ interface onChanges {
   styleUrl: './edit-schedule-component.component.scss'
 })
 export class EditScheduleComponentComponent implements OnInit, onChanges {
+  private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
+
   @Input() selectedCell: {
     employee: any;
     workHours: any;
     date: string;
   } | null = null;
 
+  @Output() cancelSelection = new EventEmitter<void>();
+
   editScheduleForm!: FormGroup;
 
-  timeFrom = signal<string>('')
-  timeTo = signal<string>('')
+  timeFrom = signal<Date | null>(null)
+  timeTo = signal<Date | null>(null)
 
 
   constructor(
@@ -45,9 +49,15 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
   }
 
   ngOnInit() {
+    this._adapter.setLocale('pl-PL');
+
+    const defaultStartTime = new Date();
+    defaultStartTime.setHours(6, 0, 0, 0);
+    this.timeFrom.set(defaultStartTime);
+
     this.editScheduleForm = this.formBuilder.group({
       employee: [''],
-      hours: [this.formattedTime, Validators.required],
+      hours: ['', Validators.required],
       date: ['']
     })
   }
@@ -55,14 +65,17 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
   ngOnChanges(changes: SimpleChanges) {
     //tego uzywwam do sprawdzania co sie dzieje kiedy input sie zminia
 
-    //faktycznie trzeba bedzie date przesylac poniewaz nie zawsze workHours istnieje
     if(this.selectedCell){
+      // RESET timepickerów
+      this.timeFrom.set(null);
+      this.timeTo.set(null);
+
+      // RESET formularza
       this.editScheduleForm.patchValue({
         employee: this.selectedCell.employee,
+        hours: '',
         date: this.selectedCell.workHours ? this.selectedCell.workHours.date : this.selectedCell.date,
       });
-
-      console.log("editScheduleForm", this.editScheduleForm.value);
     }
   }
 
@@ -70,25 +83,41 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     const from = this.timeFrom();
     const to = this.timeTo();
 
-    if(from && to){
-      return `${from}-${to}`;
-    } else {
-      return '';
+    if (from && to) {
+      // Wyciągnij tylko HH:MM z Date object
+      const fromTime = new Date(from).toTimeString().substring(0, 5); // "08:00"
+      const toTime = new Date(to).toTimeString().substring(0, 5);     // "16:00"
+      return `${fromTime}-${toTime}`;
     }
-  })
+    return '';
+  });
 
   onEditPanelSave(){
+
+    //Zanim wysylam to umieszczam godziny w polu hours
+    this.editScheduleForm.patchValue({
+      hours: this.formattedTime()
+    })
+
     if(this.editScheduleForm.valid) {
       // this.scheduleService.updateWorkHours().subscribe();
       //jezeli formularz jest wypelniony to updateujemy alb wstaiwamy nowy
       //jezeli updateujemy to musi byc watunek spelniony
 
+      console.log("editScheduleForm", this.editScheduleForm.value);
       if(this.selectedCell?.workHours){
         this.scheduleService.updateWorkHours(this.selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {})
       } else {
         // this.scheduleService.addWorkHours(this.selectedCell).subscribe();
       }
     }
+  }
+
+  onEditPanelCancel(){
+    this.timeFrom.set(null);
+    this.timeTo.set(null);
+    this.editScheduleForm.reset();
+    this.cancelSelection.emit();
   }
 
 }

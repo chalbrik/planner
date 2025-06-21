@@ -254,4 +254,8 @@ export class ScheduleComponent implements OnInit {
     });
   }
 
+  onCancelSelection() {
+    this.selectedCell.set(null);
+  }
+
 }
