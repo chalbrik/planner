@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 # Create your models here.
@@ -8,6 +10,7 @@ User = get_user_model()
 
 class Employee(models.Model):
     objects = models.Manager()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
 
@@ -21,6 +24,7 @@ class Employee(models.Model):
 
 class WorkHours(models.Model):
     objects = models.Manager()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='work_hours', verbose_name="Pracownik")
     date = models.DateField(verbose_name="Data pracy")
     hours = models.CharField(max_length=50, verbose_name="Godziny pracy", help_text="np. 8:00-16:00")

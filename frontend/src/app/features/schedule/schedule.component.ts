@@ -112,9 +112,8 @@ export class ScheduleComponent implements OnInit {
 
   selectedCell = signal<{
     employee: any;
-    day: number;
-    date: Date;
-    workHours: string;
+    workHours: any;
+    date: string
   } | null>(null);
 
   constructor(
@@ -154,6 +153,7 @@ export class ScheduleComponent implements OnInit {
 
     this.scheduleService.getWorkHours(filters).subscribe({
       next: (data) => {
+        console.log("workHours", data);
         this.workHours = data;
         this.prepareTableData();
         this.isLoading = false;
@@ -171,9 +171,6 @@ export class ScheduleComponent implements OnInit {
 
     this.dataSource = this.employees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
-
-      console.log('Dane z API - workHours:', this.workHours);
-
       // Znajdź godziny pracy dla tego pracownika
       const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
 
@@ -243,13 +240,17 @@ export class ScheduleComponent implements OnInit {
 
   onCellClick(employee: EmployeeRow, dayNumber: number) {
     const currentDate = this.currentMonthDate();
-    const dateObject = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
+    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
 
+    console.log("DateString: ", dateString);
+
+    const workHoursObject = this.workHours.find(wh =>
+      wh.employee === employee.id && wh.date === dateString
+    );
     this.selectedCell.set({
       employee: employee,
-      day: dayNumber,
-      date: dateObject,
-      workHours: this.getWorkHoursForDay(employee, dayNumber)
+      workHours: workHoursObject || null,
+      date: dateString
     });
   }
 

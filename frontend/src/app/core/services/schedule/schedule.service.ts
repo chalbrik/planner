@@ -30,7 +30,7 @@ export class ScheduleService {
     return this.http.post<any>(`${this.apiUrl}work-hours/`, workHours);
   }
 
-  updateWorkHours(id: number, workHours: any): Observable<any> {
+  updateWorkHours(id: string, workHours: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}work-hours/${id}/`, workHours);
   }
 
