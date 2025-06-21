@@ -1,7 +1,15 @@
 @if(employees.length > 0){
   <div class="h-full w-full rounded-xl bg-gray-300 p-4">
     @for(employee of employees; track employee){
-      <div class="font-rubik font-normal">{{employee.first_name}} {{employee.last_name}}</div>
+      <div class="w-full flex flex-row justify-between">
+        <div class="font-rubik font-normal">{{employee.first_name}} {{employee.last_name}}</div>
+        <button matIconButton
+                aria-label="Usuń pracownika"
+                (click)="onDeleteEmployee(employee)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
     }
     <button mat-button (click)="openAddEmployeeDialog()">Add</button>
   </div>

@@ -44,4 +44,12 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
+  onEmployeeAdded(newEmployee: Employee) {
+    this.employees.push(newEmployee);
+  }
+
+  onEmployeeDeleted(oldEmployee: Employee) {
+    this.employees = this.employees.filter((employee) => employee.id !== oldEmployee.id);
+  }
+
 }

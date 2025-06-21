@@ -38,8 +38,8 @@ export class EmployeeFormDialogComponent implements OnInit {
 
   ngOnInit() {
     this.addEmployeeForm = this.formBuilder.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      first_name: ['', Validators.required],
+      last_name: ['', Validators.required],
     })
 
   }

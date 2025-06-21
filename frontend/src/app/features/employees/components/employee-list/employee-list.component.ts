@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
 import {Employee} from '../../../../core/services/employees/employee.types';
 import {MatIcon, MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
@@ -18,10 +18,12 @@ import {EmployeesService} from '../../../../core/services/employees/employees.se
 })
 export class EmployeeListComponent implements OnInit {
   @Input() employees: Employee[] = [];
+  @Output() employeeAdded = new EventEmitter<Employee>();
+  @Output() employeeDeleted = new EventEmitter<Employee>();
 
   readonly addEmployeeDialog = inject(MatDialog);
 
-  constructor(private employeeService: EmployeesService) {
+  constructor(private employeesService: EmployeesService) {
   }
 
   ngOnInit () {
@@ -36,9 +38,28 @@ export class EmployeeListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.employeeService.addEmployee(result)
+        this.employeesService.addEmployee(result).subscribe({
+          next: (newEmployee) => {
+            this.employeeAdded.emit(newEmployee);
+          },
+          error: (error) => {
+            console.error('Błąd podczas dodawania pracownika: ', error);
+          }
+        });
       }
     })
+  }
+
+  onDeleteEmployee(employee: Employee) {
+    this.employeesService.deleteEmployee(employee.id).subscribe({
+      next: () => {
+        this.employeeDeleted.emit(employee);
+      },
+      error: (error) => {
+        console.error("Błąd podczas usuwania pracownika: ", error);
+      }
+    })
+
   }
 
 
