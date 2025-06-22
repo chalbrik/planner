@@ -1,16 +1,16 @@
 import { Component, Input, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { IconName } from './icons/icon.types';
 import { IconSize, IconComponentProps } from './icons/icon.interfaces';
 import { getIconSvg, getIconVariant } from './icons/heroicons';
-import {IconName} from './icons/icon.types';
 
 @Component({
   selector: 'app-icon',
   standalone: true,
   imports: [CommonModule],
-  template: './icon.component.html',
-  styles: './icon.component.scss',
+  templateUrl: './icon.component.html',
+  styleUrls: ['./icon.component.scss']
 })
 export class IconComponent implements OnInit {
   // Inputs jako sygnały

@@ -19,6 +19,8 @@ import {DateAdapter, provideNativeDateAdapter} from '@angular/material/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ScheduleService} from '../../../../core/services/schedule/schedule.service';
 import {Employee} from '../../../../core/services/employees/employee.types';
+import {IconComponent} from '../../../../shared/components/icon';
+
 
 interface onChanges {
 }
@@ -31,7 +33,8 @@ interface onChanges {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTimepickerModule
+    MatTimepickerModule,
+    IconComponent
   ],
   templateUrl: './edit-schedule-component.component.html',
   styleUrl: './edit-schedule-component.component.scss',
@@ -89,6 +92,8 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
         date: this.selectedCell.workHours ? this.selectedCell.workHours.date : this.selectedCell.date,
       });
     }
+
+    console.log("selectedCell: ", this.selectedCell);
   }
 
   formattedTime = computed(() => {

@@ -25,6 +25,3 @@ export {
   getIconSvg,
   HEROICONS
 } from './icons/heroicons';
-
-// Domyślny eksport komponentu
-export default IconComponent;
