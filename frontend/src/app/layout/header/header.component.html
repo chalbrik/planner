@@ -11,10 +11,7 @@
     @if (currentUser) {
       <div #userOptions class="flex justify-around items-center">
         <span class="text-true-gray-600 px-2">{{ currentUser.username }}</span>
-        <button mat-flat-button
-                class="px-2"
-                (click)="logout()"
-        >Wyloguj</button>
+        <button mat-flat-button class="px-2" (click)="logout()">Wyloguj</button>
       </div>
     }
   </div>

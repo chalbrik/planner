@@ -1,0 +1,8 @@
+<span
+  [innerHTML]="sanitizedSvg()"
+  [class]="computedClasses()"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-hidden]="ariaHidden() ? 'true' : null"
+  [style.width.px]="computedSize()"
+  [style.height.px]="computedSize()"
+></span>

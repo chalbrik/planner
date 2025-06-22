@@ -1,4 +1,15 @@
-import {Component, computed, EventEmitter, inject, Input, OnInit, Output, signal, SimpleChanges} from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output,
+  signal,
+  SimpleChanges,
+  ViewEncapsulation
+} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatTimepickerModule, MatTimepickerOption} from '@angular/material/timepicker';
@@ -23,7 +34,8 @@ interface onChanges {
     MatTimepickerModule
   ],
   templateUrl: './edit-schedule-component.component.html',
-  styleUrl: './edit-schedule-component.component.scss'
+  styleUrl: './edit-schedule-component.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class EditScheduleComponentComponent implements OnInit, onChanges {
   private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
@@ -104,7 +116,7 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
       //jezeli formularz jest wypelniony to updateujemy alb wstaiwamy nowy
       //jezeli updateujemy to musi byc watunek spelniony
 
-      console.log("editScheduleForm", this.editScheduleForm.value);
+      // console.log("editScheduleForm", this.editScheduleForm.value);
       if(this.selectedCell?.workHours){
         this.scheduleService.updateWorkHours(this.selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {})
       } else {

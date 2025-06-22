@@ -1,9 +1,22 @@
 @if(selectedCell){
-  <mat-card appearance="outlined">
+  <mat-card appearance="outlined" class="h-52">
     <mat-card-header>
-      <mat-card-title>Edytuj grafik</mat-card-title>
-      <mat-card-subtitle>Herding group</mat-card-subtitle>
+      <div class="w-full border-b-2">
+        <mat-card-title>Edytuj grafik</mat-card-title>
+        <mat-card-subtitle>Herding group</mat-card-subtitle>
+
+        <div class="flex flex-col">
+          <div class="flex flex-row">
+
+          </div>
+          <span>Imie nazwisko</span>
+        </div>
+
+      </div>
     </mat-card-header>
+
+    <!--Odstęp-->
+    <div class="w-full h-5"></div>
 
     <mat-card-content>
       <div>
@@ -33,18 +46,20 @@
       </div>
     </mat-card-content>
 
-    <mat-card-actions>
-      <button matButton
-              (click)="onEditPanelSave()"
-      >Zapisz</button>
+    <!--Odstęp-->
+    <div class="w-full h-5"></div>
 
-      <button matButton
-              (click)="onEditPanelCancel()"
-      >Anuluj</button>
+    <mat-card-actions>
+      <div class="w-full flex flex-row justify-end gap-2">
+        <button mat-flat-button class="save-button px-2" (click)="onEditPanelSave()">Zapisz</button>
+        <button matButton="outlined" class="cancel-button px-2"  (click)="onEditPanelCancel()">Anuluj</button>
+      </div>
+
     </mat-card-actions>
+
   </mat-card>
 } @else {
-  <mat-card appearance="outlined">
+  <mat-card appearance="outlined" class="h-52">
     <mat-card-header>
       <mat-card-title>Wybierz pole grafiku do edycji</mat-card-title>
       <mat-card-subtitle>Herding group</mat-card-subtitle>

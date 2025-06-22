@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-br4^m-yud-(bi(@ya!ew8avojwv%ai8pxx8iaj2=ql@_-1qn!)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -47,12 +47,10 @@ INSTALLED_APPS = [
     'schedule',
 
     'silk',
-    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -187,8 +185,8 @@ SIMPLE_JWT = {
 }
 
 # Ustawienia cookie
-SESSION_COOKIE_SECURE = True  # Wymaga HTTPS w produkcji
-CSRF_COOKIE_SECURE = True     # Wymaga HTTPS w produkcji
+SESSION_COOKIE_SECURE = False  # Wymaga HTTPS w produkcji - na True trzeba ustawic
+CSRF_COOKIE_SECURE = False     # Wymaga HTTPS w produkcji - na True trzeba ustawic
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Strict'
@@ -213,34 +211,3 @@ SESSION_COOKIE_SAMESITE = 'Strict'
 # def SILKY_PERMISSIONS(user):
 #     return user.is_staff
 
-# Konfiguracja Django Debug Toolbar
-# DEBUG_TOOLBAR_CONFIG = {
-#     'SHOW_TOOLBAR_CALLBACK': lambda request: True,  # Zawsze pokazuj pasek (możesz zmienić na własną funkcję)
-#     'SHOW_COLLAPSED': True,  # Pasek jest początkowo zwinięty
-#     'SHOW_TEMPLATE_CONTEXT': True,  # Pokazuj kontekst szablonów
-#     'ENABLE_STACKTRACES': True,  # Pokazuj stack trace dla zapytań SQL
-#
-# }
-
-# Możesz dostosować panele, które mają być wyświetlane
-# DEBUG_TOOLBAR_PANELS = [
-#     'debug_toolbar.panels.versions.VersionsPanel',
-#     'debug_toolbar.panels.timer.TimerPanel',
-#     'debug_toolbar.panels.settings.SettingsPanel',
-#     'debug_toolbar.panels.headers.HeadersPanel',
-#     'debug_toolbar.panels.request.RequestPanel',
-#     'debug_toolbar.panels.sql.SQLPanel',
-#     'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-#     'debug_toolbar.panels.templates.TemplatesPanel',
-#     'debug_toolbar.panels.cache.CachePanel',
-#     'debug_toolbar.panels.signals.SignalsPanel',
-#     'debug_toolbar.panels.logging.LoggingPanel',
-#     'debug_toolbar.panels.redirects.RedirectsPanel',
-#     'debug_toolbar.panels.profiling.ProfilingPanel',
-# ]
-
-# Django Debug Toolbar
-# INTERNAL_IPS = [
-#     '127.0.0.1',
-#     'localhost',
-# ]
