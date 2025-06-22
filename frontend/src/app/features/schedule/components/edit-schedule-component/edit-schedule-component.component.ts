@@ -72,7 +72,7 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
 
       // RESET formularza
       this.editScheduleForm.patchValue({
-        employee: this.selectedCell.employee,
+        employee: this.selectedCell.employee.id,
         hours: '',
         date: this.selectedCell.workHours ? this.selectedCell.workHours.date : this.selectedCell.date,
       });
@@ -118,6 +118,23 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     this.timeTo.set(null);
     this.editScheduleForm.reset();
     this.cancelSelection.emit();
+  }
+
+  onTimeFromChange(value: Date) {
+    this.timeFrom.set(value);
+
+    if (this.timeTo() && this.timeTo()! <= value) {
+      this.timeTo.set(null);
+    }
+  }
+
+  onTimeToChange(value: Date) {
+    const fromTime = this.timeFrom();
+    if (fromTime && value > fromTime) {
+      this.timeTo.set(value);
+    } else {
+      alert('Godzina "Do" musi być późniejsza niż "Od"');
+    }
   }
 
 }

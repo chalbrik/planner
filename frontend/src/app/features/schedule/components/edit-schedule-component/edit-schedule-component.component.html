@@ -12,7 +12,7 @@
             <mat-label>Od</mat-label>
             <input matInput
                    [matTimepicker]="fromTimePicker"
-                   (valueChange)="timeFrom.set($event)"
+                   (valueChange)="onTimeFromChange($event)"
                    [value]="timeFrom()"
             >
             <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>
@@ -23,9 +23,10 @@
             <mat-label>Do</mat-label>
             <input matInput
                    [matTimepicker]="toTimePicker"
-                   (valueChange)="timeTo.set($event)"
+                   (valueChange)="onTimeToChange($event)"
+                   [disabled]="!timeFrom()"
             >
-            <mat-timepicker-toggle matIconSuffix [for]="toTimePicker"/>
+            <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>
             <mat-timepicker interval="15min" #toTimePicker/>
           </mat-form-field>
         </div>

@@ -34,42 +34,42 @@
 <!--    <button mat-raised-button (click)="tables.pop()">Usuń tabelę</button>-->
 <!--  </div>-->
 
-  <div class="mb-4">
-    Sticky Headers:
-    <mat-button-toggle-group multiple [value]="['header-1']"
-                             #stickyHeaders="matButtonToggleGroup"
-                             class="example-sticky-toggle-group">
-      <mat-button-toggle value="header-1"> Wiersz 1 </mat-button-toggle>
-      <mat-button-toggle value="header-2"> Wiersz 2 </mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
+<!--  <div class="mb-4">-->
+<!--    Sticky Headers:-->
+<!--    <mat-button-toggle-group multiple [value]="['header-1']"-->
+<!--                             #stickyHeaders="matButtonToggleGroup"-->
+<!--                             class="example-sticky-toggle-group">-->
+<!--      <mat-button-toggle value="header-1"> Wiersz 1 </mat-button-toggle>-->
+<!--      <mat-button-toggle value="header-2"> Wiersz 2 </mat-button-toggle>-->
+<!--    </mat-button-toggle-group>-->
+<!--  </div>-->
 
-  <div class="mb-4">
-    Sticky Footers:
-    <mat-button-toggle-group multiple [value]="['footer-1']"
-                             #stickyFooters="matButtonToggleGroup"
-                             class="example-sticky-toggle-group">
-      <mat-button-toggle value="footer-1"> Wiersz 1 </mat-button-toggle>
-      <mat-button-toggle value="footer-2"> Wiersz 2 </mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
+<!--  <div class="mb-4">-->
+<!--    Sticky Footers:-->
+<!--    <mat-button-toggle-group multiple [value]="['footer-1']"-->
+<!--                             #stickyFooters="matButtonToggleGroup"-->
+<!--                             class="example-sticky-toggle-group">-->
+<!--      <mat-button-toggle value="footer-1"> Wiersz 1 </mat-button-toggle>-->
+<!--      <mat-button-toggle value="footer-2"> Wiersz 2 </mat-button-toggle>-->
+<!--    </mat-button-toggle-group>-->
+<!--  </div>-->
 
-  <div class="mb-4">
-    Sticky Columns:
-    <mat-button-toggle-group multiple [value]="['employees', 'hoursSum']"
-                             #stickyColumns="matButtonToggleGroup"
-                             class="example-sticky-toggle-group">
-      <mat-button-toggle value="employees"> Pracownicy </mat-button-toggle>
-      <mat-button-toggle value="hoursSum"> Suma godzin </mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
+<!--  <div class="mb-4">-->
+<!--    Sticky Columns:-->
+<!--    <mat-button-toggle-group multiple [value]="['employees', 'hoursSum']"-->
+<!--                             #stickyColumns="matButtonToggleGroup"-->
+<!--                             class="example-sticky-toggle-group">-->
+<!--      <mat-button-toggle value="employees"> Pracownicy </mat-button-toggle>-->
+<!--      <mat-button-toggle value="hoursSum"> Suma godzin </mat-button-toggle>-->
+<!--    </mat-button-toggle-group>-->
+<!--  </div>-->
 
   <section class="example-container mat-elevation-z8" tabindex="0">
     @for (table of tables; track table) {
       <mat-table [dataSource]="dataSource">
 
         <!-- Kolumna z pracownikami -->
-        <ng-container matColumnDef="employees" [sticky]="isSticky(stickyColumns, 'employees')">
+        <ng-container matColumnDef="employees" sticky="true">
           <mat-header-cell *matHeaderCellDef> Pracownicy </mat-header-cell>
           <mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
           <mat-footer-cell *matFooterCellDef> Pracownicy </mat-footer-cell>
@@ -104,14 +104,14 @@
         }
 
         <!-- Kolumna z sumą godzin -->
-        <ng-container matColumnDef="hoursSum" [stickyEnd]="isSticky(stickyColumns, 'hoursSum')">
+        <ng-container matColumnDef="hoursSum" stickyEnd="true">
           <mat-header-cell *matHeaderCellDef> Suma godzin </mat-header-cell>
           <mat-cell *matCellDef="let element"> {{ getTotalHoursForEmployee(element) }}h </mat-cell>
           <mat-footer-cell *matFooterCellDef> Razem </mat-footer-cell>
         </ng-container>
 
         <!-- Wiersze nagłówka -->
-        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: isSticky(stickyHeaders, 'header-1')"></mat-header-row>
+        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></mat-header-row>
 <!--        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: isSticky(stickyHeaders, 'header-2')" class="secondary-header"></mat-header-row>-->
 
         <!-- Wiersze danych -->
