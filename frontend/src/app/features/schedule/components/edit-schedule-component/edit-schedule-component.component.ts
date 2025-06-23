@@ -93,7 +93,7 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
       });
     }
 
-    console.log("selectedCell: ", this.selectedCell);
+    // console.log("selectedCell: ", this.selectedCell);
   }
 
   formattedTime = computed(() => {
@@ -117,15 +117,12 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     })
 
     if(this.editScheduleForm.valid) {
-      // this.scheduleService.updateWorkHours().subscribe();
-      //jezeli formularz jest wypelniony to updateujemy alb wstaiwamy nowy
-      //jezeli updateujemy to musi byc watunek spelniony
 
-      // console.log("editScheduleForm", this.editScheduleForm.value);
+
       if(this.selectedCell?.workHours){
         this.scheduleService.updateWorkHours(this.selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {})
       } else {
-        // this.scheduleService.addWorkHours(this.selectedCell).subscribe();
+        this.scheduleService.addWorkHours(this.editScheduleForm.value).subscribe();
       }
     }
   }

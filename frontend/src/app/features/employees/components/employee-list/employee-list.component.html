@@ -1,19 +1,33 @@
-@if(employees.length > 0){
-  <div class="h-full w-full rounded-xl bg-gray-300 p-4">
+<div class="h-screen w-full rounded-xl border p-4 flex flex-col">
+  <h2>Lista pracowników</h2>
+
+  <mat-form-field class="w-full">
+    <input matInput type="search">
+    <button matSuffix mat-icon-button aria-label="Search" class="mx-2">
+      <mat-icon>search</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <!-- Kontener na pracowników z overflow -->
+  <div class="flex-1 overflow-y-auto min-h-0">
     @for(employee of employees; track employee){
-      <div class="w-full flex flex-row justify-between">
-        <div class="font-rubik font-normal">{{employee.first_name}} {{employee.last_name}}</div>
+      <div class="w-full flex flex-row justify-between items-center bg-warm-gray-200 my-2 rounded-lg cursor-pointer py-2"
+           (click)="onEmployeeClick()"
+      >
+        <span class="font-rubik font-normal mx-4">{{employee.first_name}} {{employee.last_name}}</span>
+
         <button matIconButton
                 aria-label="Usuń pracownika"
                 (click)="onDeleteEmployee(employee)"
+                class="mx-2"
         >
           <mat-icon>delete</mat-icon>
         </button>
       </div>
     }
-    <button mat-button (click)="openAddEmployeeDialog()">Add</button>
   </div>
 
-
-}
+  <!-- Przycisk na dole -->
+  <button mat-button (click)="openAddEmployeeDialog()" class="mt-4">Add</button>
+</div>
 

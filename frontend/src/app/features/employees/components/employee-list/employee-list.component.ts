@@ -5,6 +5,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
 import {EmployeeFormDialogComponent} from '../employee-form-dialog/employee-form-dialog.component';
 import {EmployeesService} from '../../../../core/services/employees/employees.service';
+import {MatFormField, MatInput, MatSuffix} from '@angular/material/input';
 
 
 @Component({
@@ -12,6 +13,9 @@ import {EmployeesService} from '../../../../core/services/employees/employees.se
   imports: [
     MatIconModule,
     MatButtonModule,
+    MatFormField,
+    MatInput,
+    MatSuffix,
   ],
   templateUrl: './employee-list.component.html',
   styleUrl: './employee-list.component.scss'
@@ -62,5 +66,11 @@ export class EmployeeListComponent implements OnInit {
 
   }
 
+  onEmployeeClick(){
+    console.log("Hello");
+    //tutaj bede emitowal urzytkownika zeby wyswietlic jego dane w komponencie z danymi
+  }
 
+
+  protected readonly onclick = onclick;
 }
