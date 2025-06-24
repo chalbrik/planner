@@ -1,10 +1,10 @@
-<div class="min-h-screen flex flex-col bg-gray-50">
+<div class="h-screen flex flex-col bg-gray-50">
   <!-- Nagłówek -->
   <app-header></app-header>
 
-  <!-- Główna zawartość -->
-  <main class="flex-grow py-10 mt-24 mb-10">
-    <div class="mx-auto px-4 sm:px-6 lg:px-8">
+  <!-- Główna zawartość - zajmie pozostałą przestrzeń -->
+  <main class="flex-grow overflow-hidden pt-24 pb-10">
+    <div class="h-full px-4 sm:px-6 lg:px-8">
       <ng-content></ng-content>
     </div>
   </main>
@@ -12,4 +12,3 @@
   <!-- Stopka -->
   <app-footer></app-footer>
 </div>
-

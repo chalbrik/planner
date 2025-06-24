@@ -1,4 +1,4 @@
-@if(selectedCell){
+@if(selectedCell()){
   <mat-card appearance="outlined" class="h-64">
     <mat-card-header>
       <div class="w-full border-b border-warm-gray-600 flex flex-row justify-between">
@@ -10,7 +10,7 @@
               <app-icon iconName="user-mini"></app-icon>
               <span class="font-geist font-normal text-base">Pracownik</span>
             </div>
-            <span class="font-geist font-semibold text-lg">{{selectedCell.employee.name}}</span>
+            <span class="font-geist font-semibold text-lg">{{selectedCell().employee.name}}</span>
           </div>
 
           <div class="flex flex-col gap-1">
@@ -18,7 +18,7 @@
               <app-icon iconName="clock-mini" iconSize="mini"></app-icon>
               <span class="font-geist font-normal text-base">Godziny pracy</span>
             </div>
-            <span class="font-geist font-semibold text-lg">{{ selectedCell.workHours?.hours || 'Brak' }}</span>
+            <span class="font-geist font-semibold text-lg">{{ selectedCell().workHours?.hours || 'Brak' }}</span>
           </div>
 
           <div class="flex flex-col gap-1 w-28">
@@ -26,7 +26,7 @@
               <app-icon iconName="calendar-mini" iconSize="mini"></app-icon>
               <span class="font-geist font-normal text-base">Data</span>
             </div>
-            <span class="font-geist font-semibold text-lg">{{selectedCell.date}}</span>
+            <span class="font-geist font-semibold text-lg">{{selectedCell().date}}</span>
           </div>
 
         </div>

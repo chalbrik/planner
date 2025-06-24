@@ -21,22 +21,32 @@ export class IconComponent implements OnInit {
   ariaHidden = signal<boolean>(false);
 
   // Settery dla inputs (kompatybilność z Angular)
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set iconName(value: IconName) {
     this.name.set(value);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set iconSize(value: IconSize) {
     this.size.set(value);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set class(value: string) {
     this.customClass.set(value || '');
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set iconAriaLabel(value: string | undefined) {
     this.ariaLabel.set(value);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set iconAriaHidden(value: boolean) {
     this.ariaHidden.set(value);
   }

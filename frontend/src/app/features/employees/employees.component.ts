@@ -3,11 +3,13 @@ import {RouterOutlet} from '@angular/router';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {Employee} from '../../core/services/employees/employee.types';
 import {EmployeeListComponent} from './components/employee-list/employee-list.component';
+import {EmployeeInfoComponent} from './components/employee-info/employee-info.component';
 
 @Component({
   selector: 'app-employees',
   imports: [
-    EmployeeListComponent
+    EmployeeListComponent,
+    EmployeeInfoComponent
   ],
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss'
@@ -17,6 +19,9 @@ export class EmployeesComponent implements OnInit {
   employees: Employee[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+
+  //Wybrany pracownik
+  employee!: Employee;
 
   constructor(
     private employeesService: EmployeesService,
@@ -50,6 +55,11 @@ export class EmployeesComponent implements OnInit {
 
   onEmployeeDeleted(oldEmployee: Employee) {
     this.employees = this.employees.filter((employee) => employee.id !== oldEmployee.id);
+  }
+
+  onEmployeeSelected(selectedEmployee: Employee) {
+    console.log("Selected", selectedEmployee);
+    this.employee = selectedEmployee;
   }
 
 }

@@ -1,4 +1,4 @@
-<div class="bg-white">
+<div class="h-full flex flex-col bg-white">
 
   <app-edit-schedule-component
     [selectedCell]="selectedCell()"
@@ -21,7 +21,7 @@
   </div>
 
   <!-- Główny kontener grafiku -->
-  <div class="flex flex-col">
+  <div class="flex-1 overflow-auto min-h-0">
     <ng-container [ngTemplateOutlet]="Schedule"></ng-container>
   </div>
 

@@ -1,14 +1,13 @@
 import {
   Component,
   computed,
-  EventEmitter,
   inject,
-  Input,
   OnInit,
-  Output,
   signal,
   SimpleChanges,
-  ViewEncapsulation
+  ViewEncapsulation,
+  input,
+  output
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -43,13 +42,13 @@ interface onChanges {
 export class EditScheduleComponentComponent implements OnInit, onChanges {
   private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
 
-  @Input() selectedCell: {
+  readonly selectedCell = input.required<{
     employee: any;
     workHours: any;
     date: string;
-  } | null = null;
+  }>();
 
-  @Output() cancelSelection = new EventEmitter<void>();
+  readonly cancelSelection = output<void>();
 
   editScheduleForm!: FormGroup;
 
@@ -80,16 +79,17 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
   ngOnChanges(changes: SimpleChanges) {
     //tego uzywwam do sprawdzania co sie dzieje kiedy input sie zminia
 
-    if(this.selectedCell){
+    const selectedCell = this.selectedCell();
+    if(selectedCell){
       // RESET timepickerów
       this.timeFrom.set(null);
       this.timeTo.set(null);
 
       // RESET formularza
       this.editScheduleForm.patchValue({
-        employee: this.selectedCell.employee.id,
+        employee: selectedCell.employee.id,
         hours: '',
-        date: this.selectedCell.workHours ? this.selectedCell.workHours.date : this.selectedCell.date,
+        date: selectedCell.workHours ? selectedCell.workHours.date : selectedCell.date,
       });
     }
 
@@ -119,8 +119,9 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     if(this.editScheduleForm.valid) {
 
 
-      if(this.selectedCell?.workHours){
-        this.scheduleService.updateWorkHours(this.selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {})
+      const selectedCell = this.selectedCell();
+      if(selectedCell?.workHours){
+        this.scheduleService.updateWorkHours(selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {})
       } else {
         this.scheduleService.addWorkHours(this.editScheduleForm.value).subscribe();
       }
@@ -131,6 +132,7 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     this.timeFrom.set(null);
     this.timeTo.set(null);
     this.editScheduleForm.reset();
+    // TODO: The 'emit' function requires a mandatory void argument
     this.cancelSelection.emit();
   }
 

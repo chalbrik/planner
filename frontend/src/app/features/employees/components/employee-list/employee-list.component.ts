@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import {Component, inject, OnInit, input, output} from '@angular/core';
 import {Employee} from '../../../../core/services/employees/employee.types';
 import {MatIcon, MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
@@ -21,9 +21,10 @@ import {MatFormField, MatInput, MatSuffix} from '@angular/material/input';
   styleUrl: './employee-list.component.scss'
 })
 export class EmployeeListComponent implements OnInit {
-  @Input() employees: Employee[] = [];
-  @Output() employeeAdded = new EventEmitter<Employee>();
-  @Output() employeeDeleted = new EventEmitter<Employee>();
+  readonly employees = input<Employee[]>([]);
+  readonly employeeAdded = output<Employee>();
+  readonly employeeDeleted = output<Employee>();
+  readonly employeeSelected = output<Employee>();
 
   readonly addEmployeeDialog = inject(MatDialog);
 
@@ -31,7 +32,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   ngOnInit () {
-    console.log(this.employees);
+    console.log(this.employees());
   }
 
 
@@ -66,9 +67,8 @@ export class EmployeeListComponent implements OnInit {
 
   }
 
-  onEmployeeClick(){
-    console.log("Hello");
-    //tutaj bede emitowal urzytkownika zeby wyswietlic jego dane w komponencie z danymi
+  onEmployeeSelect(selectedEmployee: Employee){
+    this.employeeSelected.emit(selectedEmployee);
   }
 
 

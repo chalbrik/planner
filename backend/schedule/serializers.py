@@ -4,7 +4,7 @@ from .models import Employee, WorkHours
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
-        fields = ['id', 'first_name', 'last_name']
+        fields = ['id', 'first_name', 'last_name', 'phone', 'email']
 
 
 class WorkHoursSerializer(serializers.ModelSerializer):

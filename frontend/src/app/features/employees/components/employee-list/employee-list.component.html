@@ -1,4 +1,4 @@
-<div class="h-screen w-full rounded-xl border p-4 flex flex-col">
+<div class="h-full w-full rounded-xl border p-4 flex flex-col">
   <h2>Lista pracowników</h2>
 
   <mat-form-field class="w-full">
@@ -10,12 +10,11 @@
 
   <!-- Kontener na pracowników z overflow -->
   <div class="flex-1 overflow-y-auto min-h-0">
-    @for(employee of employees; track employee){
+    @for(employee of employees(); track employee){
       <div class="w-full flex flex-row justify-between items-center bg-warm-gray-200 my-2 rounded-lg cursor-pointer py-2"
-           (click)="onEmployeeClick()"
+           (click)="onEmployeeSelect(employee)"
       >
         <span class="font-rubik font-normal mx-4">{{employee.first_name}} {{employee.last_name}}</span>
-
         <button matIconButton
                 aria-label="Usuń pracownika"
                 (click)="onDeleteEmployee(employee)"
@@ -26,8 +25,9 @@
       </div>
     }
   </div>
-
   <!-- Przycisk na dole -->
-  <button mat-button (click)="openAddEmployeeDialog()" class="mt-4">Add</button>
-</div>
+  <div class="w-full flex flex-row justify-end py-2">
+    <button mat-flat-button class="add-employee-button px-2" (click)="openAddEmployeeDialog()" >Dodaj</button>
+  </div>
 
+</div>
