@@ -15,6 +15,9 @@ import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-to
 import {MatButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {EditScheduleComponentComponent} from './components/edit-schedule-component/edit-schedule-component.component';
+import {
+  BlancEditScheduleComponentComponent
+} from './components/blanc-edit-schedule-component/blanc-edit-schedule-component.component';
 
 interface Day {
   date: Date;
@@ -42,8 +45,6 @@ interface EmployeeRow {
     MatFooterCell,
     MatHeaderRow,
     MatRow,
-    MatButtonToggleGroup,
-    MatButtonToggle,
     MatColumnDef,
     MatHeaderCellDef,
     MatCellDef,
@@ -114,7 +115,7 @@ export class ScheduleComponent implements OnInit {
     employee: any;
     workHours: any;
     date: string
-  } | null>(null);
+  } | undefined>(undefined);
 
   constructor(
     private scheduleService: ScheduleService,
@@ -255,7 +256,16 @@ export class ScheduleComponent implements OnInit {
   }
 
   onCancelSelection() {
-    this.selectedCell.set(null);
+    this.selectedCell.set(undefined);
   }
+
+  //Metoda warunkowa do wyświetlania komponentów
+  currentComponent = computed(() => {
+    return this.selectedCell() ? EditScheduleComponentComponent : BlancEditScheduleComponentComponent;
+  })
+
+  componentInputs = computed(() => {
+    return this.selectedCell() ? { selectedCell: this.selectedCell } : {};
+  })
 
 }

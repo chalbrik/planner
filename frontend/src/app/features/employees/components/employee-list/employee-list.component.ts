@@ -38,7 +38,7 @@ export class EmployeeListComponent implements OnInit {
 
   openAddEmployeeDialog(): void {
     const dialogRef = this.addEmployeeDialog.open(EmployeeFormDialogComponent, {
-      width: '1500px',
+      width: '800px',
     });
 
     dialogRef.afterClosed().subscribe(result => {

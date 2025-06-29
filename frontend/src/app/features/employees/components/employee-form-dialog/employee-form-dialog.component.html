@@ -6,15 +6,65 @@
 <form class="p-10" [formGroup]="addEmployeeForm">
 
   <div class="flex flex-col">
-    <mat-form-field class="example-full-width">
-      <mat-label>Imię</mat-label>
-      <input matInput formControlName="first_name">
-    </mat-form-field>
 
-    <mat-form-field class="example-full-width">
-      <mat-label>Nazwisko</mat-label>
-      <input matInput formControlName="last_name">
-    </mat-form-field>
+    <div class="flex flex-row justify-between gap-2">
+      <mat-form-field class="example-full-width w-full">
+        <mat-label>Imię</mat-label>
+        <input matInput formControlName="first_name">
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width w-full">
+        <mat-label>Nazwisko</mat-label>
+        <input matInput formControlName="last_name">
+      </mat-form-field>
+    </div>
+
+    <div class="flex flex-row justify-between gap-2">
+      <mat-form-field class="example-full-width w-full">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email">
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width w-full">
+        <mat-label>Telefon</mat-label>
+        <input matInput formControlName="phone">
+      </mat-form-field>
+    </div>
+
+    <div class="flex flex-row justify-between gap-2">
+      <mat-form-field class="w-full">
+        <mat-label>Favorite food</mat-label>
+        <mat-select [(ngModel)]="selectedAgreementType" name="food">
+          @for (agreemnet of agreemnetsTypeValues; track agreemnet) {
+            <mat-option [value]="agreemnet.value">{{agreemnet.viewValue}}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="example-full-width w-full">
+        <mat-label>Stawka godzinowa</mat-label>
+        <input matInput formControlName="hourlyRate">
+      </mat-form-field>
+
+      <mat-form-field class="w-full">
+        <mat-label>Okres umowy</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate formControlName="workStart" placeholder="Start date">
+          <input matEndDate formControlName="workEnd" placeholder="End date">
+        </mat-date-range-input>
+        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+
+<!--        @if (addEmployeeForm.controls.workStart.hasError('matStartDateInvalid')) {-->
+<!--          <mat-error>Invalid start date</mat-error>-->
+<!--        }-->
+<!--        @if (addEmployeeForm.controls.workEnd.hasError('matEndDateInvalid')) {-->
+<!--          <mat-error>Invalid end date</mat-error>-->
+<!--        }-->
+      </mat-form-field>
+    </div>
+
   </div>
 
 

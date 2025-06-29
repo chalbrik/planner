@@ -1,15 +1,17 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, computed, OnInit, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {Employee} from '../../core/services/employees/employee.types';
 import {EmployeeListComponent} from './components/employee-list/employee-list.component';
 import {EmployeeInfoComponent} from './components/employee-info/employee-info.component';
+import {NgComponentOutlet} from '@angular/common';
+import {BlanckEmployeeInfoComponent} from './components/blanck-employee-info/blanck-employee-info.component';
 
 @Component({
   selector: 'app-employees',
   imports: [
     EmployeeListComponent,
-    EmployeeInfoComponent
+    NgComponentOutlet
   ],
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss'
@@ -21,7 +23,9 @@ export class EmployeesComponent implements OnInit {
   errorMessage: string | null = null;
 
   //Wybrany pracownik
-  employee!: Employee;
+  selectedEmployee = signal<Employee | null>(null);
+
+
 
   constructor(
     private employeesService: EmployeesService,
@@ -58,8 +62,16 @@ export class EmployeesComponent implements OnInit {
   }
 
   onEmployeeSelected(selectedEmployee: Employee) {
-    console.log("Selected", selectedEmployee);
-    this.employee = selectedEmployee;
+    this.selectedEmployee.set(selectedEmployee);
   }
+
+  //Metoda do warunkowego wyswietlania komponentow
+  currentComponent = computed(() => {
+    return this.selectedEmployee() ?  EmployeeInfoComponent : BlanckEmployeeInfoComponent;
+  })
+
+  componentInputs = computed(() => {
+    return this.selectedEmployee() ? { employee: this.selectedEmployee() } : {};
+  })
 
 }

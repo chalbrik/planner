@@ -12,8 +12,10 @@
  </div>
 
   <div class="w-2/3 h-full py-4">
-    <app-employee-info
-      [employee]="employee"
-    ></app-employee-info>
+<!--    <app-employee-info-->
+<!--      [employee]="employee"-->
+<!--    ></app-employee-info>-->
+
+    <ng-container [ngComponentOutlet]="currentComponent()" [ngComponentOutletInputs]="componentInputs()"></ng-container>
   </div>
 </div>

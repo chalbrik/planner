@@ -42,15 +42,16 @@ interface onChanges {
 export class EditScheduleComponentComponent implements OnInit, onChanges {
   private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
 
-  readonly selectedCell = input.required<{
+  readonly selectedCell = input<{
     employee: any;
     workHours: any;
     date: string;
-  }>();
+  } | undefined>();
 
   readonly cancelSelection = output<void>();
 
   editScheduleForm!: FormGroup;
+
 
   timeFrom = signal<Date | null>(null)
   timeTo = signal<Date | null>(null)

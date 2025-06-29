@@ -1,9 +1,7 @@
 <div class="h-full flex flex-col bg-white">
 
-  <app-edit-schedule-component
-    [selectedCell]="selectedCell()"
-    (cancelSelection)="onCancelSelection()"
-  ></app-edit-schedule-component>
+<!--  Panel edycji grafiku -->
+  <ng-container [ngComponentOutlet]="currentComponent()" [ngComponentOutletInputs]="componentInputs()"></ng-container>
 
   <!-- Kontener do wyboru miesiąca -->
   <div class="mb-6 flex items-center justify-between bg-gray-50 p-4 rounded-lg">

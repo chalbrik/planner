@@ -7,8 +7,17 @@ import {
   MatDialogTitle
 } from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
-import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatFormField, MatHint, MatInput, MatLabel} from '@angular/material/input';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {MatSelect} from '@angular/material/select';
+import {MatOption, provideNativeDateAdapter} from '@angular/material/core';
+import {MatDatepickerToggle, MatDateRangeInput, MatDateRangePicker} from '@angular/material/datepicker';
+
+
+interface Agreemnet {
+  value: string;
+  viewValue: string;
+}
 
 @Component({
   selector: 'app-employee-form-dialog',
@@ -22,30 +31,55 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
     MatLabel,
     MatInput,
     ReactiveFormsModule,
+    MatSelect,
+    MatOption,
+    FormsModule,
+    MatDateRangeInput,
+    MatDatepickerToggle,
+    MatDateRangePicker,
+    MatHint
   ],
   templateUrl: './employee-form-dialog.component.html',
   styleUrl: './employee-form-dialog.component.scss',
+  providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
 export class EmployeeFormDialogComponent implements OnInit {
   readonly dialogRef = inject(MatDialogRef<EmployeeFormDialogComponent>);
+
+  private readonly formBuilder = inject(FormBuilder);
+
   addEmployeeForm!: FormGroup;
+  selectedAgreementType: string = '';
+
+  agreemnetsTypeValues: Agreemnet[] = [
+    {value: 'steak-0', viewValue: 'Umowa o prace'},
+    {value: 'pizza-1', viewValue: 'Umowa na zlecenie'},
+  ];
 
 
-  constructor(private formBuilder: FormBuilder,) {
+  constructor() {
   }
 
   ngOnInit() {
     this.addEmployeeForm = this.formBuilder.group({
       first_name: ['', Validators.required],
       last_name: ['', Validators.required],
+      email: ['', [Validators.required,  Validators.email]],
+      phone: ['', Validators.required],
+      agreementType: [this.selectedAgreementType, Validators.required],
+      hourlyRate: ['', Validators.required],
+      agreementValue: ['', Validators.required],
+      workStart: ['', Validators.required],
+      workEnd: ['', Validators.required],
     })
 
   }
 
   onAddEmployee() {
     if(this.addEmployeeForm.valid){
+      console.log(this.addEmployeeForm.value);
       this.dialogRef.close(this.addEmployeeForm.value);
     }
   }
