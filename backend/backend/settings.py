@@ -26,8 +26,7 @@ SECRET_KEY = 'django-insecure-br4^m-yud-(bi(@ya!ew8avojwv%ai8pxx8iaj2=ql@_-1qn!)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '134.209.230.53']
 
 # Application definition
 
@@ -142,7 +141,9 @@ REST_FRAMEWORK = {
 
 # Konfiguracja CORS
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",  # Dla Angular dev server
+    "http://localhost:4200",
+    "http://134.209.230.53:4200",
+    "http://134.209.230.53",
 ]
 
 # Bardzo ważne! Pozwala na przesyłanie cookies w żądaniach CORS

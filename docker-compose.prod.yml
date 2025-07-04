@@ -1,0 +1,15 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_IN_DOCKER=True
+    command: python manage.py runserver 0.0.0.0:8000
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile  # ⭐ Production Dockerfile
+    ports:
+      - "4200:80"  # ⭐ nginx w kontenerze na porcie 80
