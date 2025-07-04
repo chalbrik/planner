@@ -1,7 +1,4 @@
-<h2 mat-dialog-title>Dodaj nowego pracownika</h2>
-<mat-dialog-content>
-  info
-</mat-dialog-content>
+<h2 mat-dialog-title>Dodaj nowego <span class="">pracownika</span></h2>
 
 <form class="p-10" [formGroup]="addEmployeeForm">
 
@@ -33,8 +30,8 @@
 
     <div class="flex flex-row justify-between gap-2">
       <mat-form-field class="w-full">
-        <mat-label>Favorite food</mat-label>
-        <mat-select [(ngModel)]="selectedAgreementType" name="food">
+        <mat-label>Rodzaj umowy</mat-label>
+        <mat-select formControlName="agreementType" name="agreement">
           @for (agreemnet of agreemnetsTypeValues; track agreemnet) {
             <mat-option [value]="agreemnet.value">{{agreemnet.viewValue}}</mat-option>
           }
@@ -43,7 +40,7 @@
 
       <mat-form-field class="example-full-width w-full">
         <mat-label>Stawka godzinowa</mat-label>
-        <input matInput formControlName="hourlyRate">
+        <input matInput formControlName="hourlyRate" type="number">
       </mat-form-field>
 
       <mat-form-field class="w-full">
@@ -52,11 +49,11 @@
           <input matStartDate formControlName="workStart" placeholder="Start date">
           <input matEndDate formControlName="workEnd" placeholder="End date">
         </mat-date-range-input>
-        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+<!--        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>-->
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-date-range-picker #picker></mat-date-range-picker>
 
-<!--        @if (addEmployeeForm.controls.workStart.hasError('matStartDateInvalid')) {-->
+<!--        @if (addEmployeeForm.get("workStart").hasError('matStartDateInvalid')) {-->
 <!--          <mat-error>Invalid start date</mat-error>-->
 <!--        }-->
 <!--        @if (addEmployeeForm.controls.workEnd.hasError('matEndDateInvalid')) {-->

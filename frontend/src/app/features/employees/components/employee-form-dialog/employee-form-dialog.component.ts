@@ -11,7 +11,13 @@ import {MatFormField, MatHint, MatInput, MatLabel} from '@angular/material/input
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatSelect} from '@angular/material/select';
 import {MatOption, provideNativeDateAdapter} from '@angular/material/core';
-import {MatDatepickerToggle, MatDateRangeInput, MatDateRangePicker} from '@angular/material/datepicker';
+import {
+  MatDatepickerToggle,
+  MatDateRangeInput,
+  MatDateRangePicker,
+  MatEndDate,
+  MatStartDate
+} from '@angular/material/datepicker';
 
 
 interface Agreemnet {
@@ -37,7 +43,9 @@ interface Agreemnet {
     MatDateRangeInput,
     MatDatepickerToggle,
     MatDateRangePicker,
-    MatHint
+    MatHint,
+    MatStartDate,
+    MatEndDate
   ],
   templateUrl: './employee-form-dialog.component.html',
   styleUrl: './employee-form-dialog.component.scss',
@@ -51,7 +59,6 @@ export class EmployeeFormDialogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
 
   addEmployeeForm!: FormGroup;
-  selectedAgreementType: string = '';
 
   agreemnetsTypeValues: Agreemnet[] = [
     {value: 'steak-0', viewValue: 'Umowa o prace'},
@@ -68,7 +75,7 @@ export class EmployeeFormDialogComponent implements OnInit {
       last_name: ['', Validators.required],
       email: ['', [Validators.required,  Validators.email]],
       phone: ['', Validators.required],
-      agreementType: [this.selectedAgreementType, Validators.required],
+      agreementType: ['', Validators.required],
       hourlyRate: ['', Validators.required],
       agreementValue: ['', Validators.required],
       workStart: ['', Validators.required],
