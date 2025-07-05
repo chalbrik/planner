@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -8,6 +8,9 @@ import { environment } from '../../../../environments/environment';
 })
 export class ScheduleService {
   private apiUrl = environment.apiUrl + 'schedule/';
+
+  private scheduleUpdatedSubject = new Subject<any>();
+  public scheduleUpdated$ = this.scheduleUpdatedSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
@@ -37,5 +40,10 @@ export class ScheduleService {
 
   deleteWorkHours(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}work-hours/${id}/`);
+  }
+
+  // Metoda do emitowania aktualizacji
+  emitScheduleUpdate(data: any) {
+    this.scheduleUpdatedSubject.next(data);
   }
 }

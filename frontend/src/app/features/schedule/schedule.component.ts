@@ -126,6 +126,11 @@ export class ScheduleComponent implements OnInit {
     this.loadEmployees();
     this.loadWorkHours();
 
+    this.scheduleService.scheduleUpdated$.subscribe(() => {
+      this.loadWorkHours();
+      this.selectedCell.set(undefined);
+    });
+
   }
 
   loadEmployees() {
@@ -265,7 +270,7 @@ export class ScheduleComponent implements OnInit {
   })
 
   componentInputs = computed(() => {
-    return this.selectedCell() ? { selectedCell: this.selectedCell } : {};
+    return this.selectedCell() ? { selectedCell: this.selectedCell() } : {};
   })
 
 }

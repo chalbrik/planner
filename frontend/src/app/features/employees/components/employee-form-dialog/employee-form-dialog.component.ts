@@ -18,6 +18,7 @@ import {
   MatEndDate,
   MatStartDate
 } from '@angular/material/datepicker';
+import {environment} from '../../../../../environments/environment';
 
 
 interface Agreemnet {
@@ -85,6 +86,7 @@ export class EmployeeFormDialogComponent implements OnInit {
 
   onAddEmployee() {
     console.log("Hello", this.addEmployeeForm.getRawValue());
+    console.log('Current API URL:', environment.apiUrl);
     if(this.addEmployeeForm.valid){
 
       console.log(this.addEmployeeForm.value);

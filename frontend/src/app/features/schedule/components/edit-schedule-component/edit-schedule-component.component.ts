@@ -7,7 +7,7 @@ import {
   SimpleChanges,
   ViewEncapsulation,
   input,
-  output
+  output, effect
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -19,6 +19,12 @@ import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ScheduleService} from '../../../../core/services/schedule/schedule.service';
 import {Employee} from '../../../../core/services/employees/employee.types';
 import {IconComponent} from '../../../../shared/components/icon';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelDescription, MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
 
 
 interface onChanges {
@@ -33,7 +39,12 @@ interface onChanges {
     MatFormFieldModule,
     MatInputModule,
     MatTimepickerModule,
-    IconComponent
+    IconComponent,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelTitle,
+    MatExpansionPanelDescription,
+    MatExpansionPanelHeader
   ],
   templateUrl: './edit-schedule-component.component.html',
   styleUrl: './edit-schedule-component.component.scss',
@@ -41,6 +52,8 @@ interface onChanges {
 })
 export class EditScheduleComponentComponent implements OnInit, onChanges {
   private readonly _adapter = inject<DateAdapter<unknown, unknown>>(DateAdapter);
+  readonly scheduleUpdated = output<any>();
+  readonly cancelSelection = output<void>();
 
   readonly selectedCell = input<{
     employee: any;
@@ -48,7 +61,9 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     date: string;
   } | undefined>();
 
-  readonly cancelSelection = output<void>();
+
+
+  readonly panelOpenState = signal(false);
 
   editScheduleForm!: FormGroup;
 
@@ -61,6 +76,23 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     private formBuilder: FormBuilder,
     private scheduleService: ScheduleService,
     ) {
+    effect(() => {
+      const selectedCell = this.selectedCell();
+
+      if (selectedCell) {
+        this.panelOpenState.set(true);
+        // RESET timepickerów
+        this.timeFrom.set(null);
+        this.timeTo.set(null);
+
+        // RESET formularza
+        this.editScheduleForm.patchValue({
+          employee: selectedCell.employee.id,
+          hours: '',
+          date: selectedCell.workHours ? selectedCell.workHours.date : selectedCell.date,
+        });
+      }
+    });
   }
 
   ngOnInit() {
@@ -75,26 +107,8 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
       hours: ['', Validators.required],
       date: ['']
     })
-  }
 
-  ngOnChanges(changes: SimpleChanges) {
-    //tego uzywwam do sprawdzania co sie dzieje kiedy input sie zminia
-
-    const selectedCell = this.selectedCell();
-    if(selectedCell && this.editScheduleForm){
-      // RESET timepickerów
-      this.timeFrom.set(null);
-      this.timeTo.set(null);
-
-      // RESET formularza
-      this.editScheduleForm.patchValue({
-        employee: selectedCell.employee.id,
-        hours: '',
-        date: selectedCell.workHours ? selectedCell.workHours.date : selectedCell.date,
-      });
-    }
-
-    // console.log("selectedCell: ", this.selectedCell);
+    // console.log("selectedCell: ", this.selectedCell());
   }
 
   formattedTime = computed(() => {
@@ -119,13 +133,20 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
 
     if(this.editScheduleForm.valid) {
 
-
       const selectedCell = this.selectedCell();
       if(selectedCell?.workHours){
-        this.scheduleService.updateWorkHours(selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {})
+        this.scheduleService.updateWorkHours(selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {
+          this.scheduleService.emitScheduleUpdate(workHours);
+        })
       } else {
-        this.scheduleService.addWorkHours(this.editScheduleForm.value).subscribe();
+        this.scheduleService.addWorkHours(this.editScheduleForm.value).subscribe(updatedData => {
+          this.scheduleService.emitScheduleUpdate(updatedData);
+        });
       }
+      //
+      // this.panelOpenState.set(false);
+      // this.cancelSelection.emit();
+
     }
   }
 
@@ -133,7 +154,7 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     this.timeFrom.set(null);
     this.timeTo.set(null);
     this.editScheduleForm.reset();
-    // TODO: The 'emit' function requires a mandatory void argument
+    this.panelOpenState.set(false);
     this.cancelSelection.emit();
   }
 

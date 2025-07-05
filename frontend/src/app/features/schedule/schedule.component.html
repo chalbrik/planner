@@ -1,7 +1,8 @@
 <div class="h-full flex flex-col bg-white">
 
 <!--  Panel edycji grafiku -->
-  <ng-container [ngComponentOutlet]="currentComponent()" [ngComponentOutletInputs]="componentInputs()"></ng-container>
+<!--  <ng-container [ngComponentOutlet]="currentComponent()" [ngComponentOutletInputs]="componentInputs()"></ng-container>-->
+  <app-edit-schedule-component [selectedCell]="selectedCell()" (cancelSelection)="onCancelSelection()" ></app-edit-schedule-component>
 
   <!-- Kontener do wyboru miesiąca -->
   <div class="mb-6 flex items-center justify-between bg-gray-50 p-4 rounded-lg">
@@ -20,7 +21,7 @@
 
   <!-- Główny kontener grafiku -->
   <div class="flex-1 overflow-auto min-h-0">
-    <ng-container [ngTemplateOutlet]="Schedule"></ng-container>
+    <ng-container [ngTemplateOutlet]="Schedule" ></ng-container>
   </div>
 
 </div>
