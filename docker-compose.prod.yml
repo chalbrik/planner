@@ -1,6 +1,6 @@
 services:
   backend:
-    build: ./backend
+    image: chalbrik/planner-backend:latest
     ports:
       - "8000:8000"
     environment:
@@ -8,8 +8,6 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile  # ⭐ Production Dockerfile
+    image: chalbrik/planner-frontend:latest
     ports:
-      - "4200:80"  # ⭐ nginx w kontenerze na porcie 80
+      - "4200:80"

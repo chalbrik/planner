@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import {environment} from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -31,7 +32,7 @@ export class LoginComponent implements OnInit {
     });
 
     // Sprawdź, czy jesteśmy w trybie deweloperskim
-    if (typeof window !== 'undefined' && window.location.hostname === 'localhost' && this.autoLogin) {
+    if (typeof window !== 'undefined' && !environment.production && this.autoLogin) {
       // Ustaw dane dla trybu deweloperskiego
       this.loginForm.setValue({
         username: 'chalbrik',  // Zmień na własne dane testowe
