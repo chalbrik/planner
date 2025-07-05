@@ -81,7 +81,7 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     //tego uzywwam do sprawdzania co sie dzieje kiedy input sie zminia
 
     const selectedCell = this.selectedCell();
-    if(selectedCell){
+    if(selectedCell && this.editScheduleForm){
       // RESET timepickerów
       this.timeFrom.set(null);
       this.timeTo.set(null);

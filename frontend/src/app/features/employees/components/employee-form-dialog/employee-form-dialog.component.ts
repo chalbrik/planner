@@ -77,7 +77,6 @@ export class EmployeeFormDialogComponent implements OnInit {
       phone: ['', Validators.required],
       agreementType: ['', Validators.required],
       hourlyRate: ['', Validators.required],
-      agreementValue: ['', Validators.required],
       workStart: ['', Validators.required],
       workEnd: ['', Validators.required],
     })
@@ -85,7 +84,9 @@ export class EmployeeFormDialogComponent implements OnInit {
   }
 
   onAddEmployee() {
+    console.log("Hello", this.addEmployeeForm.getRawValue());
     if(this.addEmployeeForm.valid){
+
       console.log(this.addEmployeeForm.value);
       this.dialogRef.close(this.addEmployeeForm.value);
     }
