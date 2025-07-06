@@ -200,10 +200,36 @@ export class ScheduleComponent implements OnInit {
   }
 
   // Metoda do obliczania sumy godzin dla pracownika (uproszczona)
+  // getTotalHoursForEmployee(employee: EmployeeRow): number {
+  //   const hours = Object.values(employee.workHours);
+  //   // To jest uproszczona logika - możesz ją rozbudować
+  //   return hours.length * 8; // Przykład: każdy dzień pracy = 8 godzin
+  // }
+
   getTotalHoursForEmployee(employee: EmployeeRow): number {
-    const hours = Object.values(employee.workHours);
-    // To jest uproszczona logika - możesz ją rozbudować
-    return hours.length * 8; // Przykład: każdy dzień pracy = 8 godzin
+    let totalHours = 0;
+
+    // Iteruj przez wszystkie godziny pracy tego pracownika
+    Object.values(employee.workHours).forEach(hoursString => {
+      if (hoursString) {
+        // Parsuj format "8:00-16:00"
+        const match = hoursString.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
+
+        if (match) {
+          const [, startHour, startMin, endHour, endMin] = match;
+
+          // Konwertuj na minuty
+          const startMinutes = parseInt(startHour) * 60 + parseInt(startMin);
+          const endMinutes = parseInt(endHour) * 60 + parseInt(endMin);
+
+          // Oblicz różnicę w godzinach
+          const hoursWorked = (endMinutes - startMinutes) / 60;
+          totalHours += hoursWorked;
+        }
+      }
+    });
+
+    return Math.round(totalHours * 100) / 100; // zaokrągl do 2 miejsc po przecinku
   }
 
   // Metoda do zmiany miesiąca
