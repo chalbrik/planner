@@ -78,36 +78,39 @@
 
 <!--</mat-card>-->
 
-<div class="mt-4">
+<div class="px-4">
   <mat-accordion>
-    <mat-expansion-panel hideToggle [expanded]="panelOpenState()">
+    <mat-expansion-panel hideToggle [expanded]="true">
       <mat-expansion-panel-header>
         <div class="w-full border-b border-warm-gray-600 flex flex-row justify-between">
           <mat-panel-title> Edytuj grafik </mat-panel-title>
           @if(selectedCell()){
             <div class="flex flex-row gap-12">
-              <div class="flex flex-col gap-1 w-44">
-                <div class="flex flex-row gap-2">
-                  <app-icon iconName="user-mini"></app-icon>
-                  <span class="font-geist font-normal text-base">Pracownik</span>
+              <div class="flex flex-row items-start gap-1 w-44">
+                <app-icon iconName="user-circle-micro" iconSize="micro"></app-icon>
+                <div class="flex flex-col gap-1">
+                  <span class="font-geist font-normal text-xs">Pracownik</span>
+                  <span class="font-geist font-semibold text-xs">{{selectedCell()?.employee.name || 'Brak'}}</span>
                 </div>
-                <span class="font-geist font-semibold text-lg">{{selectedCell()?.employee.name || 'Brak'}}</span>
+
               </div>
 
-              <div class="flex flex-col gap-1">
-                <div class="flex flex-row gap-2">
-                  <app-icon iconName="clock-mini" iconSize="mini"></app-icon>
-                  <span class="font-geist font-normal text-base">Godziny pracy</span>
+              <div class="flex flex-row items-start gap-1">
+                <app-icon iconName="clock-micro" iconSize="micro"></app-icon>
+                <div class="flex flex-col gap-1">
+                  <span class="font-geist font-normal text-xs">Godziny pracy</span>
+                  <span class="font-geist font-semibold text-xs">{{ selectedCell()?.workHours?.hours || 'Brak' }}</span>
                 </div>
-                <span class="font-geist font-semibold text-lg">{{ selectedCell()?.workHours?.hours || 'Brak' }}</span>
+
               </div>
 
-              <div class="flex flex-col gap-1 w-28">
-                <div class="flex flex-row gap-2">
-                  <app-icon iconName="calendar-mini" iconSize="mini"></app-icon>
-                  <span class="font-geist font-normal text-base">Data</span>
+              <div class="flex flex-row items-start gap-1 w-28">
+                <app-icon iconName="calendar-micro" iconSize="micro"></app-icon>
+                <div class="flex flex-col gap-1">
+                  <span class="font-geist font-normal text-xs">Data</span>
+                  <span class="font-geist font-semibold text-xs">{{selectedCell()?.date}}</span>
                 </div>
-                <span class="font-geist font-semibold text-lg">{{selectedCell()?.date}}</span>
+
               </div>
             </div>
           }
@@ -115,10 +118,10 @@
 
       </mat-expansion-panel-header>
       <div class="w-full flex flex-col items-end justify-end gap-2">
-        <span class="font-geist font-semibold text-lg">Zmień godziny pracy</span>
+        <span class="font-geist font-semibold text-sm">Zmień godziny pracy</span>
         <div class="flex flex-row gap-2">
-          <mat-form-field>
-            <mat-label>Od</mat-label>
+          <mat-form-field appearance="fill">
+<!--            <mat-label>Od</mat-label>-->
             <input matInput
                    [matTimepicker]="fromTimePicker"
                    (valueChange)="onTimeFromChange($event)"
@@ -128,16 +131,18 @@
             <mat-timepicker interval="15min" #fromTimePicker/>
           </mat-form-field>
 
-          <mat-form-field>
-            <mat-label>Do</mat-label>
+          <mat-form-field appearance="fill">
+<!--            <mat-label>Do</mat-label>-->
             <input matInput
                    [matTimepicker]="toTimePicker"
                    (valueChange)="onTimeToChange($event)"
                    [disabled]="!timeFrom()"
+                   placeholder="Do"
             >
             <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>
             <mat-timepicker interval="15min" #toTimePicker/>
           </mat-form-field>
+
         </div>
 
         <div class="w-full flex flex-row justify-end gap-2">

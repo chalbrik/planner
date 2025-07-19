@@ -5,18 +5,30 @@
   <app-edit-schedule-component [selectedCell]="selectedCell()" (cancelSelection)="onCancelSelection()" ></app-edit-schedule-component>
 
   <!-- Kontener do wyboru miesiąca -->
-  <div class="mb-6 flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-    <button mat-raised-button (click)="changeMonth(-1)" class="mr-4">
-      ← Poprzedni miesiąc
-    </button>
+  <div class="flex items-center justify-end gap-6 bg-gray-50 p-4 rounded-lg">
 
     <h2 class="text-xl font-semibold text-gray-800">
       {{ getMonthName() }}
     </h2>
 
-    <button mat-raised-button (click)="changeMonth(1)" class="ml-4">
-      Następny miesiąc →
-    </button>
+    <div>
+<!--      <button mat-raised-button (click)="changeMonth(-1)" class="mr-4">-->
+<!--        <app-icon iconName="chevron-left" iconSize="outline"></app-icon>-->
+<!--    </button>-->
+
+<!--      <button mat-raised-button (click)="changeMonth(1)" class="ml-4">-->
+<!--        <app-icon iconName="chevron-right" iconSize="outline"></app-icon>-->
+<!--      </button>-->
+
+      <button matIconButton (click)="changeMonth(-1)">
+        <app-icon iconName="chevron-left" iconSize="outline"></app-icon>
+      </button>
+
+      <button matIconButton (click)="changeMonth(1)">
+        <app-icon iconName="chevron-right" iconSize="outline"></app-icon>
+      </button>
+    </div>
+
   </div>
 
   <!-- Główny kontener grafiku -->
@@ -111,6 +123,7 @@
 
         <!-- Wiersze nagłówka -->
         <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></mat-header-row>
+<!--        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: isSticky(stickyHeaders, 'header-1')"></mat-header-row>-->
 <!--        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: isSticky(stickyHeaders, 'header-2')" class="secondary-header"></mat-header-row>-->
 
         <!-- Wiersze danych -->

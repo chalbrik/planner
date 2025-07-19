@@ -1,6 +1,20 @@
 .example-container {
   //height: 500px;
-  overflow: auto;
+  //overflow: auto;
+}
+
+.example-container {
+  //height: 70vh !important; // WAŻNE: musi mieć określoną wysokość
+  //overflow-y: auto !important;
+  position: relative !important;
+}
+
+.mat-mdc-header-row {
+  //position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  //background-color: white !important;
+  //box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
 .mat-mdc-table-sticky {
@@ -20,7 +34,7 @@
 
 mat-table .mat-column-employees {
   width: 400px !important;
-  min-width: 250px ;
+  min-width: 160px ;
   max-width: 400px !important;
   //flex: 0 0 400px !important; // Dla mat-table w trybie flex
   //left: 0px !important;  // Dla sticky pozycjonowania

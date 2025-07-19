@@ -12,12 +12,13 @@ import {
   MatTable
 } from '@angular/material/table';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
-import {MatButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {EditScheduleComponentComponent} from './components/edit-schedule-component/edit-schedule-component.component';
 import {
   BlancEditScheduleComponentComponent
 } from './components/blanc-edit-schedule-component/blanc-edit-schedule-component.component';
+import {IconComponent} from '../../shared/components/icon';
 
 interface Day {
   date: Date;
@@ -52,7 +53,11 @@ interface EmployeeRow {
     MatRowDef,
     MatHeaderRowDef,
     MatButton,
-    EditScheduleComponentComponent
+    EditScheduleComponentComponent,
+    MatButtonToggleGroup,
+    MatButtonToggle,
+    IconComponent,
+    MatIconButton
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -126,7 +131,17 @@ export class ScheduleComponent implements OnInit {
     this.loadEmployees();
     this.loadWorkHours();
 
-    this.scheduleService.scheduleUpdated$.subscribe(() => {
+    this.scheduleService.scheduleUpdated$.subscribe((updatedData) => {
+      const adjacentHours = this.getAdjacentDaysHours(updatedData.employee, updatedData.date);
+
+      const timeDifferences = this.calculateTimeDifferences(
+        updatedData.hours,
+        adjacentHours.previousDay,
+        adjacentHours.nextDay
+      );
+
+      console.log('Przerwa od poprzedniego dnia:', timeDifferences.restFromPrevious, 'h');
+      console.log('Przerwa do następnego dnia:', timeDifferences.restToNext, 'h');
       this.loadWorkHours();
       this.selectedCell.set(undefined);
     });
@@ -159,7 +174,7 @@ export class ScheduleComponent implements OnInit {
 
     this.scheduleService.getWorkHours(filters).subscribe({
       next: (data) => {
-        console.log("workHours", data);
+        // console.log("workHours", data);
         this.workHours = data;
         this.prepareTableData();
         this.isLoading = false;
@@ -298,5 +313,90 @@ export class ScheduleComponent implements OnInit {
   componentInputs = computed(() => {
     return this.selectedCell() ? { selectedCell: this.selectedCell() } : {};
   })
+
+  //Pobieranie godzin z dnia poprzedniego oraz nastepnego
+  private getAdjacentDaysHours(employeeId: number, currentDate: string): { previousDay: string | null, nextDay: string | null } {
+    const currentDateObj = new Date(currentDate);
+
+    // Poprzedni dzień
+    const previousDateObj = new Date(currentDateObj);
+    previousDateObj.setDate(previousDateObj.getDate() - 1);
+    const previousDateString = previousDateObj.toISOString().split('T')[0];
+
+    // Następny dzień
+    const nextDateObj = new Date(currentDateObj);
+    nextDateObj.setDate(nextDateObj.getDate() + 1);
+    const nextDateString = nextDateObj.toISOString().split('T')[0];
+
+    // Pobierz godziny z workHours
+    const previousDayHours = this.workHours.find(wh =>
+      wh.employee === employeeId && wh.date === previousDateString
+    )?.hours || null;
+
+    const nextDayHours = this.workHours.find(wh =>
+      wh.employee === employeeId && wh.date === nextDateString
+    )?.hours || null;
+
+    return {
+      previousDay: previousDayHours,
+      nextDay: nextDayHours
+    };
+  }
+
+  private calculateTimeDifferences(
+    currentDayHours: string,
+    previousDayHours: string | null,
+    nextDayHours: string | null
+  ): { restFromPrevious: number | null, restToNext: number | null } {
+
+    const currentShift = this.parseWorkHours(currentDayHours);
+    if (!currentShift) {
+      return { restFromPrevious: null, restToNext: null };
+    }
+
+    let restFromPrevious = null;
+    let restToNext = null;
+
+    // Różnica między końcem poprzedniego dnia a początkiem obecnego
+    if (previousDayHours) {
+      const previousShift = this.parseWorkHours(previousDayHours);
+      if (previousShift) {
+        // Przerwa od końca poprzedniej zmiany do początku obecnej (w godzinach)
+        restFromPrevious = (currentShift.startTime - previousShift.endTime) / 60;
+        // Jeśli wynik ujemny, dodaj 24h (przejście przez północ)
+        if (restFromPrevious < 0) {
+          restFromPrevious += 24;
+        }
+      }
+    }
+
+    // Różnica między końcem obecnego dnia a początkiem następnego
+    if (nextDayHours) {
+      const nextShift = this.parseWorkHours(nextDayHours);
+      if (nextShift) {
+        // Przerwa od końca obecnej zmiany do początku następnej (w godzinach)
+        restToNext = (nextShift.startTime - currentShift.endTime) / 60;
+        // Jeśli wynik ujemny, dodaj 24h (przejście przez północ)
+        if (restToNext < 0) {
+          restToNext += 24;
+        }
+      }
+    }
+
+    return { restFromPrevious, restToNext };
+  }
+
+  private parseWorkHours(hoursString: string): { startTime: number, endTime: number } | null {
+    const match = hoursString.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
+
+    if (!match) return null;
+
+    const [, startHour, startMin, endHour, endMin] = match;
+
+    return {
+      startTime: parseInt(startHour) * 60 + parseInt(startMin), // minuty od północy
+      endTime: parseInt(endHour) * 60 + parseInt(endMin)
+    };
+  }
 
 }
