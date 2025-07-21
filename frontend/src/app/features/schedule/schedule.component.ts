@@ -122,6 +122,9 @@ export class ScheduleComponent implements OnInit {
     date: string
   } | undefined>(undefined);
 
+  conflictingCells = signal<Set<string>>(new Set());
+  badWeeks = signal<Map<string, Set<number>>>(new Map());
+
   constructor(
     private scheduleService: ScheduleService,
     private employeesService: EmployeesService,
@@ -144,7 +147,12 @@ export class ScheduleComponent implements OnInit {
       console.log('Przerwa do następnego dnia:', timeDifferences.restToNext, 'h');
       this.loadWorkHours();
       this.selectedCell.set(undefined);
+
+      this.checkRestTimeConflicts();
+      // this.check35HourRestInAllWeeks();
     });
+
+    // this.check35HourRestInAllWeeks();
 
   }
 
@@ -205,6 +213,9 @@ export class ScheduleComponent implements OnInit {
         workHours: workHoursMap
       };
     });
+
+    this.checkRestTimeConflicts();
+    this.check35HourRestInAllWeeks();
   }
 
   // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
@@ -398,5 +409,217 @@ export class ScheduleComponent implements OnInit {
       endTime: parseInt(endHour) * 60 + parseInt(endMin)
     };
   }
+
+  private checkRestTimeConflicts(): void {
+    const conflicts = new Set<string>();
+
+    this.employees.forEach(employee => {
+      const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+
+      employeeWorkHours.forEach(currentWorkHour => {
+        const adjacentHours = this.getAdjacentDaysHours(employee.id, currentWorkHour.date);
+
+        const timeDifferences = this.calculateTimeDifferences(
+          currentWorkHour.hours,
+          adjacentHours.previousDay,
+          adjacentHours.nextDay
+        );
+
+        // Sprawdź przerwę od poprzedniego dnia
+        if (timeDifferences.restFromPrevious !== null && timeDifferences.restFromPrevious < 11) {
+          conflicts.add(`${employee.id}-${currentWorkHour.date}`);
+        }
+
+        // Sprawdź przerwę do następnego dnia
+        if (timeDifferences.restToNext !== null && timeDifferences.restToNext < 11) {
+          conflicts.add(`${employee.id}-${currentWorkHour.date}`);
+        }
+      });
+    });
+
+    this.conflictingCells.set(conflicts);
+  }
+
+  // Metoda do sprawdzania czy komórka jest konfliktowa
+  isCellConflicting(employee: EmployeeRow, dayNumber: number): boolean {
+    const currentDate = this.currentMonthDate();
+    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const cellKey = `${employee.id}-${dateString}`;
+
+    return this.conflictingCells().has(cellKey);
+  }
+
+  // Metoda pomocnicza - oblicz numer tygodnia dla dnia
+  private getWeekNumber(dayNumber: number): number {
+    return Math.ceil(dayNumber / 7);
+  }
+
+// Główna metoda sprawdzająca
+
+  private check35HourRestInAllWeeks(): void {
+    console.log('=== Sprawdzanie wszystkich tygodni w miesiącu ===');
+
+    const currentDate = this.currentMonthDate();
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const numberOfWeeks = Math.ceil(daysInMonth / 7);
+    const badWeeksMap = new Map<string, Set<number>>();
+
+    console.log(`Miesiąc ma ${daysInMonth} dni, podzielonych na ${numberOfWeeks} tygodni`);
+
+    this.employees.forEach(employee => {
+      console.log(`\n--- Pracownik: ${employee.first_name} ${employee.last_name} ---`);
+
+      const employeeShifts = this.workHours
+        .filter(wh => wh.employee === employee.id)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      console.log('Wszystkie zmiany:', employeeShifts.map(s => `${s.date}: ${s.hours}`));
+
+      const employeeBadWeeks = new Set<number>();
+
+      // Sprawdź każdy tydzień osobno
+      for (let week = 1; week <= numberOfWeeks; week++) {
+        const weekStart = (week - 1) * 7 + 1;
+        const weekEnd = Math.min(week * 7, daysInMonth);
+
+        console.log(`\n  Tydzień ${week} (dni ${weekStart}-${weekEnd}):`);
+
+        // Pobierz zmiany z tego tygodnia
+        const weekShifts = employeeShifts.filter(shift => {
+          const day = new Date(shift.date).getDate();
+          return day >= weekStart && day <= weekEnd;
+        });
+
+        console.log('  Zmiany w tym tygodniu:', weekShifts.map(s => `${s.date}: ${s.hours}`));
+
+        // Oblicz wszystkie przerwy w tygodniu
+        const restPeriods = this.calculateAllRestPeriodsInWeek(weekShifts, weekStart, weekEnd);
+
+        console.log('  Wszystkie przerwy:');
+        restPeriods.forEach((rest, index) => {
+          console.log(`    Przerwa ${index + 1}: ${rest.hours}h (${rest.description})`);
+        });
+
+        // Sprawdź czy jest przynajmniej jedna przerwa >= 35h
+        const hasLongRest = restPeriods.some(rest => rest.hours >= 35);
+        const maxRest = Math.max(...restPeriods.map(r => r.hours));
+
+        if (hasLongRest) {
+          console.log(`  ✅ Tydzień ${week} - ma wymaganą 35h+ przerwę (najdłuższa: ${maxRest}h)`);
+        } else {
+          console.log(`  ❌ Tydzień ${week} - BRAK 35h przerwy (najdłuższa: ${maxRest}h)`);
+          employeeBadWeeks.add(week);
+        }
+      }
+
+      if (employeeBadWeeks.size > 0) {
+        badWeeksMap.set(employee.id, employeeBadWeeks);
+      }
+    });
+
+    this.badWeeks.set(badWeeksMap);
+  }
+
+  private calculateAllRestPeriodsInWeek(weekShifts: any[], weekStart: number, weekEnd: number): Array<{hours: number, description: string}> {
+    const restPeriods: Array<{hours: number, description: string}> = [];
+
+    if (weekShifts.length === 0) {
+      // Cały tydzień wolny
+      const totalWeekHours = (weekEnd - weekStart + 1) * 24;
+      restPeriods.push({
+        hours: totalWeekHours,
+        description: `Cały tydzień wolny (${weekEnd - weekStart + 1} dni)`
+      });
+      return restPeriods;
+    }
+
+    // Stwórz datę początku i końca tygodnia
+    const currentDate = this.currentMonthDate();
+    const weekStartDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), weekStart, 0, 0, 0);
+    const weekEndDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), weekEnd, 23, 59, 59);
+
+    // 1. Przerwa od początku tygodnia do pierwszej zmiany
+    const firstShift = weekShifts[0];
+    const firstShiftStart = this.parseShiftStartTime(firstShift);
+
+    if (firstShiftStart) {
+      const restFromWeekStart = (firstShiftStart.getTime() - weekStartDate.getTime()) / (1000 * 60 * 60);
+      if (restFromWeekStart > 0) {
+        restPeriods.push({
+          hours: Math.round(restFromWeekStart * 100) / 100,
+          description: `Od początku tygodnia do ${firstShift.date}`
+        });
+      }
+    }
+
+    // 2. Przerwy między zmianami
+    for (let i = 0; i < weekShifts.length - 1; i++) {
+      const currentShiftEnd = this.parseShiftEndTime(weekShifts[i]);
+      const nextShiftStart = this.parseShiftStartTime(weekShifts[i + 1]);
+
+      if (currentShiftEnd && nextShiftStart) {
+        const restBetween = (nextShiftStart.getTime() - currentShiftEnd.getTime()) / (1000 * 60 * 60);
+        if (restBetween > 0) {
+          restPeriods.push({
+            hours: Math.round(restBetween * 100) / 100,
+            description: `${weekShifts[i].date} -> ${weekShifts[i + 1].date}`
+          });
+        }
+      }
+    }
+
+    // 3. Przerwa od ostatniej zmiany do końca tygodnia
+    const lastShift = weekShifts[weekShifts.length - 1];
+    const lastShiftEnd = this.parseShiftEndTime(lastShift);
+
+    if (lastShiftEnd) {
+      const restToWeekEnd = (weekEndDate.getTime() - lastShiftEnd.getTime()) / (1000 * 60 * 60);
+      if (restToWeekEnd > 0) {
+        restPeriods.push({
+          hours: Math.round(restToWeekEnd * 100) / 100,
+          description: `Od ${lastShift.date} do końca tygodnia`
+        });
+      }
+    }
+
+    return restPeriods;
+  }
+
+  private parseShiftStartTime(shift: any): Date | null {
+    const match = shift.hours.match(/(\d{1,2}):(\d{2})-\d{1,2}:\d{2}/);
+    if (!match) return null;
+
+    const date = new Date(shift.date);
+    date.setHours(parseInt(match[1]), parseInt(match[2]), 0, 0);
+    return date;
+  }
+
+  private parseShiftEndTime(shift: any): Date | null {
+    const match = shift.hours.match(/\d{1,2}:\d{2}-(\d{1,2}):(\d{2})/);
+    if (!match) return null;
+
+    const date = new Date(shift.date);
+    date.setHours(parseInt(match[1]), parseInt(match[2]), 0, 0);
+    return date;
+  }
+
+
+  isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
+    const selectedCell = this.selectedCell();
+    if (!selectedCell) return false;
+
+    const currentDate = this.currentMonthDate();
+    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+
+    return selectedCell.employee.id === employee.id && selectedCell.date === dateString;
+  }
+
+  // Sprawdź czy komórka należy do złego tygodnia
+  isCellInBadWeek(employee: EmployeeRow, dayNumber: number): boolean {
+    const weekNumber = this.getWeekNumber(dayNumber);
+    const employeeBadWeeks = this.badWeeks().get(employee.id.toString());
+    return employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
+  }
+
 
 }

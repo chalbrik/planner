@@ -72,6 +72,7 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
   timeTo = signal<Date | null>(null)
 
 
+
   constructor(
     private formBuilder: FormBuilder,
     private scheduleService: ScheduleService,
@@ -81,9 +82,17 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
 
       if (selectedCell) {
         this.panelOpenState.set(true);
+
+        const defaultFrom = new Date();
+        const defaultTo = new Date();
+        defaultFrom.setHours(6, 0, 0, 0);
+        defaultTo.setHours(12, 0, 0, 0);
+        this.timeFrom.set(defaultFrom);
+        this.timeTo.set(defaultTo);
+
         // RESET timepickerów
-        this.timeFrom.set(null);
-        this.timeTo.set(null);
+        // this.timeFrom.set(null);
+        // this.timeTo.set(null);
 
         // RESET formularza
         this.editScheduleForm.patchValue({

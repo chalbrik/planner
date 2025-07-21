@@ -99,8 +99,13 @@
             </mat-header-cell>
 
             <mat-cell *matCellDef="let element"
+                      class="cursor-pointer text-center"
                       [class.weekend-cell]="day.isWeekend"
                       [class.today-cell]="day.isToday"
+                      [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
+                      [class.selected-cell]="isCellSelected(element, day.dayNumber)"
+                      [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"
+
                       (click)="onCellClick(element, day.dayNumber)">
               <div class="work-hours-cell">
                 {{ getWorkHoursForDay(element, day.dayNumber) }}

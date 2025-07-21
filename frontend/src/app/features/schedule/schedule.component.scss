@@ -46,6 +46,10 @@ mat-table .mat-column-hoursSum {
   max-width: 80px !important;
 }
 
+.mdc-data-table__cell, .mdc-data-table__header-cell {
+  padding: 0 !important;
+}
+
 //mat-table .mat-column-hoursSum {
 //  width: 50px !important;
 //  min-width: 50px !important;
@@ -75,5 +79,110 @@ mat-table .mat-column-hoursSum {
 
 .mat-mdc-table-sticky-border-elem-left {
   border-right: 2px solid midnightblue;
+}
+
+.conflict-cell {
+  background-color: #fee2e2 !important; // jasny czerwony
+  border: 2px solid #dc2626 !important; // czerwona ramka
+
+  &:hover {
+    background-color: #fecaca !important; // ciemniejszy przy hover
+  }
+
+  .work-hours-cell {
+    color: #991b1b; // ciemny czerwony tekst
+    font-weight: 600;
+  }
+}
+
+// Dodaj na końcu pliku
+.bad-week-cell {
+  background-color: #fef3c7 !important; // jasny żółty
+
+  &:hover {
+    background-color: #fde047 !important; // ciemniejszy żółty przy hover
+  }
+}
+
+// Priorytet dla konfliktów - czerwony ważniejszy niż żółty
+.conflict-cell.bad-week-cell {
+  background-color: #fee2e2 !important; // pozostaw czerwony
+}
+
+// Nagłówki tygodni - opcjonalnie
+.bad-week-cell.mat-mdc-header-cell {
+  background-color: #f59e0b !important;
+  color: white !important;
+}
+
+.selected-cell {
+  border: 3px solid #3b82f6 !important; // niebieska ramka
+  background-color: #dbeafe !important; // jasne niebieskie tło
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3) !important; // subtelny cień
+
+  .work-hours-cell {
+    font-weight: 600;
+    color: #1e40af; // ciemny niebieski tekst
+  }
+}
+
+// Animacja przy zaznaczaniu
+.selected-cell {
+  //transition: all 0.2s ease-in-out;
+}
+
+// Priorytet - zaznaczenie ważniejsze niż inne stany
+.selected-cell.weekend-cell,
+.selected-cell.today-cell,
+.selected-cell.conflict-cell,
+.selected-cell.bad-week-cell {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5) !important;
+}
+
+// Hover dla wszystkich komórek (podstawowy)
+.mat-mdc-cell {
+  &:hover {
+    background-color: #E7E5E4 !important; // szare tło przy hover
+  }
+}
+
+// Złe tygodnie (brak 35h przerwy) - pomarańczowy
+.bad-week-cell {
+  background-color: #fed7aa !important; // jasny pomarańczowy
+  //border-left: 4px solid #ea580c !important; // pomarańczowa lewa ramka
+
+  &:hover {
+    background-color: #fdba74 !important; // ciemniejszy pomarańczowy przy hover
+  }
+
+  .work-hours-cell {
+    color: #9a3412; // ciemny pomarańczowy tekst
+    font-weight: 500;
+  }
+}
+
+// Priorytety kolorów (od najważniejszego):
+// 1. Zaznaczona komórka (niebieska)
+.selected-cell.bad-week-cell {
+  background-color: #dbeafe !important;
+  border-color: #3b82f6 !important;
+}
+
+// 2. Konflikty (czerwone) - ważniejsze niż złe tygodnie
+.conflict-cell.bad-week-cell {
+  background-color: #fee2e2 !important;
+  border-color: #dc2626 !important;
+}
+
+// 3. Złe tygodnie + dzisiaj
+.bad-week-cell.today-cell {
+  background-color: #fef3c7 !important; // żółto-pomarańczowy mix
+  border-color: #f59e0b !important;
+}
+
+// 4. Złe tygodnie + weekend
+.bad-week-cell.weekend-cell {
+  background-color: #fde68a !important; // lekko ciemniejszy pomarańczowy
 }
 
