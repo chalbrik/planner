@@ -143,8 +143,6 @@ export class ScheduleComponent implements OnInit {
         adjacentHours.nextDay
       );
 
-      console.log('Przerwa od poprzedniego dnia:', timeDifferences.restFromPrevious, 'h');
-      console.log('Przerwa do następnego dnia:', timeDifferences.restToNext, 'h');
       this.loadWorkHours();
       this.selectedCell.set(undefined);
 

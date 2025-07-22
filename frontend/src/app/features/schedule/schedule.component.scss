@@ -1,68 +1,23 @@
+// === PODSTAWOWE STYLE KONTENERA ===
 .example-container {
-  //height: 500px;
-  //overflow: auto;
-}
-
-.example-container {
-  //height: 70vh !important; // WAŻNE: musi mieć określoną wysokość
-  //overflow-y: auto !important;
   position: relative !important;
 }
 
-.mat-mdc-header-row {
-  //position: sticky !important;
-  top: 0 !important;
-  z-index: 1000 !important;
-  //background-color: white !important;
-  //box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+// === UKRYWANIE LINII TABELI ===
+.mat-mdc-cell {
+  border-bottom-style: none !important;
 }
 
+// === STYLE NAGŁÓWKA ===
+.mat-mdc-header-row {
+  top: 0 !important;
+  z-index: 1000 !important;
+}
+
+// === STICKY TABELA ===
 .mat-mdc-table-sticky {
   background: #59abfd;
   opacity: 1;
-}
-
-.example-sticky-toggle-group {
-  margin: 8px;
-}
-
-.mat-column-filler {
-  padding: 0 8px;
-  font-size: 10px;
-  text-align: center;
-}
-
-mat-table .mat-column-employees {
-  width: 400px !important;
-  min-width: 160px ;
-  max-width: 400px !important;
-  //flex: 0 0 400px !important; // Dla mat-table w trybie flex
-  //left: 0px !important;  // Dla sticky pozycjonowania
-}
-
-mat-table .mat-column-hoursSum {
-  width: 80px !important;
-  min-width: 80px !important;
-  max-width: 80px !important;
-}
-
-.mdc-data-table__cell, .mdc-data-table__header-cell {
-  padding: 0 !important;
-}
-
-//mat-table .mat-column-hoursSum {
-//  width: 50px !important;
-//  min-width: 50px !important;
-//  max-width: 50px !important;
-//}
-
-.mat-mdc-header-cell, .mat-mdc-footer-cell, .mat-mdc-cell {
-  //min-width: 80px;
-  box-sizing: border-box;
-}
-
-.mat-mdc-header-row, .mat-mdc-footer-row, .mat-mdc-row {
-  min-width: 1920px; /* 24 columns, 80px each */
 }
 
 .mat-mdc-table-sticky-border-elem-top {
@@ -81,108 +36,116 @@ mat-table .mat-column-hoursSum {
   border-right: 2px solid midnightblue;
 }
 
-.conflict-cell {
-  background-color: #fee2e2 !important; // jasny czerwony
-  border: 2px solid #dc2626 !important; // czerwona ramka
-
-  &:hover {
-    background-color: #fecaca !important; // ciemniejszy przy hover
-  }
-
-  .work-hours-cell {
-    color: #991b1b; // ciemny czerwony tekst
-    font-weight: 600;
-  }
+// === WYMIARY KOLUMN ===
+mat-table .mat-column-employees {
+  width: 400px !important;
+  min-width: 160px;
+  max-width: 400px !important;
 }
 
-// Dodaj na końcu pliku
-.bad-week-cell {
-  background-color: #fef3c7 !important; // jasny żółty
-
-  &:hover {
-    background-color: #fde047 !important; // ciemniejszy żółty przy hover
-  }
+mat-table .mat-column-hoursSum {
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
 }
 
-// Priorytet dla konfliktów - czerwony ważniejszy niż żółty
-.conflict-cell.bad-week-cell {
-  background-color: #fee2e2 !important; // pozostaw czerwony
+// Kolumny dni
+.mat-mdc-cell[class*="day-"], .mat-mdc-header-cell[class*="day-"] {
+  width: 55px !important;
+  min-width: 55px !important;
+  box-sizing: border-box;
 }
 
-// Nagłówki tygodni - opcjonalnie
-.bad-week-cell.mat-mdc-header-cell {
-  background-color: #f59e0b !important;
-  color: white !important;
+// === WYMIARY WIERSZY ===
+.mat-mdc-header-cell, .mat-mdc-footer-cell, .mat-mdc-cell {
+  box-sizing: border-box;
 }
 
-.selected-cell {
-  border: 3px solid #3b82f6 !important; // niebieska ramka
-  background-color: #dbeafe !important; // jasne niebieskie tło
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3) !important; // subtelny cień
-
-  .work-hours-cell {
-    font-weight: 600;
-    color: #1e40af; // ciemny niebieski tekst
-  }
+.mat-mdc-header-row, .mat-mdc-footer-row, .mat-mdc-row {
+  min-width: 1920px;
+  height: 55px !important;
+  min-height: 55px !important;
 }
 
-// Animacja przy zaznaczaniu
-.selected-cell {
-  //transition: all 0.2s ease-in-out;
-}
-
-// Priorytet - zaznaczenie ważniejsze niż inne stany
-.selected-cell.weekend-cell,
-.selected-cell.today-cell,
-.selected-cell.conflict-cell,
-.selected-cell.bad-week-cell {
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5) !important;
-}
-
-// Hover dla wszystkich komórek (podstawowy)
+// === PODSTAWOWY HOVER ===
 .mat-mdc-cell {
   &:hover {
-    background-color: #E7E5E4 !important; // szare tło przy hover
+    background-color: #E5E7EB !important;
+    border-radius: 4px;
   }
 }
 
-// Złe tygodnie (brak 35h przerwy) - pomarańczowy
+// === STANY KOMÓREK (od najmniej do najbardziej ważnego) ===
+
+// 1. ZŁY TYDZIEŃ (brak 35h przerwy) - FIOLETOWY (domyślnie dla całego tygodnia)
 .bad-week-cell {
-  background-color: #fed7aa !important; // jasny pomarańczowy
-  //border-left: 4px solid #ea580c !important; // pomarańczowa lewa ramka
+  background-color: rgba(139, 92, 246, 0.5) !important; // fioletowy 50% transparentności
+  //border-radius: 4px !important;
 
   &:hover {
-    background-color: #fdba74 !important; // ciemniejszy pomarańczowy przy hover
-  }
-
-  .work-hours-cell {
-    color: #9a3412; // ciemny pomarańczowy tekst
-    font-weight: 500;
+    background-color: rgba(139, 92, 246, 0.7) !important; // ciemniejszy przy hover
+    border-radius: 0 !important;
   }
 }
 
-// Priorytety kolorów (od najważniejszego):
-// 1. Zaznaczona komórka (niebieska)
+// 2. KONFLIKT 11H - CZERWONY (nadpisuje fioletowy dla konkretnych komórek)
+.conflict-cell {
+  background-color: rgba(248, 113, 113, 0.5) !important; // czerwony 50% transparentności - nadpisuje fioletowy
+  //border-radius: 4px !important;
+
+  &:hover {
+    background-color: rgba(248, 113, 113, 0.7) !important; // ciemniejszy przy hover
+    border-radius: 0 !important;
+  }
+}
+
+// 3. Konflikt ma wyższy priorytet - nie potrzebujemy kombinacji
+// .conflict-cell automatycznie nadpisuje .bad-week-cell dzięki kolejności CSS
+
+// 4. ZAZNACZONA KOMÓRKA - NAJWYŻSZY PRIORYTET
+.selected-cell {
+  border: 3px solid #F59E0B !important; // pomarańczowa ramka
+  border-radius: 4px !important;
+  z-index: 10 !important; // zawsze na wierzchu
+}
+
+// Zachowaj tła dla zaznaczonych komórek z błędami
+.selected-cell.conflict-cell {
+  background-color: rgba(248, 113, 113, 0.3) !important; // delikatniejszy czerwony
+}
+
 .selected-cell.bad-week-cell {
-  background-color: #dbeafe !important;
-  border-color: #3b82f6 !important;
+  background-color: rgba(139, 92, 246, 0.3) !important; // delikatniejszy fioletowy
 }
 
-// 2. Konflikty (czerwone) - ważniejsze niż złe tygodnie
-.conflict-cell.bad-week-cell {
-  background-color: #fee2e2 !important;
-  border-color: #dc2626 !important;
+.selected-cell.conflict-cell.bad-week-cell {
+  background: linear-gradient(135deg,
+    rgba(248, 113, 113, 0.3) 0%,
+    rgba(248, 113, 113, 0.3) 50%,
+    rgba(139, 92, 246, 0.3) 50%,
+    rgba(139, 92, 246, 0.3) 100%) !important;
 }
 
-// 3. Złe tygodnie + dzisiaj
+// === INNE KOMBINACJE ===
 .bad-week-cell.today-cell {
-  background-color: #fef3c7 !important; // żółto-pomarańczowy mix
-  border-color: #f59e0b !important;
+  background-color: rgba(139, 92, 246, 0.6) !important;
 }
 
-// 4. Złe tygodnie + weekend
 .bad-week-cell.weekend-cell {
-  background-color: #fde68a !important; // lekko ciemniejszy pomarańczowy
+  background-color: rgba(139, 92, 246, 0.4) !important;
 }
 
+// === USUNIĘTE DUPLIKATY I NIEUŻYWANE STYLE ===
+.mdc-data-table__cell, .mdc-data-table__header-cell {
+  padding: 0 !important;
+}
+
+.example-sticky-toggle-group {
+  margin: 8px;
+}
+
+.mat-column-filler {
+  padding: 0 8px;
+  font-size: 10px;
+  text-align: center;
+}

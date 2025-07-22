@@ -99,7 +99,7 @@
             </mat-header-cell>
 
             <mat-cell *matCellDef="let element"
-                      class="cursor-pointer text-center"
+                      class="cursor-pointer text-center w-2"
                       [class.weekend-cell]="day.isWeekend"
                       [class.today-cell]="day.isToday"
                       [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
