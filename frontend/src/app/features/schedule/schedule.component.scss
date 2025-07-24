@@ -104,7 +104,7 @@ mat-table .mat-column-hoursSum {
 
 // 4. ZAZNACZONA KOMÓRKA - NAJWYŻSZY PRIORYTET
 .selected-cell {
-  border: 3px solid #F59E0B !important; // pomarańczowa ramka
+  border: 3px solid #10B981 !important; // pomarańczowa ramka
   border-radius: 4px !important;
   z-index: 10 !important; // zawsze na wierzchu
 }
@@ -124,6 +124,21 @@ mat-table .mat-column-hoursSum {
     rgba(248, 113, 113, 0.3) 50%,
     rgba(139, 92, 246, 0.3) 50%,
     rgba(139, 92, 246, 0.3) 100%) !important;
+}
+
+// 5. PRZEKROCZENIE 12H PRACY - ŻÓŁTY
+.exceeding-12h-cell {
+  background-color: rgba(245, 158, 11, 0.5) !important; // żółty 50% transparentności
+
+  &:hover {
+    background-color: rgba(245, 158, 11, 0.7) !important; // ciemniejszy przy hover
+    border-radius: 0 !important;
+  }
+}
+
+// Zachowaj tła dla zaznaczonych komórek z przekroczeniem 12h
+.selected-cell.exceeding-12h-cell {
+  background-color: rgba(245, 158, 11, 0.3) !important; // delikatniejszy żółty
 }
 
 // === INNE KOMBINACJE ===
@@ -148,4 +163,21 @@ mat-table .mat-column-hoursSum {
   padding: 0 8px;
   font-size: 10px;
   text-align: center;
+}
+
+// Kombinacje z innymi błędami
+.exceeding-12h-cell.conflict-cell {
+  background: linear-gradient(45deg,
+    rgba(245, 158, 11, 0.5) 0%,
+    rgba(245, 158, 11, 0.5) 50%,
+    rgba(248, 113, 113, 0.5) 50%,
+    rgba(248, 113, 113, 0.5) 100%) !important;
+}
+
+.exceeding-12h-cell.bad-week-cell {
+  background: linear-gradient(135deg,
+    rgba(245, 158, 11, 0.5) 0%,
+    rgba(245, 158, 11, 0.5) 50%,
+    rgba(139, 92, 246, 0.5) 50%,
+    rgba(139, 92, 246, 0.5) 100%) !important;
 }

@@ -1,0 +1,25 @@
+<div class="notification-dialog" [attr.data-type]="data.type">
+  <div class="notification-content">
+    <div class="notification-icon">
+      @switch (data.type) {
+        @case ('exceed12h') {
+          <mat-icon>schedule</mat-icon>
+        }
+        @case ('conflict11h') {
+          <mat-icon>warning</mat-icon>
+        }
+        @case ('badWeek35h') {
+          <mat-icon>event_busy</mat-icon>
+        }
+      }
+    </div>
+
+    <div class="notification-message">
+      {{ data.message }}
+    </div>
+
+    <button mat-icon-button class="close-button" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>

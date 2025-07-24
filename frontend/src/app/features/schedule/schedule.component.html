@@ -105,6 +105,7 @@
                       [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
                       [class.selected-cell]="isCellSelected(element, day.dayNumber)"
                       [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"
+                      [class.exceeding-12h-cell]="isCellExceeding12h(element, day.dayNumber)"
 
                       (click)="onCellClick(element, day.dayNumber)">
               <div class="work-hours-cell">

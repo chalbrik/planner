@@ -133,15 +133,72 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
     return '';
   });
 
-  onEditPanelSave(){
+  // onEditPanelSave(){
+  //
+  //   //Zanim wysylam to umieszczam godziny w polu hours
+  //   this.editScheduleForm.patchValue({
+  //     hours: this.formattedTime()
+  //   })
+  //
+  //   if(this.editScheduleForm.valid) {
+  //
+  //     const selectedCell = this.selectedCell();
+  //     if(selectedCell?.workHours){
+  //       this.scheduleService.updateWorkHours(selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {
+  //         this.scheduleService.emitScheduleUpdate(workHours);
+  //       })
+  //     } else {
+  //       this.scheduleService.addWorkHours(this.editScheduleForm.value).subscribe(updatedData => {
+  //         this.scheduleService.emitScheduleUpdate(updatedData);
+  //       });
+  //     }
+  //     //
+  //     // this.panelOpenState.set(false);
+  //     // this.cancelSelection.emit();
+  //
+  //   }
+  // }
 
-    //Zanim wysylam to umieszczam godziny w polu hours
+  // onEditPanelSave(){
+  //   // Zanim wysyłamy to umieszczamy godziny w polu hours
+  //   this.editScheduleForm.patchValue({
+  //     hours: this.formattedTime()
+  //   })
+  //
+  //   if(this.editScheduleForm.valid) {
+  //     const hoursString = this.formattedTime();
+  //
+  //     // Sprawdź czy przekracza 12h używając serwisu
+  //     const validationError = this.scheduleService.validateWorkHoursExceed12h(hoursString);
+  //
+  //     // ZAWSZE zapisz godziny
+  //     const selectedCell = this.selectedCell();
+  //     if(selectedCell?.workHours){
+  //       this.scheduleService.updateWorkHours(selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {
+  //         this.scheduleService.emitScheduleUpdate(workHours);
+  //       })
+  //     } else {
+  //       this.scheduleService.addWorkHours(this.editScheduleForm.value).subscribe(updatedData => {
+  //         this.scheduleService.emitScheduleUpdate(updatedData);
+  //       });
+  //     }
+  //
+  //     // POTEM pokaż komunikat jeśli są błędy
+  //     if (validationError) {
+  //       this.validationError.emit(validationError);
+  //     } else {
+  //       this.validationError.emit(null); // Wyczyść błędy
+  //     }
+  //   }
+  // }
+
+  onEditPanelSave(){
     this.editScheduleForm.patchValue({
       hours: this.formattedTime()
     })
 
     if(this.editScheduleForm.valid) {
-
+      // ZAWSZE zapisz godziny - bez walidacji
       const selectedCell = this.selectedCell();
       if(selectedCell?.workHours){
         this.scheduleService.updateWorkHours(selectedCell.workHours.id, this.editScheduleForm.value).subscribe(workHours => {
@@ -152,10 +209,6 @@ export class EditScheduleComponentComponent implements OnInit, onChanges {
           this.scheduleService.emitScheduleUpdate(updatedData);
         });
       }
-      //
-      // this.panelOpenState.set(false);
-      // this.cancelSelection.emit();
-
     }
   }
 
