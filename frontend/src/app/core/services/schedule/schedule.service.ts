@@ -1,7 +1,10 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {Observable, Subject} from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import {tap} from 'rxjs/operators';
+import {WorkHours} from './schedule.types';
+import {EmployeesService} from '../employees/employees.service';
 
 interface ValidationResult {
   type: 'exceed12h' | 'conflict11h' | 'badWeek35h';
@@ -12,27 +15,25 @@ interface ValidationResult {
   providedIn: 'root'
 })
 export class ScheduleService {
+  _http = inject(HttpClient);
+  _employeesService = inject(EmployeesService)
+
+  _workHours = signal<WorkHours[]>([])
+
   private apiUrl = environment.apiUrl + 'schedule/';
 
   private scheduleUpdatedSubject = new Subject<any>();
   public scheduleUpdated$ = this.scheduleUpdatedSubject.asObservable();
 
+
   constructor(private http: HttpClient) { }
 
-  getWorkHours(filters?: any): Observable<any[]> {
-    let url = `${this.apiUrl}work-hours/`;
-    if(filters){
-      const params = new URLSearchParams();
-      if (filters.month) params.append('month', filters.month);
-      if (filters.year) params.append('year', filters.year);
-      if (filters.employee_id) params.append('employee_id', filters.employee_id);
-
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
-    }
-
-    return this.http.get<any[]>(url);
+  getWorkHours(filters?: any): Observable<WorkHours[]> {
+    return this.http.get<any[]>(`${this.apiUrl}work-hours/`, { params: filters }).pipe(
+      tap(responseData => {
+        this._workHours.set(responseData)
+      })
+    );
   }
 
   addWorkHours(workHours: any): Observable<any> {
@@ -86,23 +87,23 @@ export class ScheduleService {
     };
   }
 
-  validateRestTimeConflicts(
-    employees: any[],
-    workHours: any[],
-    getAdjacentDaysHours: (employeeId: number, date: string) => { previousDay: string | null, nextDay: string | null }
-  ): Set<string> {
+  validateRestTimeConflicts(): Set<string> {
     const conflicts = new Set<string>();
+    const employees = this._employeesService.employees();
+    const workHours = this._workHours();
 
     employees.forEach(employee => {
-      const employeeWorkHours = workHours.filter(wh => wh.employee === employee.id);
+      const employeeWorkHours = workHours.filter(wh => wh.employee === employee.id).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-      employeeWorkHours.forEach(currentWorkHour => {
-        const adjacentHours = getAdjacentDaysHours(employee.id, currentWorkHour.date);
+      for (let i = 0; i < employeeWorkHours.length; i++) {
+        const currentWorkHour = employeeWorkHours[i];
+        const previousWorkHour = employeeWorkHours[i - 1];
+        const nextWorkHour = employeeWorkHours[i + 1];
 
         const timeDifferences = this.calculateTimeDifferences(
           currentWorkHour.hours,
-          adjacentHours.previousDay,
-          adjacentHours.nextDay
+          previousWorkHour?.hours || null,
+          nextWorkHour?.hours || null
         );
 
         // Sprawdź przerwę od poprzedniego dnia
@@ -114,7 +115,7 @@ export class ScheduleService {
         if (timeDifferences.restToNext !== null && timeDifferences.restToNext < 11) {
           conflicts.add(`${employee.id}-${currentWorkHour.date}`);
         }
-      });
+      }
     });
 
     return conflicts;

@@ -142,12 +142,15 @@ export class ScheduleComponent implements OnInit {
 
     this.scheduleService.scheduleUpdated$.subscribe((updatedData) => {
       this.loadWorkHours();
+
+      // Lepszym rozwiązaniem byłoby użycie Observable zamiast setTimeout: - mialem problem z dockerem poniewaz byl wolniejszy
+      setTimeout(() => {
+        this.checkRestTimeConflicts();
+        this.validateAndShowErrors(updatedData);
+      }, 300);
+
       this.selectedCell.set(undefined);
 
-      this.checkRestTimeConflicts();
-      // this.checkWorkHoursExceed12h(updatedData.hours, updatedData.employee, updatedData.date);
-
-      this.validateAndShowErrors(updatedData);
     });
 
   }
@@ -194,14 +197,9 @@ export class ScheduleComponent implements OnInit {
   prepareTableData() {
     if (this.employees.length === 0) return;
 
-    console.log('prepareTableData - employees:', this.employees.length); // DODAJ TO
-    console.log('prepareTableData - workHours:', this.workHours.length); // DODAJ TO
-
     this.dataSource = this.employees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
       const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
-
-      console.log(`Pracownik ${employee.first_name}: ${employeeWorkHours.length} godzin pracy`); // DODAJ TO
 
       employeeWorkHours.forEach(wh => {
         workHoursMap[wh.date] = wh.hours;
@@ -225,13 +223,6 @@ export class ScheduleComponent implements OnInit {
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
     return employee.workHours[dateString] || '';
   }
-
-  // Metoda do obliczania sumy godzin dla pracownika (uproszczona)
-  // getTotalHoursForEmployee(employee: EmployeeRow): number {
-  //   const hours = Object.values(employee.workHours);
-  //   // To jest uproszczona logika - możesz ją rozbudować
-  //   return hours.length * 8; // Przykład: każdy dzień pracy = 8 godzin
-  // }
 
   getTotalHoursForEmployee(employee: EmployeeRow): number {
     let totalHours = 0;
@@ -276,32 +267,9 @@ export class ScheduleComponent implements OnInit {
     return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   }
 
-  /** Whether the button toggle group contains the id as an active value. */
-  isSticky(buttonToggleGroup: MatButtonToggleGroup, id: string) {
-    return (buttonToggleGroup.value || []).indexOf(id) !== -1;
-  }
-
-  // Metoda pomocnicza do sprawdzania czy dzień jest weekendem
-  isDayWeekend(dayNumber: number): boolean {
-    const currentDate = this.currentMonthDate();
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
-    const dayOfWeek = date.getDay();
-    return dayOfWeek === 0 || dayOfWeek === 6;
-  }
-
-  // Metoda pomocnicza do sprawdzania czy dzień jest dzisiaj
-  isDayToday(dayNumber: number): boolean {
-    const currentDate = this.currentMonthDate();
-    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
-    const today = new Date();
-    return date.toDateString() === today.toDateString();
-  }
-
   onCellClick(employee: EmployeeRow, dayNumber: number) {
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-
-    console.log("DateString: ", dateString);
 
     const workHoursObject = this.workHours.find(wh =>
       wh.employee === employee.id && wh.date === dateString
@@ -311,24 +279,19 @@ export class ScheduleComponent implements OnInit {
       workHours: workHoursObject || null,
       date: dateString
     });
+
   }
 
   onCancelSelection() {
     this.selectedCell.set(undefined);
   }
 
-  //Metoda warunkowa do wyświetlania komponentów
-  currentComponent = computed(() => {
-    return this.selectedCell() ? EditScheduleComponentComponent : BlancEditScheduleComponentComponent;
-  })
-
-  componentInputs = computed(() => {
-    return this.selectedCell() ? { selectedCell: this.selectedCell() } : {};
-  })
 
   //Pobieranie godzin z dnia poprzedniego oraz nastepnego
-  private getAdjacentDaysHours(employeeId: number, currentDate: string): { previousDay: string | null, nextDay: string | null } {
+  private getAdjacentDaysHours(employeeId: string, currentDate: string): { previousDay: string | null, nextDay: string | null } {
     const currentDateObj = new Date(currentDate);
+    // console.log('employeeId', employeeId);
+    // console.log('currentDate ', currentDate);
 
     // Poprzedni dzień
     const previousDateObj = new Date(currentDateObj);
@@ -355,27 +318,8 @@ export class ScheduleComponent implements OnInit {
     };
   }
 
-
-
-  private parseWorkHours(hoursString: string): { startTime: number, endTime: number } | null {
-    const match = hoursString.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
-
-    if (!match) return null;
-
-    const [, startHour, startMin, endHour, endMin] = match;
-
-    return {
-      startTime: parseInt(startHour) * 60 + parseInt(startMin), // minuty od północy
-      endTime: parseInt(endHour) * 60 + parseInt(endMin)
-    };
-  }
-
   private checkRestTimeConflicts(): void {
-    const conflicts = this.scheduleService.validateRestTimeConflicts(
-      this.employees,
-      this.workHours,
-      (employeeId: number, date: string) => this.getAdjacentDaysHours(employeeId, date)
-    );
+    const conflicts = this.scheduleService.validateRestTimeConflicts();
 
     this.conflictingCells.set(conflicts);
   }
@@ -451,30 +395,17 @@ export class ScheduleComponent implements OnInit {
     return this.exceedingWorkHours().has(cellKey);
   }
 
-  onValidationError(error: {type: string, message: string} | null) {
-    if (error) {
-      this.dialog.open(NotificationPopUpComponent, {
-        data: error,
-        width: '400px',
-        disableClose: false
-      });
-    }
-  }
-
   private validateAndShowErrors(updatedData: any): void {
     const hoursString = updatedData.hours;
     const employeeId = updatedData.employee;
     const date = updatedData.date;
 
+
     // 1. Walidacja przekroczenia 12h
     const exceed12hError = this.scheduleService.validateWorkHoursExceed12h(hoursString);
 
     // 2. Walidacja konfliktów 11h
-    const conflicts = this.scheduleService.validateRestTimeConflicts(
-      this.employees,
-      this.workHours,
-      (empId: number, dateStr: string) => this.getAdjacentDaysHours(empId, dateStr)
-    );
+    const conflicts = this.scheduleService.validateRestTimeConflicts();
     const hasConflict11h = conflicts.has(`${employeeId}-${date}`);
 
     // 3. Walidacja 35h w tygodniu
@@ -488,21 +419,31 @@ export class ScheduleComponent implements OnInit {
     const employeeBadWeeks = badWeeks.get(employeeId.toString());
     const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
 
+
     // Pokaż komunikat w kolejności priorytetów
     if (exceed12hError) {
       this.showNotification(exceed12hError);
-    } else if (hasConflict11h) {
+    }
+    if (hasConflict11h) {
       this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
-    } else if (hasBadWeek35h) {
+    }
+    if (hasBadWeek35h) {
       this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
     }
   }
 
   private showNotification(error: {type: string, message: string}): void {
+    // Sprawdź ile dialogów jest już otwartych
+    const openDialogs = this.dialog.openDialogs.length;
+
     this.dialog.open(NotificationPopUpComponent, {
       data: error,
       width: '400px',
-      disableClose: false
+      disableClose: false,
+      position: {
+        top: `${100 + (openDialogs * 80)}px`,  // Każdy kolejny o 120px niżej
+        left: '20px'                           // Wszystkie po prawej stronie
+      }
     });
   }
 
