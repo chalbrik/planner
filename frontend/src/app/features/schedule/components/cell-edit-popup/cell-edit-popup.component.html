@@ -1,0 +1,45 @@
+<div class="popup-container bg-blue-gray-400 shadow-lg rounded-lg flex flex-row items-center justify-between gap-1 p-2">
+
+
+    <mat-form-field appearance="fill" class="time-field">
+      <!--            <mat-label>Od</mat-label>-->
+      <input matInput
+             [matTimepicker]="fromTimePicker"
+             (valueChange)="onTimeFromChange($event)"
+             [value]="timeFrom()"
+      >
+      <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>
+      <mat-timepicker interval="15min" #fromTimePicker/>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <!--            <mat-label>Do</mat-label>-->
+      <input matInput
+             [matTimepicker]="toTimePicker"
+             [value]="timeTo()"
+             (valueChange)="onTimeToChange($event)"
+      >
+      <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>
+      <mat-timepicker interval="15min" #toTimePicker/>
+    </mat-form-field>
+
+
+
+    <button mat-icon-button color="primary" (click)="onSave()">
+      <app-icon iconName="check" iconSize="outline" ></app-icon>
+    </button>
+
+    <button mat-icon-button (click)="onCancel()">
+      <app-icon iconName="x-mark" iconSize="outline"></app-icon>
+    </button>
+
+    <mat-divider [vertical]="true" class="h-8 border-gray-800"></mat-divider>
+
+    <button mat-icon-button class="delete-button" (click)="onDelete()">
+      <app-icon iconName="trash" iconSize="outline"></app-icon>
+    </button>
+
+
+
+
+</div>

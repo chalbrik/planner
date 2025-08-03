@@ -1,26 +1,25 @@
-import {Component, OnInit, signal, computed, ViewEncapsulation, inject} from '@angular/core';
+import {Component, OnInit, signal, computed, ViewEncapsulation, inject, OnDestroy} from '@angular/core';
 import {ScheduleService} from '../../core/services/schedule/schedule.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
   MatCell, MatCellDef, MatColumnDef,
   MatFooterCell, MatFooterCellDef,
-  MatFooterRow, MatFooterRowDef,
   MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef,
   MatRow, MatRowDef,
   MatTable
 } from '@angular/material/table';
-import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
-import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIconButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {EditScheduleComponentComponent} from './components/edit-schedule-component/edit-schedule-component.component';
-import {
-  BlancEditScheduleComponentComponent
-} from './components/blanc-edit-schedule-component/blanc-edit-schedule-component.component';
 import {IconComponent} from '../../shared/components/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationPopUpComponent } from './components/notification-pop-up/notification-pop-up.component'; // sprawdź ścieżkę!
+import { Overlay, OverlayRef } from '@angular/cdk/overlay';
+import { ComponentPortal } from '@angular/cdk/portal';
+import {CellEditPopupComponent} from './components/cell-edit-popup/cell-edit-popup.component';
+
 
 interface Day {
   date: Date;
@@ -54,26 +53,28 @@ interface EmployeeRow {
     MatFooterCellDef,
     MatRowDef,
     MatHeaderRowDef,
-    MatButton,
     EditScheduleComponentComponent,
-    MatButtonToggleGroup,
-    MatButtonToggle,
     IconComponent,
-    MatIconButton
+    MatIconButton,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
 })
-export class ScheduleComponent implements OnInit {
+export class ScheduleComponent implements OnInit, OnDestroy {
 
   private readonly dialog = inject(MatDialog);
+  private readonly scheduleService = inject(ScheduleService);
+  private readonly employeesService = inject(EmployeesService);
+  private readonly overlay = inject(Overlay);
 
   employees: any[] = [];
   workHours: any[] = [];
   isLoading = false;
   errorMessage: string | null = null;
+
+
 
   // Sygnały dla zarządzania datami
   currentMonthDate = signal<Date>(new Date());
@@ -131,14 +132,17 @@ export class ScheduleComponent implements OnInit {
   badWeeks = signal<Map<string, Set<number>>>(new Map());
   exceedingWorkHours = signal<Set<string>>(new Set());
 
-  constructor(
-    private scheduleService: ScheduleService,
-    private employeesService: EmployeesService,
-  ) {}
+  private overlayRef?: OverlayRef;
+
+  dayColumnWidth = signal<number>(55);
+
+  constructor() {}
 
   ngOnInit() {
     this.loadEmployees();
     this.loadWorkHours();
+
+    this.setupResponsiveColumns();
 
     this.scheduleService.scheduleUpdated$.subscribe((updatedData) => {
       this.loadWorkHours();
@@ -150,9 +154,60 @@ export class ScheduleComponent implements OnInit {
       }, 300);
 
       this.selectedCell.set(undefined);
-
     });
 
+  }
+
+  ngOnDestroy() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', this.calculateDayColumnWidth.bind(this));
+    }
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+    }
+  }
+
+  private setupResponsiveColumns(): void {
+    // Oblicz szerokość przy inicjalizacji
+    this.calculateDayColumnWidth();
+
+    // Nasłuchuj zmian rozmiaru okna
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => {
+        this.calculateDayColumnWidth();
+      });
+    }
+  }
+
+  private calculateDayColumnWidth(): void {
+    if (typeof window === 'undefined') return;
+
+    const screenWidth = window.innerWidth;
+    const isLargeScreen = screenWidth >= 1024; // lg breakpoint
+
+    if (!isLargeScreen) {
+      this.dayColumnWidth.set(55); // Domyślna szerokość
+      this.updateCSSCustomProperty(55);
+      return;
+    }
+
+    // Oblicz dostępną przestrzeń na ekranach lg+
+    const fixedColumnsWidth = 400 + 80 + 64; // Pracownicy + Suma + margines
+    const availableWidth = screenWidth - fixedColumnsWidth;
+    const numberOfDays = this.monthDays().length;
+
+    // Oblicz szerokość komórki
+    const calculatedWidth = Math.floor(availableWidth / numberOfDays);
+    const finalWidth = Math.max(calculatedWidth, 40); // Min 40px
+
+    this.dayColumnWidth.set(finalWidth);
+    this.updateCSSCustomProperty(finalWidth);
+  }
+
+  private updateCSSCustomProperty(width: number): void {
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.setProperty('--day-column-width', `${width}px`);
+    }
   }
 
   loadEmployees() {
@@ -255,7 +310,13 @@ export class ScheduleComponent implements OnInit {
     const current = this.currentMonthDate();
     const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 1);
     this.currentMonthDate.set(newDate);
-    this.loadWorkHours(); // Przeładuj dane dla nowego miesiąca
+    this.loadWorkHours();
+
+    // Przelicz szerokość dla nowego miesiąca
+    this.calculateDayColumnWidth();
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+    }
   }
 
   getMonthName(): string {
@@ -267,19 +328,162 @@ export class ScheduleComponent implements OnInit {
     return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   }
 
-  onCellClick(employee: EmployeeRow, dayNumber: number) {
+  // onCellClick(employee: EmployeeRow, dayNumber: number) {
+  //   const currentDate = this.currentMonthDate();
+  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+  //
+  //   const workHoursObject = this.workHours.find(wh =>
+  //     wh.employee === employee.id && wh.date === dateString
+  //   );
+  //   this.selectedCell.set({
+  //     employee: employee,
+  //     workHours: workHoursObject || null,
+  //     date: dateString
+  //   });
+  //
+  // }
+
+  onCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
+    // Zamknij poprzedni overlay jeśli istnieje
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+    }
+
+    // Przygotuj dane selectedCell
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
 
     const workHoursObject = this.workHours.find(wh =>
       wh.employee === employee.id && wh.date === dateString
     );
-    this.selectedCell.set({
+
+    const selectedCellData = {
       employee: employee,
       workHours: workHoursObject || null,
       date: dateString
+    };
+
+    // Pobierz element komórki
+    const cellElement = event.target as HTMLElement;
+
+    // Stwórz strategię pozycjonowania
+    const positionStrategy = this.overlay.position()
+      .flexibleConnectedTo(cellElement)
+      .withPositions([
+        {
+          originX: 'center',
+          originY: 'top',
+          overlayX: 'center',
+          overlayY: 'bottom',
+          offsetY: -8
+        },
+        {
+          originX: 'center',
+          originY: 'bottom',
+          overlayX: 'center',
+          overlayY: 'top',
+          offsetY: 8
+        }
+      ]);
+
+    // Stwórz overlay
+    this.overlayRef = this.overlay.create({
+      positionStrategy,
+      hasBackdrop: false,
+      scrollStrategy: this.overlay.scrollStrategies.reposition()
     });
 
+    this.overlayRef.backdropClick().subscribe(() => {
+      this.closePopup();
+    });
+
+    // Stwórz portal komponentu
+    const portal = new ComponentPortal(CellEditPopupComponent);
+
+    // Podłącz komponent do overlay
+    const componentRef = this.overlayRef.attach(portal);
+
+    // *** TUTAJ PRZEKAŻ selectedCell ***
+    componentRef.setInput('selectedCell', selectedCellData);
+
+    // Obsłuż eventy z komponentu
+    componentRef.instance.save.subscribe((data) => {
+      this.onPopupSave(data);
+    });
+
+    componentRef.instance.cancel.subscribe(() => {
+      this.onPopupCancel();
+    });
+
+    componentRef.instance.delete.subscribe((data) => {
+      this.onPopupDelete(data);
+    });
+
+    // Zachowaj w sygnale (dla accordion panelu)
+    this.selectedCell.set(selectedCellData);
+  }
+
+  private onPopupSave(data: { hours: string; employee: string; date: string; id?: string }) {
+    if (data.id) {
+      // Update istniejących godzin
+      this.scheduleService.updateWorkHours(data.id, {
+        hours: data.hours,
+        employee: data.employee,
+        date: data.date
+      }).subscribe({
+        next: (updatedData) => {
+          this.scheduleService.emitScheduleUpdate(updatedData);
+          this.closePopup();
+        },
+        error: (error) => {
+          console.error('Błąd podczas aktualizacji godzin:', error);
+          // Tu możesz dodać obsługę błędów
+        }
+      });
+    } else {
+      // Dodaj nowe godziny
+      this.scheduleService.addWorkHours({
+        hours: data.hours,
+        employee: data.employee,
+        date: data.date
+      }).subscribe({
+        next: (newData) => {
+          this.scheduleService.emitScheduleUpdate(newData);
+          this.closePopup();
+        },
+        error: (error) => {
+          console.error('Błąd podczas dodawania godzin:', error);
+          // Tu możesz dodać obsługę błędów
+        }
+      });
+    }
+  }
+
+  private onPopupCancel() {
+    console.log('Popup cancel');
+    this.closePopup();
+  }
+
+  private onPopupDelete(data: { id: string }) {
+    this.scheduleService.deleteWorkHours(data.id).subscribe({
+      next: () => {
+        // Emit schedule update z informacją o usunięciu
+        this.scheduleService.emitScheduleUpdate({ deleted: true, id: data.id });
+        this.closePopup();
+      },
+      error: (error) => {
+        console.error('Błąd podczas usuwania godzin:', error);
+        // Tu możesz dodać obsługę błędów
+      }
+    });
+  }
+
+  private closePopup() {
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+      this.overlayRef = undefined;
+    }
+    this.selectedCell.set(undefined);
   }
 
   onCancelSelection() {
@@ -341,11 +545,7 @@ export class ScheduleComponent implements OnInit {
 // Główna metoda sprawdzająca
 
   private check35HourRestInAllWeeks(): void {
-    const badWeeksMap = this.scheduleService.validate35HourRestInAllWeeks(
-      this.employees,
-      this.workHours,
-      this.currentMonthDate()
-    );
+    const badWeeksMap = this.scheduleService.validate35HourRestInAllWeeks(this.currentMonthDate());
 
     this.badWeeks.set(badWeeksMap);
   }
@@ -409,11 +609,7 @@ export class ScheduleComponent implements OnInit {
     const hasConflict11h = conflicts.has(`${employeeId}-${date}`);
 
     // 3. Walidacja 35h w tygodniu
-    const badWeeks = this.scheduleService.validate35HourRestInAllWeeks(
-      this.employees,
-      this.workHours,
-      this.currentMonthDate()
-    );
+    const badWeeks = this.scheduleService.validate35HourRestInAllWeeks(this.currentMonthDate());
     const dayNumber = new Date(date).getDate();
     const weekNumber = this.getWeekNumber(dayNumber);
     const employeeBadWeeks = badWeeks.get(employeeId.toString());

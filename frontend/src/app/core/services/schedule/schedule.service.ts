@@ -15,7 +15,13 @@ interface ValidationResult {
   providedIn: 'root'
 })
 export class ScheduleService {
-  _http = inject(HttpClient);
+
+  private static readonly REQUIRED_REST_HOURS = 35;
+  private static readonly HOURS_IN_DAY = 24;
+  private static readonly DAYS_IN_WEEK = 7;
+
+
+  http = inject(HttpClient);
   _employeesService = inject(EmployeesService)
 
   _workHours = signal<WorkHours[]>([])
@@ -25,8 +31,13 @@ export class ScheduleService {
   private scheduleUpdatedSubject = new Subject<any>();
   public scheduleUpdated$ = this.scheduleUpdatedSubject.asObservable();
 
+  //zmienna ktora przechowuje parsowane WorkHours
+  private parseWorkHoursCache = new Map<string, {startTime: number, endTime: number}>();
 
-  constructor(private http: HttpClient) { }
+  private dayNumberCache = new Map<string, number>();
+
+
+  constructor() { }
 
   getWorkHours(filters?: any): Observable<WorkHours[]> {
     return this.http.get<any[]>(`${this.apiUrl}work-hours/`, { params: filters }).pipe(
@@ -44,7 +55,7 @@ export class ScheduleService {
     return this.http.put<any>(`${this.apiUrl}work-hours/${id}/`, workHours);
   }
 
-  deleteWorkHours(id: number): Observable<any> {
+  deleteWorkHours(id: string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}work-hours/${id}/`);
   }
 
@@ -92,28 +103,31 @@ export class ScheduleService {
     const employees = this._employeesService.employees();
     const workHours = this._workHours();
 
+    // ✅ Nie mutuj oryginalnych danych
+    const sortedWorkHours = [...workHours].sort((a, b) => a.date.localeCompare(b.date));
+
+    const workHoursByEmployee = new Map<string, WorkHours[]>();
+
+    sortedWorkHours.forEach(wh => {
+      if (!workHoursByEmployee.has(wh.employee)) {
+        workHoursByEmployee.set(wh.employee, []);
+      }
+      workHoursByEmployee.get(wh.employee)!.push(wh);
+    });
+
     employees.forEach(employee => {
-      const employeeWorkHours = workHours.filter(wh => wh.employee === employee.id).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const employeeWorkHours = workHoursByEmployee.get(employee.id) || [];
 
-      for (let i = 0; i < employeeWorkHours.length; i++) {
-        const currentWorkHour = employeeWorkHours[i];
-        const previousWorkHour = employeeWorkHours[i - 1];
-        const nextWorkHour = employeeWorkHours[i + 1];
+      for (let i = 0; i < employeeWorkHours.length - 1; i++) {
+        const currentDay = employeeWorkHours[i];
+        const nextDay = employeeWorkHours[i + 1];
 
-        const timeDifferences = this.calculateTimeDifferences(
-          currentWorkHour.hours,
-          previousWorkHour?.hours || null,
-          nextWorkHour?.hours || null
-        );
+        // ✅ POPRAWKA: Przekaż całe obiekty zamiast tylko stringów godzin
+        const restTime = this.calculateRestBetween(currentDay, nextDay);
 
-        // Sprawdź przerwę od poprzedniego dnia
-        if (timeDifferences.restFromPrevious !== null && timeDifferences.restFromPrevious < 11) {
-          conflicts.add(`${employee.id}-${currentWorkHour.date}`);
-        }
-
-        // Sprawdź przerwę do następnego dnia
-        if (timeDifferences.restToNext !== null && timeDifferences.restToNext < 11) {
-          conflicts.add(`${employee.id}-${currentWorkHour.date}`);
+        if (restTime < 11) {
+          conflicts.add(`${employee.id}-${currentDay.date}`);
+          conflicts.add(`${employee.id}-${nextDay.date}`);
         }
       }
     });
@@ -121,80 +135,95 @@ export class ScheduleService {
     return conflicts;
   }
 
-  private calculateTimeDifferences(
-    currentDayHours: string,
-    previousDayHours: string | null,
-    nextDayHours: string | null
-  ): { restFromPrevious: number | null, restToNext: number | null } {
+  private calculateRestBetween(currentDay: any, nextDay: any): number {
+    const currentShift = this.parseWorkHoursCached(currentDay.hours);
+    const nextShift = this.parseWorkHoursCached(nextDay.hours);
 
-    const currentShift = this.parseWorkHours(currentDayHours);
-    if (!currentShift) {
-      return { restFromPrevious: null, restToNext: null };
-    }
+    if (!currentShift || !nextShift) return 24;
 
-    let restFromPrevious = null;
-    let restToNext = null;
+    // ✅ Oblicz pełne daty z godzinami
+    const currentDate = new Date(currentDay.date);
+    const nextDate = new Date(nextDay.date);
 
-    // Różnica między końcem poprzedniego dnia a początkiem obecnego
-    if (previousDayHours) {
-      const previousShift = this.parseWorkHours(previousDayHours);
-      if (previousShift) {
-        // Przerwa od końca poprzedniej zmiany do początku obecnej (w godzinach)
-        restFromPrevious = (currentShift.startTime - previousShift.endTime) / 60;
-        // Jeśli wynik ujemny, dodaj 24h (przejście przez północ)
-        if (restFromPrevious < 0) {
-          restFromPrevious += 24;
-        }
-      }
-    }
+    // Ustaw końcową godzinę obecnej zmiany
+    const currentEndTime = new Date(currentDate);
+    currentEndTime.setHours(
+      Math.floor(currentShift.endTime / 60),
+      currentShift.endTime % 60,
+      0,
+      0
+    );
 
-    // Różnica między końcem obecnego dnia a początkiem następnego
-    if (nextDayHours) {
-      const nextShift = this.parseWorkHours(nextDayHours);
-      if (nextShift) {
-        // Przerwa od końca obecnej zmiany do początku następnej (w godzinach)
-        restToNext = (nextShift.startTime - currentShift.endTime) / 60;
-        // Jeśli wynik ujemny, dodaj 24h (przejście przez północ)
-        if (restToNext < 0) {
-          restToNext += 24;
-        }
-      }
-    }
+    // Ustaw początkową godzinę następnej zmiany
+    const nextStartTime = new Date(nextDate);
+    nextStartTime.setHours(
+      Math.floor(nextShift.startTime / 60),
+      nextShift.startTime % 60,
+      0,
+      0
+    );
 
-    return { restFromPrevious, restToNext };
+    // ✅ Oblicz różnicę w godzinach uwzględniając pełne dni
+    const restHours = (nextStartTime.getTime() - currentEndTime.getTime()) / (1000 * 60 * 60);
+
+    return Math.max(0, restHours);
   }
 
-  validate35HourRestInAllWeeks(
-    employees: any[],
-    workHours: any[],
-    currentMonthDate: Date
-  ): Map<string, Set<number>> {
+  private parseWorkHoursCached(hoursString: string): { startTime: number, endTime: number } | null {
+    // ✅ Sprawdź cache najpierw
+    if (this.parseWorkHoursCache.has(hoursString)) {
+      return this.parseWorkHoursCache.get(hoursString)!;
+    }
+
+    // ✅ Jeśli nie ma w cache - parsuj i zapisz
+    const parsed = this.parseWorkHours(hoursString);
+    if (parsed) {
+      this.parseWorkHoursCache.set(hoursString, parsed);
+    }
+
+    return parsed;
+  }
+
+  validate35HourRestInAllWeeks(currentMonthDate: Date): Map<string, Set<number>> {
+    const employees = this._employeesService.employees();
+    const workHours = this._workHours();
+
     const daysInMonth = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth() + 1, 0).getDate();
     const numberOfWeeks = Math.ceil(daysInMonth / 7);
+
+    // Pre-sortowanie i grupowanie
+    const sortedWorkHours = [...workHours].sort((a, b) => a.date.localeCompare(b.date));
+    const workHoursByEmployee = new Map<string, any[]>();
+
+    sortedWorkHours.forEach(wh => {
+      if (!workHoursByEmployee.has(wh.employee)) {
+        workHoursByEmployee.set(wh.employee, []);
+      }
+      workHoursByEmployee.get(wh.employee)!.push(wh);
+    });
+
     const badWeeksMap = new Map<string, Set<number>>();
 
     employees.forEach(employee => {
-      const employeeShifts = workHours
-        .filter(wh => wh.employee === employee.id)
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
+      const employeeShifts = workHoursByEmployee.get(employee.id) || [];
       const employeeBadWeeks = new Set<number>();
 
-      // Sprawdź każdy tydzień osobno
+      // Grupuj zmiany według tygodni
+      const shiftsByWeek = new Map<number, any[]>();
+      employeeShifts.forEach(shift => {
+        const dayNumber = this.getDayNumber(shift.date);
+        const weekNumber = Math.ceil(dayNumber / 7);
+
+        if (!shiftsByWeek.has(weekNumber)) {
+          shiftsByWeek.set(weekNumber, []);
+        }
+        shiftsByWeek.get(weekNumber)!.push(shift);
+      });
+
+      // Sprawdź każdy tydzień
       for (let week = 1; week <= numberOfWeeks; week++) {
-        const weekStart = (week - 1) * 7 + 1;
-        const weekEnd = Math.min(week * 7, daysInMonth);
-
-        // Pobierz zmiany z tego tygodnia
-        const weekShifts = employeeShifts.filter(shift => {
-          const day = new Date(shift.date).getDate();
-          return day >= weekStart && day <= weekEnd;
-        });
-
-        // Oblicz wszystkie przerwy w tygodniu
-        const restPeriods = this.calculateAllRestPeriodsInWeek(weekShifts, weekStart, weekEnd, currentMonthDate);
-
-        // Sprawdź czy jest przynajmniej jedna przerwa >= 35h
+        const weekShifts = shiftsByWeek.get(week) || [];
+        const restPeriods = this.calculateAllRestPeriodsInWeek(weekShifts, week, currentMonthDate);
         const hasLongRest = restPeriods.some(rest => rest.hours >= 35);
 
         if (!hasLongRest) {
@@ -210,91 +239,107 @@ export class ScheduleService {
     return badWeeksMap;
   }
 
+  private getDayNumber(dateString: string): number {
+    if (!this.dayNumberCache.has(dateString)) {
+      this.dayNumberCache.set(dateString, new Date(dateString).getDate());
+    }
+    return this.dayNumberCache.get(dateString)!;
+  }
+
   private calculateAllRestPeriodsInWeek(
     weekShifts: any[],
-    weekStart: number,
-    weekEnd: number,
+    weekNumber: number,
     currentMonthDate: Date
-  ): Array<{hours: number, description: string}> {
-    const restPeriods: Array<{hours: number, description: string}> = [];
+  ): Array<{hours: number}> {
 
     if (weekShifts.length === 0) {
-      // Cały tydzień wolny
-      const totalWeekHours = (weekEnd - weekStart + 1) * 24;
-      restPeriods.push({
-        hours: totalWeekHours,
-        description: `Cały tydzień wolny (${weekEnd - weekStart + 1} dni)`
-      });
-      return restPeriods;
+      return [{hours: 168}];
     }
 
-    // Stwórz datę początku i końca tygodnia
-    const weekStartDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), weekStart, 0, 0, 0);
-    const weekEndDate = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), weekEnd, 23, 59, 59);
+    const restPeriods: Array<{hours: number}> = [];
+    const year = currentMonthDate.getFullYear();
+    const month = currentMonthDate.getMonth();
 
-    // 1. Przerwa od początku tygodnia do pierwszej zmiany
+    // Oblicz granice tygodnia
+    const weekStart = (weekNumber - 1) * 7 + 1;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const weekEnd = Math.min(weekNumber * 7, daysInMonth);
+
+
+    // ✅ 1. Przerwa od początku tygodnia do pierwszej zmiany
     const firstShift = weekShifts[0];
-    const firstShiftStart = this.parseShiftStartTime(firstShift);
+    const firstShiftDay = new Date(firstShift.date).getDate();
+    const firstShiftStart = this.parseShiftStartTime(firstShift, year, month);
 
-    if (firstShiftStart) {
-      const restFromWeekStart = (firstShiftStart.getTime() - weekStartDate.getTime()) / (1000 * 60 * 60);
-      if (restFromWeekStart > 0) {
-        restPeriods.push({
-          hours: Math.round(restFromWeekStart * 100) / 100,
-          description: `Od początku tygodnia do ${firstShift.date}`
-        });
+    if (firstShiftDay > weekStart) {
+      // Całe dni przed pierwszą zmianą
+      const fullDaysBefore = firstShiftDay - weekStart;
+      const hoursFromFullDays = fullDaysBefore * 24;
+      restPeriods.push({hours: hoursFromFullDays});
+    }
+
+    if (firstShiftDay === weekStart && firstShiftStart) {
+      // Godziny od początku dnia do pierwszej zmiany
+      const startOfDay = new Date(year, month, firstShiftDay, 0, 0, 0);
+      const hoursFromDayStart = (firstShiftStart.getTime() - startOfDay.getTime()) / (1000 * 60 * 60);
+      if (hoursFromDayStart > 0) {
+        restPeriods.push({hours: hoursFromDayStart});
       }
     }
 
-    // 2. Przerwy między zmianami
+    // ✅ 2. Przerwy między zmianami (istniejący kod)
     for (let i = 0; i < weekShifts.length - 1; i++) {
-      const currentShiftEnd = this.parseShiftEndTime(weekShifts[i]);
-      const nextShiftStart = this.parseShiftStartTime(weekShifts[i + 1]);
+      const currentEnd = this.parseShiftEndTime(weekShifts[i], year, month);
+      const nextStart = this.parseShiftStartTime(weekShifts[i + 1], year, month);
 
-      if (currentShiftEnd && nextShiftStart) {
-        const restBetween = (nextShiftStart.getTime() - currentShiftEnd.getTime()) / (1000 * 60 * 60);
-        if (restBetween > 0) {
-          restPeriods.push({
-            hours: Math.round(restBetween * 100) / 100,
-            description: `${weekShifts[i].date} -> ${weekShifts[i + 1].date}`
-          });
+      if (currentEnd && nextStart) {
+        const restHours = (nextStart.getTime() - currentEnd.getTime()) / (1000 * 60 * 60);
+
+        if (restHours > 0) {
+          restPeriods.push({hours: restHours});
         }
       }
     }
 
-    // 3. Przerwa od ostatniej zmiany do końca tygodnia
+    // ✅ 3. Przerwa od ostatniej zmiany do końca tygodnia
     const lastShift = weekShifts[weekShifts.length - 1];
-    const lastShiftEnd = this.parseShiftEndTime(lastShift);
+    const lastShiftDay = new Date(lastShift.date).getDate();
+    const lastShiftEnd = this.parseShiftEndTime(lastShift, year, month);
 
-    if (lastShiftEnd) {
-      const restToWeekEnd = (weekEndDate.getTime() - lastShiftEnd.getTime()) / (1000 * 60 * 60);
-      if (restToWeekEnd > 0) {
-        restPeriods.push({
-          hours: Math.round(restToWeekEnd * 100) / 100,
-          description: `Od ${lastShift.date} do końca tygodnia`
-        });
+    if (lastShiftDay < weekEnd) {
+      // Całe dni po ostatniej zmianie
+      const fullDaysAfter = weekEnd - lastShiftDay;
+      const hoursFromFullDays = fullDaysAfter * 24;
+      restPeriods.push({hours: hoursFromFullDays});
+    }
+
+    if (lastShiftDay === weekEnd && lastShiftEnd) {
+      // Godziny od ostatniej zmiany do końca dnia
+      const endOfDay = new Date(year, month, lastShiftDay, 23, 59, 59);
+      const hoursToEndOfDay = (endOfDay.getTime() - lastShiftEnd.getTime()) / (1000 * 60 * 60);
+      if (hoursToEndOfDay > 0) {
+        restPeriods.push({hours: hoursToEndOfDay});
       }
     }
 
     return restPeriods;
   }
 
-  private parseShiftStartTime(shift: any): Date | null {
-    const match = shift.hours.match(/(\d{1,2}):(\d{2})-\d{1,2}:\d{2}/);
+  private parseShiftStartTime(shift: any, year: number, month: number): Date | null {
+    const match = shift.hours.match(/(\d{1,2}):(\d{2})-/);
     if (!match) return null;
 
-    const date = new Date(shift.date);
+    const date = new Date(year, month, new Date(shift.date).getDate());
     date.setHours(parseInt(match[1]), parseInt(match[2]), 0, 0);
     return date;
   }
 
-  private parseShiftEndTime(shift: any): Date | null {
-    const match = shift.hours.match(/\d{1,2}:\d{2}-(\d{1,2}):(\d{2})/);
+  private parseShiftEndTime(shift: any, year: number, month: number): Date | null {
+    const match = shift.hours.match(/-(\d{1,2}):(\d{2})/);
     if (!match) return null;
 
-    const date = new Date(shift.date);
+    const date = new Date(year, month, new Date(shift.date).getDate());
     date.setHours(parseInt(match[1]), parseInt(match[2]), 0, 0);
     return date;
   }
-
 }

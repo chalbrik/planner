@@ -22,26 +22,52 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   init(): void {
-    //na moment pracy developerskiej
-    this.accessToken = localStorage.getItem('access_token');
-    //
+    console.log('🔧 AuthService init() - start');
 
-    //Sprawdzenie autentykacji użytkownika
-    this.checkAuth();
+    // Odczytaj token z localStorage przy starcie
+    this.accessToken = localStorage.getItem('access_token');
+    console.log('🔑 Token z localStorage:', this.accessToken ? 'JEST' : 'BRAK');
+
+    // Sprawdź czy token istnieje i czy jest ważny
+    if (this.accessToken && !this.isTokenExpired(this.accessToken)) {
+      console.log('✅ Token ważny - sprawdzam auth');
+      this.checkAuth();
+    } else if (this.accessToken && this.isTokenExpired(this.accessToken)) {
+      console.log('⏰ Token wygasł - odświeżam');
+      this.refreshToken().subscribe({
+        next: () => {
+          console.log('✅ Token odświeżony pomyślnie');
+          this.checkAuth();
+        },
+        error: (err) => {
+          console.log('❌ Błąd odświeżania tokenu:', err);
+          this.clearAuthData();
+        }
+      });
+    } else {
+      console.log('🚫 Brak tokenu lub token nieprawidłowy');
+      this.currentUserSubject.next(null);
+    }
   }
 
   checkAuth(): void {
+    console.log('🔍 checkAuth() - start');
+
     // Jeśli nie ma tokenu dostępu, nie próbuj sprawdzać autoryzacji
     if (!this.accessToken) {
+      console.log('❌ checkAuth: brak tokenu');
       this.currentUserSubject.next(null);
       return;
     }
 
+    console.log('📡 Wysyłam żądanie do /user/');
     this.http.get<User>(`${this.apiUrl}user/`, {withCredentials: true}).subscribe({
       next: (user: User) => {
+        console.log('✅ checkAuth: otrzymano użytkownika', user);
         this.currentUserSubject.next(user);
       },
       error: (err) => {
+        console.log('❌ checkAuth: błąd', err);
         this.currentUserSubject.next(null);
         console.error("Błąd statusu autentykacji użytkownika: ", err);
       }
@@ -54,10 +80,7 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       tap(response => {
-        //na moment pracy developerskiej
         localStorage.setItem('access_token', response.access);
-        //
-
         this.accessToken = response.access;
         this.loadUserProfile();
       })
@@ -81,27 +104,24 @@ export class AuthService {
     ).pipe(
       tap(response => {
         this.accessToken = response.access;
+        // DODANE: Zapisz nowy token do localStorage
+        localStorage.setItem('access_token', response.access);
         this.isRefreshing = false;
       }),
       catchError(error => {
         this.isRefreshing = false;
-        this.accessToken = null;
-        this.currentUserSubject.next(null);
+        // DODANE: Wyczyść dane przy błędzie
+        this.clearAuthData();
         return throwError(() => error);
       })
     );
   }
 
   logout(): Observable<any> {
-
-    //na moment pracy developerskiej
     localStorage.removeItem('access_token');
-    //
 
-    //Wysyłamy żądanie do backendu, żeby wyczyścił cookie z refresh token
     if (!this.accessToken) {
-      this.accessToken = null;
-      this.currentUserSubject.next(null);
+      this.clearAuthData();
       return of({ detail: 'Wylogowano pomyślnie' });
     }
 
@@ -110,12 +130,10 @@ export class AuthService {
       {withCredentials: true}
     ).pipe(
       tap(() => {
-        this.accessToken = null;
-        this.currentUserSubject.next(null);
+        this.clearAuthData();
       }),
       catchError(() => {
-        this.accessToken = null;
-        this.currentUserSubject.next(null);
+        this.clearAuthData();
         return of({ detail: 'Wylogowano pomyślnie' });
       })
     );
@@ -136,4 +154,22 @@ export class AuthService {
   getAccessToken(): string | null {
     return this.accessToken;
   }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp < currentTime;
+    } catch {
+      return true; // Jeśli nie można zdekodować - token nieprawidłowy
+    }
+  }
+
+  private clearAuthData(): void {
+    this.accessToken = null;
+    this.currentUserSubject.next(null);
+    localStorage.removeItem('access_token');
+  }
+
 }
+

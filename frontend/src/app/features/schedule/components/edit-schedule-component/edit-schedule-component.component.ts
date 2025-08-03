@@ -4,25 +4,22 @@ import {
   inject,
   OnInit,
   signal,
-  SimpleChanges,
   ViewEncapsulation,
   input,
   output, effect
 } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
-import {MatTimepickerModule, MatTimepickerOption} from '@angular/material/timepicker';
+import {MatTimepickerModule} from '@angular/material/timepicker';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {DateAdapter, provideNativeDateAdapter} from '@angular/material/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ScheduleService} from '../../../../core/services/schedule/schedule.service';
-import {Employee} from '../../../../core/services/employees/employee.types';
 import {IconComponent} from '../../../../shared/components/icon';
 import {
   MatAccordion,
-  MatExpansionPanel,
-  MatExpansionPanelDescription, MatExpansionPanelHeader,
+  MatExpansionPanel, MatExpansionPanelHeader,
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
 
@@ -43,7 +40,6 @@ interface onChanges {
     MatAccordion,
     MatExpansionPanel,
     MatExpansionPanelTitle,
-    MatExpansionPanelDescription,
     MatExpansionPanelHeader
   ],
   templateUrl: './edit-schedule-component.component.html',

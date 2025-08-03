@@ -5,7 +5,7 @@
   <app-edit-schedule-component [selectedCell]="selectedCell()" (cancelSelection)="onCancelSelection()" ></app-edit-schedule-component>
 
   <!-- Kontener do wyboru miesiąca -->
-  <div class="flex items-center justify-end gap-6 bg-gray-50 p-4 rounded-lg">
+  <div class="flex items-center justify-start gap-6 bg-gray-50 p-4 rounded-lg">
 
     <h2 class="text-xl font-semibold text-gray-800">
       {{ getMonthName() }}
@@ -107,7 +107,7 @@
                       [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"
                       [class.exceeding-12h-cell]="isCellExceeding12h(element, day.dayNumber)"
 
-                      (click)="onCellClick(element, day.dayNumber)">
+                      (click)="onCellClick(element, day.dayNumber, $event)">
               <div class="work-hours-cell">
                 {{ getWorkHoursForDay(element, day.dayNumber) }}
               </div>

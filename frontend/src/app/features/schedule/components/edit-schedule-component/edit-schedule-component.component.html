@@ -82,74 +82,74 @@
   <mat-accordion>
     <mat-expansion-panel hideToggle [expanded]="true">
       <mat-expansion-panel-header>
-        <div class="w-full border-b border-warm-gray-600 flex flex-row justify-between">
-          <mat-panel-title> Edytuj grafik </mat-panel-title>
-          @if(selectedCell()){
-            <div class="flex flex-row gap-12">
-              <div class="flex flex-row items-start gap-1 w-44">
-                <app-icon iconName="user-circle-micro" iconSize="micro"></app-icon>
-                <div class="flex flex-col gap-1">
-                  <span class="font-geist font-normal text-xs">Pracownik</span>
-                  <span class="font-geist font-semibold text-xs">{{selectedCell()?.employee.name || 'Brak'}}</span>
-                </div>
+<!--        <div class="w-full border-b border-warm-gray-600 flex flex-row justify-between">-->
+<!--          <mat-panel-title> Edytuj grafik </mat-panel-title>-->
+<!--          @if(selectedCell()){-->
+<!--            <div class="flex flex-row gap-12">-->
+<!--              <div class="flex flex-row items-start gap-1 w-44">-->
+<!--                <app-icon iconName="user-circle-micro" iconSize="micro"></app-icon>-->
+<!--                <div class="flex flex-col gap-1">-->
+<!--                  <span class="font-geist font-normal text-xs">Pracownik</span>-->
+<!--                  <span class="font-geist font-semibold text-xs">{{selectedCell()?.employee.name || 'Brak'}}</span>-->
+<!--                </div>-->
 
-              </div>
+<!--              </div>-->
 
-              <div class="flex flex-row items-start gap-1">
-                <app-icon iconName="clock-micro" iconSize="micro"></app-icon>
-                <div class="flex flex-col gap-1">
-                  <span class="font-geist font-normal text-xs">Godziny pracy</span>
-                  <span class="font-geist font-semibold text-xs">{{ selectedCell()?.workHours?.hours || 'Brak' }}</span>
-                </div>
+<!--              <div class="flex flex-row items-start gap-1">-->
+<!--                <app-icon iconName="clock-micro" iconSize="micro"></app-icon>-->
+<!--                <div class="flex flex-col gap-1">-->
+<!--                  <span class="font-geist font-normal text-xs">Godziny pracy</span>-->
+<!--                  <span class="font-geist font-semibold text-xs">{{ selectedCell()?.workHours?.hours || 'Brak' }}</span>-->
+<!--                </div>-->
 
-              </div>
+<!--              </div>-->
 
-              <div class="flex flex-row items-start gap-1 w-28">
-                <app-icon iconName="calendar-micro" iconSize="micro"></app-icon>
-                <div class="flex flex-col gap-1">
-                  <span class="font-geist font-normal text-xs">Data</span>
-                  <span class="font-geist font-semibold text-xs">{{selectedCell()?.date}}</span>
-                </div>
+<!--              <div class="flex flex-row items-start gap-1 w-28">-->
+<!--                <app-icon iconName="calendar-micro" iconSize="micro"></app-icon>-->
+<!--                <div class="flex flex-col gap-1">-->
+<!--                  <span class="font-geist font-normal text-xs">Data</span>-->
+<!--                  <span class="font-geist font-semibold text-xs">{{selectedCell()?.date}}</span>-->
+<!--                </div>-->
 
-              </div>
-            </div>
-          }
-        </div>
+<!--              </div>-->
+<!--            </div>-->
+<!--          }-->
+<!--        </div>-->
 
       </mat-expansion-panel-header>
-      <div class="w-full flex flex-col items-end justify-end gap-2">
-        <span class="font-geist font-semibold text-sm">Zmień godziny pracy</span>
-        <div class="flex flex-row gap-2">
-          <mat-form-field appearance="fill">
-<!--            <mat-label>Od</mat-label>-->
-            <input matInput
-                   [matTimepicker]="fromTimePicker"
-                   (valueChange)="onTimeFromChange($event)"
-                   [value]="timeFrom()"
-            >
-            <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>
-            <mat-timepicker interval="15min" #fromTimePicker/>
-          </mat-form-field>
+<!--      <div class="w-full flex flex-col items-end justify-end gap-2">-->
+<!--        <span class="font-geist font-semibold text-sm">Zmień godziny pracy</span>-->
+<!--        <div class="flex flex-row gap-2">-->
+<!--          <mat-form-field appearance="fill">-->
+<!--&lt;!&ndash;            <mat-label>Od</mat-label>&ndash;&gt;-->
+<!--            <input matInput-->
+<!--                   [matTimepicker]="fromTimePicker"-->
+<!--                   (valueChange)="onTimeFromChange($event)"-->
+<!--                   [value]="timeFrom()"-->
+<!--            >-->
+<!--            <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>-->
+<!--            <mat-timepicker interval="15min" #fromTimePicker/>-->
+<!--          </mat-form-field>-->
 
-          <mat-form-field appearance="fill">
-<!--            <mat-label>Do</mat-label>-->
-            <input matInput
-                   [matTimepicker]="toTimePicker"
-                   (valueChange)="onTimeToChange($event)"
-                   [disabled]="!timeFrom()"
-                   placeholder="Do"
-            >
-            <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>
-            <mat-timepicker interval="15min" #toTimePicker/>
-          </mat-form-field>
+<!--          <mat-form-field appearance="fill">-->
+<!--&lt;!&ndash;            <mat-label>Do</mat-label>&ndash;&gt;-->
+<!--            <input matInput-->
+<!--                   [matTimepicker]="toTimePicker"-->
+<!--                   (valueChange)="onTimeToChange($event)"-->
+<!--                   [disabled]="!timeFrom()"-->
+<!--                   placeholder="Do"-->
+<!--            >-->
+<!--            <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>-->
+<!--            <mat-timepicker interval="15min" #toTimePicker/>-->
+<!--          </mat-form-field>-->
 
-        </div>
+<!--        </div>-->
 
-        <div class="w-full flex flex-row justify-end gap-2">
-          <button mat-flat-button class="save-button px-2" (click)="onEditPanelSave()">Zapisz</button>
-          <button matButton="outlined" class="cancel-button px-2"  (click)="onEditPanelCancel()">Anuluj</button>
-        </div>
-      </div>
+<!--        <div class="w-full flex flex-row justify-end gap-2">-->
+<!--          <button mat-flat-button class="save-button px-2" (click)="onEditPanelSave()">Zapisz</button>-->
+<!--          <button matButton="outlined" class="cancel-button px-2"  (click)="onEditPanelCancel()">Anuluj</button>-->
+<!--        </div>-->
+<!--      </div>-->
     </mat-expansion-panel>
   </mat-accordion>
 </div>

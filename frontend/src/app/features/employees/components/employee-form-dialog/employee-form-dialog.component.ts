@@ -2,12 +2,11 @@ import {ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsul
 import {
   MatDialogActions,
   MatDialogClose,
-  MatDialogContent,
   MatDialogRef,
   MatDialogTitle
 } from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
-import {MatFormField, MatHint, MatInput, MatLabel} from '@angular/material/input';
+import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatSelect} from '@angular/material/select';
 import {MatOption, provideNativeDateAdapter} from '@angular/material/core';
@@ -29,7 +28,6 @@ interface Agreemnet {
 @Component({
   selector: 'app-employee-form-dialog',
   imports: [
-    MatDialogContent,
     MatDialogActions,
     MatDialogTitle,
     MatDialogClose,
@@ -44,7 +42,6 @@ interface Agreemnet {
     MatDateRangeInput,
     MatDatepickerToggle,
     MatDateRangePicker,
-    MatHint,
     MatStartDate,
     MatEndDate
   ],

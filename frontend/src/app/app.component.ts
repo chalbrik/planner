@@ -12,7 +12,7 @@ import {AuthService} from './core/services/auth.service';
 export class AppComponent {
   title = 'Planner';
 
-  constructor(private authService: AuthService) {
-    setTimeout(() => this.authService.init(), 1000);
+  constructor() {
+
   }
 }

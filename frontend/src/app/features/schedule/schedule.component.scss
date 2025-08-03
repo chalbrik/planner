@@ -1,6 +1,21 @@
+// === RESPONSIVE SZEROKOŚCI - CSS CUSTOM PROPERTIES ===
+:root {
+  --day-column-width: 55px; // Domyślna wartość
+}
+
 // === PODSTAWOWE STYLE KONTENERA ===
 .example-container {
   position: relative !important;
+
+  // Na małych ekranach - scroll poziomy
+  @media (max-width: 1023px) {
+    overflow-x: auto;
+  }
+
+  // Na dużych ekranach - bez scrollu
+  @media (min-width: 1024px) {
+    overflow-x: visible;
+  }
 }
 
 // === UKRYWANIE LINII TABELI ===
@@ -36,35 +51,55 @@
   border-right: 2px solid midnightblue;
 }
 
-// === WYMIARY KOLUMN ===
+// === RESPONSIVE WYMIARY KOLUMN ===
+// Kolumny pracownicy - stała szerokość
 mat-table .mat-column-employees {
-  width: 400px !important;
-  min-width: 160px;
-  max-width: 400px !important;
+  width: 150px !important;
+  min-width: 150px !important;
+  max-width: 150px !important;
 }
 
+// Kolumny suma godzin - stała szerokość
 mat-table .mat-column-hoursSum {
   width: 80px !important;
   min-width: 80px !important;
   max-width: 80px !important;
 }
 
-// Kolumny dni
+// Kolumny dni - responsive szerokość
 .mat-mdc-cell[class*="day-"], .mat-mdc-header-cell[class*="day-"] {
-  width: 55px !important;
-  min-width: 55px !important;
   box-sizing: border-box;
+
+  // Domyślna szerokość dla ekranów < lg
+  width: 40px !important;
+  min-width: 40px !important;
+
+  // Na ekranach lg+ używaj CSS custom property
+  @media (min-width: 1024px) {
+    width: var(--day-column-width) !important;
+    min-width: var(--day-column-width) !important;
+  }
 }
 
-// === WYMIARY WIERSZY ===
+// === RESPONSIVE WYMIARY WIERSZY ===
 .mat-mdc-header-cell, .mat-mdc-footer-cell, .mat-mdc-cell {
   box-sizing: border-box;
 }
 
 .mat-mdc-header-row, .mat-mdc-footer-row, .mat-mdc-row {
-  min-width: 1920px;
   height: 55px !important;
   min-height: 55px !important;
+
+  // Na małych ekranach zachowaj stałą szerokość dla scrollowania
+  @media (max-width: 1023px) {
+    min-width: 1920px;
+  }
+
+  // Na dużych ekranach dopasuj do kontenera
+  @media (min-width: 1024px) {
+    min-width: 100%;
+    width: 100%;
+  }
 }
 
 // === PODSTAWOWY HOVER ===
@@ -77,45 +112,54 @@ mat-table .mat-column-hoursSum {
 
 // === STANY KOMÓREK (od najmniej do najbardziej ważnego) ===
 
-// 1. ZŁY TYDZIEŃ (brak 35h przerwy) - FIOLETOWY (domyślnie dla całego tygodnia)
+// 1. ZŁY TYDZIEŃ (brak 35h przerwy) - FIOLETOWY
 .bad-week-cell {
-  background-color: rgba(139, 92, 246, 0.5) !important; // fioletowy 50% transparentności
-  //border-radius: 4px !important;
+  background-color: rgba(139, 92, 246, 0.5) !important;
 
   &:hover {
-    background-color: rgba(139, 92, 246, 0.7) !important; // ciemniejszy przy hover
+    background-color: rgba(139, 92, 246, 0.7) !important;
     border-radius: 0 !important;
   }
 }
 
-// 2. KONFLIKT 11H - CZERWONY (nadpisuje fioletowy dla konkretnych komórek)
+// 2. KONFLIKT 11H - CZERWONY (nadpisuje fioletowy)
 .conflict-cell {
-  background-color: rgba(248, 113, 113, 0.5) !important; // czerwony 50% transparentności - nadpisuje fioletowy
-  //border-radius: 4px !important;
+  background-color: rgba(248, 113, 113, 0.5) !important;
 
   &:hover {
-    background-color: rgba(248, 113, 113, 0.7) !important; // ciemniejszy przy hover
+    background-color: rgba(248, 113, 113, 0.7) !important;
     border-radius: 0 !important;
   }
 }
 
-// 3. Konflikt ma wyższy priorytet - nie potrzebujemy kombinacji
-// .conflict-cell automatycznie nadpisuje .bad-week-cell dzięki kolejności CSS
+// 3. PRZEKROCZENIE 12H PRACY - ŻÓŁTY
+.exceeding-12h-cell {
+  background-color: rgba(245, 158, 11, 0.5) !important;
+
+  &:hover {
+    background-color: rgba(245, 158, 11, 0.7) !important;
+    border-radius: 0 !important;
+  }
+}
 
 // 4. ZAZNACZONA KOMÓRKA - NAJWYŻSZY PRIORYTET
 .selected-cell {
-  border: 3px solid #10B981 !important; // pomarańczowa ramka
+  border: 3px solid #10B981 !important;
   border-radius: 4px !important;
-  z-index: 10 !important; // zawsze na wierzchu
+  z-index: 10 !important;
 }
 
-// Zachowaj tła dla zaznaczonych komórek z błędami
+// === KOMBINACJE STANÓW DLA ZAZNACZONYCH KOMÓREK ===
 .selected-cell.conflict-cell {
-  background-color: rgba(248, 113, 113, 0.3) !important; // delikatniejszy czerwony
+  background-color: rgba(248, 113, 113, 0.3) !important;
 }
 
 .selected-cell.bad-week-cell {
-  background-color: rgba(139, 92, 246, 0.3) !important; // delikatniejszy fioletowy
+  background-color: rgba(139, 92, 246, 0.3) !important;
+}
+
+.selected-cell.exceeding-12h-cell {
+  background-color: rgba(245, 158, 11, 0.3) !important;
 }
 
 .selected-cell.conflict-cell.bad-week-cell {
@@ -126,46 +170,7 @@ mat-table .mat-column-hoursSum {
     rgba(139, 92, 246, 0.3) 100%) !important;
 }
 
-// 5. PRZEKROCZENIE 12H PRACY - ŻÓŁTY
-.exceeding-12h-cell {
-  background-color: rgba(245, 158, 11, 0.5) !important; // żółty 50% transparentności
-
-  &:hover {
-    background-color: rgba(245, 158, 11, 0.7) !important; // ciemniejszy przy hover
-    border-radius: 0 !important;
-  }
-}
-
-// Zachowaj tła dla zaznaczonych komórek z przekroczeniem 12h
-.selected-cell.exceeding-12h-cell {
-  background-color: rgba(245, 158, 11, 0.3) !important; // delikatniejszy żółty
-}
-
-// === INNE KOMBINACJE ===
-.bad-week-cell.today-cell {
-  background-color: rgba(139, 92, 246, 0.6) !important;
-}
-
-.bad-week-cell.weekend-cell {
-  background-color: rgba(139, 92, 246, 0.4) !important;
-}
-
-// === USUNIĘTE DUPLIKATY I NIEUŻYWANE STYLE ===
-.mdc-data-table__cell, .mdc-data-table__header-cell {
-  padding: 0 !important;
-}
-
-.example-sticky-toggle-group {
-  margin: 8px;
-}
-
-.mat-column-filler {
-  padding: 0 8px;
-  font-size: 10px;
-  text-align: center;
-}
-
-// Kombinacje z innymi błędami
+// === KOMBINACJE BŁĘDÓW ===
 .exceeding-12h-cell.conflict-cell {
   background: linear-gradient(45deg,
     rgba(245, 158, 11, 0.5) 0%,
@@ -180,4 +185,28 @@ mat-table .mat-column-hoursSum {
     rgba(245, 158, 11, 0.5) 50%,
     rgba(139, 92, 246, 0.5) 50%,
     rgba(139, 92, 246, 0.5) 100%) !important;
+}
+
+// === INNE KOMBINACJE ===
+.bad-week-cell.today-cell {
+  background-color: rgba(139, 92, 246, 0.6) !important;
+}
+
+.bad-week-cell.weekend-cell {
+  background-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+// === DODATKOWE STYLE TABELI ===
+.mdc-data-table__cell, .mdc-data-table__header-cell {
+  padding: 0 !important;
+}
+
+.example-sticky-toggle-group {
+  margin: 8px;
+}
+
+.mat-column-filler {
+  padding: 0 8px;
+  font-size: 10px;
+  text-align: center;
 }
