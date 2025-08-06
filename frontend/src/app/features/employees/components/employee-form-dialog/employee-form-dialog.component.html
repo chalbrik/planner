@@ -31,7 +31,7 @@
     <div class="flex flex-row justify-between gap-2">
       <mat-form-field class="w-full">
         <mat-label>Rodzaj umowy</mat-label>
-        <mat-select formControlName="agreementType" name="agreement">
+        <mat-select formControlName="agreement_type" name="agreement">
           @for (agreemnet of agreemnetsTypeValues; track agreemnet) {
             <mat-option [value]="agreemnet.value">{{agreemnet.viewValue}}</mat-option>
           }

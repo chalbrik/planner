@@ -59,8 +59,8 @@ export class EmployeeFormDialogComponent implements OnInit {
   addEmployeeForm!: FormGroup;
 
   agreemnetsTypeValues: Agreemnet[] = [
-    {value: 'steak-0', viewValue: 'Umowa o prace'},
-    {value: 'pizza-1', viewValue: 'Umowa na zlecenie'},
+    {value: 'permanent', viewValue: 'Umowa o prace'},
+    {value: 'contract', viewValue: 'Umowa na zlecenie'},
   ];
 
 
@@ -73,10 +73,10 @@ export class EmployeeFormDialogComponent implements OnInit {
       last_name: ['', Validators.required],
       email: ['', [Validators.required,  Validators.email]],
       phone: ['', Validators.required],
-      agreementType: ['', Validators.required],
-      hourlyRate: ['', Validators.required],
-      workStart: ['', Validators.required],
-      workEnd: ['', Validators.required],
+      agreement_type: ['', Validators.required],
+      hourlyRate: [''],
+      workStart: [''],
+      workEnd: [''],
     })
 
   }

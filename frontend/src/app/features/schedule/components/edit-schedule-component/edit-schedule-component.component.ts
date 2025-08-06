@@ -16,11 +16,9 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {DateAdapter, provideNativeDateAdapter} from '@angular/material/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ScheduleService} from '../../../../core/services/schedule/schedule.service';
-import {IconComponent} from '../../../../shared/components/icon';
 import {
   MatAccordion,
   MatExpansionPanel, MatExpansionPanelHeader,
-  MatExpansionPanelTitle
 } from '@angular/material/expansion';
 
 
@@ -36,10 +34,8 @@ interface onChanges {
     MatFormFieldModule,
     MatInputModule,
     MatTimepickerModule,
-    IconComponent,
     MatAccordion,
     MatExpansionPanel,
-    MatExpansionPanelTitle,
     MatExpansionPanelHeader
   ],
   templateUrl: './edit-schedule-component.component.html',

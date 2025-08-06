@@ -10,7 +10,7 @@ import {
   MatRow, MatRowDef,
   MatTable
 } from '@angular/material/table';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {EditScheduleComponentComponent} from './components/edit-schedule-component/edit-schedule-component.component';
 import {IconComponent} from '../../shared/components/icon';
@@ -27,12 +27,16 @@ interface Day {
   isCurrentMonth: boolean;
   isToday: boolean;
   isWeekend: boolean;
+  isSaturday: boolean;
+  isSunday: boolean;
 }
 
 interface EmployeeRow {
-  id: number;
+  id: string;
   name: string;
   workHours: { [key: string]: string }; // klucz to data w formacie YYYY-MM-DD, wartość to godziny pracy
+  agreement_type?: 'permanent' | 'contract';
+  isSeparator?: boolean;
 }
 
 @Component({
@@ -56,6 +60,7 @@ interface EmployeeRow {
     EditScheduleComponentComponent,
     IconComponent,
     MatIconButton,
+    MatButton,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -103,7 +108,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         dayNumber: day,
         isCurrentMonth: true,
         isToday: date.toDateString() === today.toDateString(),
-        isWeekend: dayOfWeek === 0 || dayOfWeek === 6
+        isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
+        isSaturday: dayOfWeek === 6,
+        isSunday: dayOfWeek === 0,
       });
     }
 
@@ -249,10 +256,38 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
+  // prepareTableData() {
+  //   if (this.employees.length === 0) return;
+  //
+  //   this.dataSource = this.employees.map(employee => {
+  //     const workHoursMap: { [key: string]: string } = {};
+  //     const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+  //
+  //     employeeWorkHours.forEach(wh => {
+  //       workHoursMap[wh.date] = wh.hours;
+  //       this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
+  //     });
+  //
+  //     return {
+  //       id: employee.id,
+  //       name: `${employee.first_name} ${employee.last_name}`,
+  //       workHours: workHoursMap
+  //     };
+  //   });
+  //
+  //   this.checkRestTimeConflicts();
+  //   this.check35HourRestInAllWeeks();
+  // }
+
   prepareTableData() {
     if (this.employees.length === 0) return;
 
-    this.dataSource = this.employees.map(employee => {
+    // Podziel pracowników na grupy
+    const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
+    const contractEmployees = this.employees.filter(emp => emp.agreement_type === 'contract');
+
+    // Przygotuj dane dla UoP (Umowa o Pracę)
+    const permanentRows = permanentEmployees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
       const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
 
@@ -264,9 +299,45 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       return {
         id: employee.id,
         name: `${employee.first_name} ${employee.last_name}`,
-        workHours: workHoursMap
+        workHours: workHoursMap,
+        agreement_type: employee.agreement_type
       };
     });
+
+    // Separator - tylko jeśli są pracownicy w obu grupach
+    const rows: EmployeeRow[] = [...permanentRows];
+
+    if (contractEmployees.length > 0 && permanentEmployees.length > 0) {
+      const separatorRow: EmployeeRow = {
+        id: 'separator',
+        name: '',
+        workHours: {},
+        isSeparator: true
+      };
+      rows.push(separatorRow);
+    }
+
+    // Przygotuj dane dla UZ (Umowa na Zlecenie)
+    const contractRows = contractEmployees.map(employee => {
+      const workHoursMap: { [key: string]: string } = {};
+      const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+
+      employeeWorkHours.forEach(wh => {
+        workHoursMap[wh.date] = wh.hours;
+        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
+      });
+
+      return {
+        id: employee.id,
+        name: `${employee.first_name} ${employee.last_name}`,
+        workHours: workHoursMap,
+        agreement_type: employee.agreement_type
+      };
+    });
+
+    // Połącz wszystko
+    rows.push(...contractRows);
+    this.dataSource = rows;
 
     this.checkRestTimeConflicts();
     this.check35HourRestInAllWeeks();

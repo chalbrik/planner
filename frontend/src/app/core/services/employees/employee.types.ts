@@ -4,4 +4,8 @@ export interface Employee {
   last_name: string;
   email: string;
   phone: string;
+  agreement_type: 'permanent' | 'contract';
+
+
+  isSeparator: boolean;
 }

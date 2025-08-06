@@ -7,8 +7,8 @@ from .models import Employee, WorkHours
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name', 'email', 'phone')
-    search_fields = ('first_name', 'last_name', 'email', 'phone')
+    list_display = ('id', 'first_name', 'last_name', 'email', 'phone', 'agreement_type')
+    search_fields = ('first_name', 'last_name', 'email', 'phone', 'agreement_type')
 
 @admin.register(WorkHours)
 class WorkHoursAdmin(admin.ModelAdmin):

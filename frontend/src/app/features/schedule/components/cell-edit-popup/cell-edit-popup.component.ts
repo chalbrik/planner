@@ -14,13 +14,10 @@ import {MatDivider, MatDividerModule} from '@angular/material/divider';
     { provide: MAT_DATE_LOCALE, useValue: 'pl-PL' }
   ],
   imports: [
-    MatIcon,
     MatFormField,
-    MatLabel,
     MatTimepickerToggle,
     MatTimepicker,
     MatTimepickerInput,
-    MatButton,
     MatInput,
     MatIconButton,
     MatSuffix,

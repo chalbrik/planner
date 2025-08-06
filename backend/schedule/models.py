@@ -15,6 +15,15 @@ class Employee(models.Model):
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
+    agreement_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("permanent", "Umowa o pracę"),
+            ("contract", "Umowa na zlecenie")
+        ],
+        default='permanent',
+        verbose_name="Rodzaj umowy"
+    )
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
