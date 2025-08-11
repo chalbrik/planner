@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,9 +14,15 @@ interface NotificationData {
   templateUrl: './notification-pop-up.component.html',
   styleUrl: './notification-pop-up.component.scss'
 })
-export class NotificationPopUpComponent {
+export class NotificationPopUpComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<NotificationPopUpComponent>); // bez generic type
   readonly data = inject<NotificationData>(MAT_DIALOG_DATA);
+
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.close();
+    }, 5000);
+  }
 
   getNotificationColor(): string {
     switch(this.data.type) {

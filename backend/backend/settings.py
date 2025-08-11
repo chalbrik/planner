@@ -122,6 +122,11 @@ USE_I18N = True
 
 USE_TZ = True
 
+USE_L10N = False  # Wyłącz automatyczną lokalizację
+DATE_FORMAT = 'd.m.Y'
+DATETIME_FORMAT = 'd.m.Y H:i'
+SHORT_DATE_FORMAT = 'd.m.Y'
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

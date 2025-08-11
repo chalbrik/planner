@@ -4,12 +4,13 @@ import {AuthService} from '../../core/services/auth.service';
 import {Router, RouterModule} from '@angular/router';
 
 import {MatButton} from "@angular/material/button";
+import {IconComponent} from '../../shared/components/icon';
 
 
 
 @Component({
   selector: 'app-header',
-  imports: [RouterModule, MatButton],
+  imports: [RouterModule, MatButton, IconComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   standalone: true

@@ -1,17 +1,12 @@
 <div class="h-full flex flex-col bg-warm-gray-200 px-2">
 
-<!--  Panel edycji grafiku -->
-<!--  <ng-container [ngComponentOutlet]="currentComponent()" [ngComponentOutletInputs]="componentInputs()"></ng-container>-->
-<!--  <app-edit-schedule-component [selectedCell]="selectedCell()" (cancelSelection)="onCancelSelection()" ></app-edit-schedule-component>-->
-
   <!-- Kontener do wyboru miesiąca -->
   <div class="flex items-center justify-start gap-6 bg-warm-gray-50 p-2">
-
-    <h2 class="text-xl font-semibold text-gray-800">
+    <h2 class="text-xl font-semibold text-gray-800 w-40 flex-shrink-0">
       {{ getMonthName() }}
     </h2>
 
-    <div>
+    <div class="w-20 flex-shrink-0">
       <button matIconButton (click)="changeMonth(-1)">
         <div class="flex justify-center items-center">
           <app-icon iconName="chevron-left" iconSize="outline"></app-icon>
@@ -27,78 +22,92 @@
   </div>
 
   <!-- Główny kontener grafiku -->
-  <div class="flex-1 overflow-auto min-h-0">
-    <ng-container [ngTemplateOutlet]="Schedule" ></ng-container>
-  </div>
+  <div class="flex-1 overflow-auto min-h-0 space-y-2">
 
+    <!-- Tabela dla Umowy o Pracę -->
+    @if (permanentDataSource().length > 0) {
+      <ng-container [ngTemplateOutlet]="ScheduleTable"
+                    [ngTemplateOutletContext]="{
+                      dataSource: permanentDataSource(),
+                      title: 'Pracownicy zatrudnieni na podstawie umowy o pracę'
+                    }">
+      </ng-container>
+    }
+
+    <!-- Tabela dla Umowy na Zlecenie -->
+    @if (contractDataSource().length > 0) {
+      <ng-container [ngTemplateOutlet]="ScheduleTable"
+                    [ngTemplateOutletContext]="{
+                      dataSource: contractDataSource(),
+                      title: 'Pracownicy zatrudnieni na podstawie umowy na zlecenie'
+                    }">
+      </ng-container>
+    }
+
+  </div>
 </div>
 
-<ng-template #Schedule>
-
+<ng-template #ScheduleTable let-dataSource="dataSource" let-title="title">
   <section class="example-container mat-elevation-z8 border-4 border-white rounded-lg overflow-hidden" tabindex="0">
-    <div class="bg-white p-2 sticky left-0">Grafik pracowników zatrudnionych na podstawie umowy o pracę</div>
-      <mat-table [dataSource]="dataSource">
+    <div class="bg-white p-2 sticky left-0 font-semibold">{{ title }}</div>
 
-        <!-- Kolumna z pracownikami -->
-        <ng-container matColumnDef="employees" sticky="true">
-          <mat-header-cell *matHeaderCellDef class="!bg-warm-gray-100"> Pracownicy </mat-header-cell>
-          <mat-cell *matCellDef="let element" class="!bg-warm-gray-100"> {{ element.name }} </mat-cell>
+    <mat-table [dataSource]="dataSource">
+      <!-- Kolumna z pracownikami -->
+      <ng-container matColumnDef="employees" sticky="true">
+        <mat-header-cell *matHeaderCellDef class="!bg-warm-gray-100"> Pracownicy </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="!bg-warm-gray-100"> {{ element.name }} </mat-cell>
+      </ng-container>
+
+      <!-- Dynamiczne kolumny dla dni miesiąca -->
+      @for (day of monthDays(); track day.dayNumber) {
+        <ng-container [matColumnDef]="'day-' + day.dayNumber">
+          <mat-header-cell *matHeaderCellDef
+                           class="!bg-warm-gray-100"
+                           [class.weekend-header]="day.isWeekend"
+                           [class.today-header]="day.isToday"
+                           [class.saturday-cell]="day.isSaturday"
+                           [class.sunday-cell]="day.isSunday">
+            <div class="day-header w-full text-xs text-center">
+              <div class="day-number text-center">{{ day.dayNumber }}</div>
+              <div class="day-name text-center">{{ day.date | date:'EEE':'pl' }}</div>
+            </div>
+          </mat-header-cell>
+
+          <mat-cell *matCellDef="let element"
+                    class="cursor-pointer w-2 !bg-warm-gray-100"
+                    [class.weekend-cell]="day.isWeekend"
+                    [class.today-cell]="day.isToday"
+                    [class.saturday-cell]="day.isSaturday"
+                    [class.sunday-cell]="day.isSunday"
+                    [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
+                    [class.selected-cell]="isCellSelected(element, day.dayNumber)"
+                    [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"
+                    [class.exceeding-12h-cell]="isCellExceeding12h(element, day.dayNumber)"
+                    (click)="onCellClick(element, day.dayNumber, $event)"
+                    (dblclick)="onDbCellClick(element, day.dayNumber, $event)">
+            <div class="work-hours-cell text-xs text-center">
+              {{ getWorkHoursForDay(element, day.dayNumber) }}
+            </div>
+          </mat-cell>
+
+          <mat-footer-cell *matFooterCellDef [class.weekend-footer]="day.isWeekend">
+            <!-- Tutaj możesz dodać podsumowanie dla dnia -->
+          </mat-footer-cell>
         </ng-container>
+      }
 
-        <!-- Dynamiczne kolumny dla dni miesiąca -->
-        @for (day of monthDays(); track day.dayNumber) {
-          <ng-container [matColumnDef]="'day-' + day.dayNumber">
-            <mat-header-cell *matHeaderCellDef
-                             class="!bg-warm-gray-100"
-                             [class.weekend-header]="day.isWeekend"
-                             [class.today-header]="day.isToday"
-                             [class.saturday-cell]="day.isSaturday"
-                             [class.sunday-cell]="day.isSunday"
-            >
-              <div class="day-header w-full text-xs text-center">
-                <div class="day-number text-center">{{ day.dayNumber }}</div>
-                <div class="day-name text-center">{{ day.date | date:'EEE':'pl' }}</div>
-              </div>
-            </mat-header-cell>
+      <!-- Kolumna z sumą godzin -->
+      <ng-container matColumnDef="hoursSum" stickyEnd="true">
+        <mat-header-cell *matHeaderCellDef class="!bg-warm-gray-100"> Suma godzin </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="!bg-warm-gray-100"> {{ getTotalHoursForEmployee(element) }}h </mat-cell>
+      </ng-container>
 
-            <mat-cell *matCellDef="let element"
-                      class="cursor-pointer w-2 !bg-warm-gray-100"
-                      [class.weekend-cell]="day.isWeekend"
-                      [class.today-cell]="day.isToday"
-                      [class.saturday-cell]="day.isSaturday"
-                      [class.sunday-cell]="day.isSunday"
-                      [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
-                      [class.selected-cell]="isCellSelected(element, day.dayNumber)"
-                      [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"
-                      [class.exceeding-12h-cell]="isCellExceeding12h(element, day.dayNumber)"
+      <!-- Wiersze nagłówka -->
+      <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></mat-header-row>
 
-                      (click)="onCellClick(element, day.dayNumber, $event)">
-              <div class="work-hours-cell text-xs text-center">
-                {{ getWorkHoursForDay(element, day.dayNumber) }}
-              </div>
-            </mat-cell>
+      <!-- Wiersze danych -->
+      <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
 
-            <mat-footer-cell *matFooterCellDef
-                             [class.weekend-footer]="day.isWeekend">
-              <!-- Tutaj możesz dodać podsumowanie dla dnia -->
-            </mat-footer-cell>
-          </ng-container>
-        }
-
-        <!-- Kolumna z sumą godzin -->
-        <ng-container matColumnDef="hoursSum" stickyEnd="true">
-          <mat-header-cell *matHeaderCellDef class="!bg-warm-gray-100"> Suma godzin </mat-header-cell>
-          <mat-cell *matCellDef="let element" class="!bg-warm-gray-100"> {{ getTotalHoursForEmployee(element) }}h </mat-cell>
-<!--          <mat-footer-cell *matFooterCellDef> Razem </mat-footer-cell>-->
-        </ng-container>
-
-        <!-- Wiersze nagłówka -->
-        <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></mat-header-row>
-
-        <!-- Wiersze danych -->
-        <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
-
-      </mat-table>
+    </mat-table>
   </section>
-
 </ng-template>

@@ -1,40 +1,83 @@
-import {Component, computed, OnInit, signal} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {Employee} from '../../core/services/employees/employee.types';
-import {EmployeeListComponent} from './components/employee-list/employee-list.component';
 import {EmployeeInfoComponent} from './components/employee-info/employee-info.component';
-import {NgComponentOutlet} from '@angular/common';
-import {BlanckEmployeeInfoComponent} from './components/blanck-employee-info/blanck-employee-info.component';
+import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
+import {
+  MatCell, MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow, MatHeaderRowDef, MatNoDataRow,
+  MatRow, MatRowDef,
+  MatTable, MatTableDataSource
+} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSidenav, MatSidenavContainer, MatSidenavContent, MatSidenavModule} from '@angular/material/sidenav';
+import {MatIcon} from '@angular/material/icon';
+import {EmployeeFormDialogComponent} from './components/employee-form-dialog/employee-form-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-employees',
   imports: [
-    EmployeeListComponent,
-    NgComponentOutlet
+    MatInput,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatSort,
+    MatHeaderRow,
+    MatRow,
+    MatPaginator,
+    MatHeaderCellDef,
+    MatCellDef,
+    MatHeaderRowDef,
+    MatRowDef,
+    MatNoDataRow,
+    MatFormField,
+    MatLabel,
+    MatSidenav,
+    MatIcon,
+    MatSidenavContainer,
+    MatSidenavContent,
+    EmployeeInfoComponent
   ],
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss'
 })
 export class EmployeesComponent implements OnInit {
 
-  employees: Employee[] = [];
+  private readonly employeesService = inject(EmployeesService);
+  private readonly dialog = inject(MatDialog);
+
+  displayedColumns: string[] = ['name', 'email', 'phone', 'agreement_type', 'actions'];
+  dataSource: MatTableDataSource<Employee>;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
   isLoading = false;
   errorMessage: string | null = null;
 
-  //Wybrany pracownik
   selectedEmployee = signal<Employee | null>(null);
 
+  isSidenavOpen = computed(() => !!this.selectedEmployee());
 
 
-  constructor(
-    private employeesService: EmployeesService,
-  ) {}
+  constructor() {
+    this.dataSource = new MatTableDataSource<Employee>([]);
+  }
 
   ngOnInit() {
     this.loadEmployees();
   }
 
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
 
   loadEmployees(): void {
     this.isLoading = true;
@@ -42,7 +85,8 @@ export class EmployeesComponent implements OnInit {
 
     this.employeesService.getEmployees().subscribe({
       next: (data) => {
-        this.employees = data;
+        console.log("Pracownicy: ", data);
+        this.dataSource.data = data;
         this.isLoading = false;
       },
       error: (error) => {
@@ -53,25 +97,68 @@ export class EmployeesComponent implements OnInit {
     });
   }
 
-  onEmployeeAdded(newEmployee: Employee) {
-    this.employees.push(newEmployee);
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
-  onEmployeeDeleted(oldEmployee: Employee) {
-    this.employees = this.employees.filter((employee) => employee.id !== oldEmployee.id);
+// Pomocnicza metoda do wyświetlania rodzaju umowy
+  getAgreementTypeLabel(type: string): string {
+    return type === 'permanent' ? 'Umowa o pracę' : 'Umowa na zlecenie';
   }
 
-  onEmployeeSelected(selectedEmployee: Employee) {
-    this.selectedEmployee.set(selectedEmployee);
+  onRowClick(employee: Employee): void {
+    this.selectedEmployee.set(employee);
   }
 
-  //Metoda do warunkowego wyswietlania komponentow
-  currentComponent = computed(() => {
-    return this.selectedEmployee() ?  EmployeeInfoComponent : BlanckEmployeeInfoComponent;
-  })
+  closeSidenav(): void {
+    this.selectedEmployee.set(null);
+  }
 
-  componentInputs = computed(() => {
-    return this.selectedEmployee() ? { employee: this.selectedEmployee() } : {};
-  })
+  openAddEmployeeDialog(): void {
+    const dialogRef = this.dialog.open(EmployeeFormDialogComponent, {
+      width: '800px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.employeesService.addEmployee(result).subscribe({
+          next: (newEmployee) => {
+            // Dodaj do dataSource
+            const currentData = this.dataSource.data;
+            this.dataSource.data = [...currentData, newEmployee];
+          },
+          error: (error) => {
+            console.error('Błąd podczas dodawania pracownika: ', error);
+          }
+        });
+      }
+    });
+  }
+
+  onDeleteEmployee(employee: Employee, event: Event): void {
+    // Zatrzymaj propagację - żeby nie otworzyć sidenav
+    event.stopPropagation();
+
+    this.employeesService.deleteEmployee(employee.id).subscribe({
+      next: () => {
+        // Usuń z dataSource
+        const currentData = this.dataSource.data;
+        this.dataSource.data = currentData.filter(emp => emp.id !== employee.id);
+
+        // Zamknij sidenav jeśli usuwany pracownik był wybrany
+        if (this.selectedEmployee()?.id === employee.id) {
+          this.closeSidenav();
+        }
+      },
+      error: (error) => {
+        console.error("Błąd podczas usuwania pracownika: ", error);
+      }
+    });
+  }
 
 }

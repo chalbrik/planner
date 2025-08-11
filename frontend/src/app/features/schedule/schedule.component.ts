@@ -10,15 +10,15 @@ import {
   MatRow, MatRowDef,
   MatTable
 } from '@angular/material/table';
-import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatIconButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
-import {EditScheduleComponentComponent} from './components/edit-schedule-component/edit-schedule-component.component';
 import {IconComponent} from '../../shared/components/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { NotificationPopUpComponent } from './components/notification-pop-up/notification-pop-up.component'; // sprawdź ścieżkę!
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {CellEditPopupComponent} from './components/cell-edit-popup/cell-edit-popup.component';
+import {timer} from 'rxjs';
 
 
 interface Day {
@@ -57,10 +57,8 @@ interface EmployeeRow {
     MatFooterCellDef,
     MatRowDef,
     MatHeaderRowDef,
-    EditScheduleComponentComponent,
     IconComponent,
     MatIconButton,
-    MatButton,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -143,6 +141,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   dayColumnWidth = signal<number>(55);
 
+  permanentDataSource = signal<EmployeeRow[]>([]);
+  contractDataSource = signal<EmployeeRow[]>([]);
+
   constructor() {}
 
   ngOnInit() {
@@ -154,15 +155,14 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.scheduleService.scheduleUpdated$.subscribe((updatedData) => {
       this.loadWorkHours();
 
-      // Lepszym rozwiązaniem byłoby użycie Observable zamiast setTimeout: - mialem problem z dockerem poniewaz byl wolniejszy
-      setTimeout(() => {
+      // Użyj timer Observable
+      timer(800).subscribe(() => {
         this.checkRestTimeConflicts();
         this.validateAndShowErrors(updatedData);
-      }, 300);
+      });
 
       this.selectedCell.set(undefined);
     });
-
   }
 
   ngOnDestroy() {
@@ -279,8 +279,76 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   //   this.check35HourRestInAllWeeks();
   // }
 
+  // prepareTableData() {
+  //   if (this.employees.length === 0) return;
+  //
+  //   // Podziel pracowników na grupy
+  //   const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
+  //   const contractEmployees = this.employees.filter(emp => emp.agreement_type === 'contract');
+  //
+  //   // Przygotuj dane dla UoP (Umowa o Pracę)
+  //   const permanentRows = permanentEmployees.map(employee => {
+  //     const workHoursMap: { [key: string]: string } = {};
+  //     const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+  //
+  //     employeeWorkHours.forEach(wh => {
+  //       workHoursMap[wh.date] = wh.hours;
+  //       this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
+  //     });
+  //
+  //     return {
+  //       id: employee.id,
+  //       name: `${employee.first_name} ${employee.last_name}`,
+  //       workHours: workHoursMap,
+  //       agreement_type: employee.agreement_type
+  //     };
+  //   });
+  //
+  //   // Separator - tylko jeśli są pracownicy w obu grupach
+  //   const rows: EmployeeRow[] = [...permanentRows];
+  //
+  //   if (contractEmployees.length > 0 && permanentEmployees.length > 0) {
+  //     const separatorRow: EmployeeRow = {
+  //       id: 'separator',
+  //       name: '',
+  //       workHours: {},
+  //       isSeparator: true
+  //     };
+  //     rows.push(separatorRow);
+  //   }
+  //
+  //   // Przygotuj dane dla UZ (Umowa na Zlecenie)
+  //   const contractRows = contractEmployees.map(employee => {
+  //     const workHoursMap: { [key: string]: string } = {};
+  //     const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+  //
+  //     employeeWorkHours.forEach(wh => {
+  //       workHoursMap[wh.date] = wh.hours;
+  //       this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
+  //     });
+  //
+  //     return {
+  //       id: employee.id,
+  //       name: `${employee.first_name} ${employee.last_name}`,
+  //       workHours: workHoursMap,
+  //       agreement_type: employee.agreement_type
+  //     };
+  //   });
+  //
+  //   // Połącz wszystko
+  //   rows.push(...contractRows);
+  //   this.dataSource = rows;
+  //
+  //   this.checkRestTimeConflicts();
+  //   this.check35HourRestInAllWeeks();
+  // }
+
   prepareTableData() {
-    if (this.employees.length === 0) return;
+    if (this.employees.length === 0) {
+      this.permanentDataSource.set([]);
+      this.contractDataSource.set([]);
+      return;
+    }
 
     // Podziel pracowników na grupy
     const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
@@ -304,19 +372,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       };
     });
 
-    // Separator - tylko jeśli są pracownicy w obu grupach
-    const rows: EmployeeRow[] = [...permanentRows];
-
-    if (contractEmployees.length > 0 && permanentEmployees.length > 0) {
-      const separatorRow: EmployeeRow = {
-        id: 'separator',
-        name: '',
-        workHours: {},
-        isSeparator: true
-      };
-      rows.push(separatorRow);
-    }
-
     // Przygotuj dane dla UZ (Umowa na Zlecenie)
     const contractRows = contractEmployees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
@@ -335,13 +390,17 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       };
     });
 
-    // Połącz wszystko
-    rows.push(...contractRows);
-    this.dataSource = rows;
+    // Ustaw sygnały zamiast jednego dataSource
+    this.permanentDataSource.set(permanentRows);
+    this.contractDataSource.set(contractRows);
+
+    // Zachowaj stary dataSource dla kompatybilności (opcjonalnie możesz go usunąć później)
+    this.dataSource = [...permanentRows, ...contractRows];
 
     this.checkRestTimeConflicts();
     this.check35HourRestInAllWeeks();
   }
+
 
   // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
   getWorkHoursForDay(employee: EmployeeRow, dayNumber: number): string {
@@ -415,12 +474,34 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   // }
 
   onCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+    }
+    // Przygotuj dane selectedCell
+    const currentDate = this.currentMonthDate();
+    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+
+    const workHoursObject = this.workHours.find(wh =>
+      wh.employee === employee.id && wh.date === dateString
+    );
+
+    const selectedCellData = {
+      employee: employee,
+      workHours: workHoursObject || null,
+      date: dateString
+    };
+
+    // Tylko zaznacz komórkę - zachowaj w sygnale
+    this.selectedCell.set(selectedCellData);
+  }
+
+  onDbCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
     // Zamknij poprzedni overlay jeśli istnieje
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
 
-    // Przygotuj dane selectedCell
+    // Przygotuj dane selectedCell (można też użyć this.selectedCell() jeśli była już zaznaczona)
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
 
@@ -474,7 +555,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Podłącz komponent do overlay
     const componentRef = this.overlayRef.attach(portal);
 
-    // *** TUTAJ PRZEKAŻ selectedCell ***
+    // Przekaż selectedCell
     componentRef.setInput('selectedCell', selectedCellData);
 
     // Obsłuż eventy z komponentu
@@ -490,7 +571,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.onPopupDelete(data);
     });
 
-    // Zachowaj w sygnale (dla accordion panelu)
+    // Zaktualizuj sygnał
     this.selectedCell.set(selectedCellData);
   }
 
@@ -708,10 +789,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       width: '400px',
       disableClose: false,
       position: {
-        top: `${100 + (openDialogs * 80)}px`,  // Każdy kolejny o 120px niżej
-        left: '20px'                           // Wszystkie po prawej stronie
+        top: `${50 + (openDialogs * 80)}px`,  // Każdy kolejny o 120px niżej
+        right: '20px'                           // Wszystkie po prawej stronie
       }
     });
+
   }
 
 

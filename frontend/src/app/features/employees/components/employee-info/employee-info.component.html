@@ -1,56 +1,81 @@
-<div class="h-full w-full rounded-xl border p-4 flex flex-col">
-  <h2 class="my-2">Informacje szczegółowe</h2>
+<div class="h-full w-full flex flex-col gap-6">
 
-  <div class="my-2"> {{employee().first_name}} {{employee().last_name}} </div>
 
-    <div class="grid grid-cols-3 gap-3">
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-row gap-2">
-          <app-icon iconName="envelope" iconSize="outline"></app-icon>
-          <span class="font-geist font-normal text-base">Adres email</span>
-        </div>
-        <span class="font-geist font-semibold text-lg">{{ employee().email || 'Brak' }}</span>
-      </div>
 
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-row gap-2">
-          <app-icon iconName="envelope" iconSize="outline"></app-icon>
-          <span class="font-geist font-normal text-base">Numer telefonu</span>
-        </div>
-        <span class="font-geist font-semibold text-lg">{{ employee().phone || 'Brak' }}</span>
-      </div>
+  <app-info-display [name]="'Imię Nazwisko'" [data]="`${employee().first_name} ${employee().last_name}`" [iconName]="'user-circle'" [iconSize]="'outline'"></app-info-display>
 
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-row gap-2">
-          <app-icon iconName="envelope" iconSize="outline"></app-icon>
-          <span class="font-geist font-normal text-base">Rodzaj umowy</span>
-        </div>
-        <span class="font-geist font-semibold text-lg">Do uzupelnienia</span>
-      </div>
 
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-row gap-2">
-          <app-icon iconName="envelope" iconSize="outline"></app-icon>
-          <span class="font-geist font-normal text-base">Stawka godzinowa</span>
-        </div>
-        <span class="font-geist font-semibold text-lg">Do uzupełnienia</span>
-      </div>
+  <mat-divider class="!border-warm-gray-400"></mat-divider>
 
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-row gap-2">
-          <app-icon iconName="envelope" iconSize="outline"></app-icon>
-          <span class="font-geist font-normal text-base">Okres umowy</span>
-        </div>
-        <span class="font-geist font-semibold text-lg">Do uzupelnienia</span>
-      </div>
+    <div class="grid grid-cols-2 gap-3">
 
-      <div class="flex flex-col gap-1">
-        <div class="flex flex-row gap-2">
-          <app-icon iconName="envelope" iconSize="outline"></app-icon>
-          <span class="font-geist font-normal text-base">Okres wypoczynkowy</span>
-        </div>
-        <span class="font-geist font-semibold text-lg">Do uzupełnienia</span>
-      </div>
+      <app-info-display [name]="'Numer ewidencyjny'" [data]="employee().identification_number || 'Brak'" [iconName]="'identification'" [iconSize]="'outline'"></app-info-display>
+
+      <app-info-display [name]="'Etat'" [data]="employee().job || 'Brak'" [iconName]="'briefcase'" [iconSize]="'outline'"></app-info-display>
+
+      <app-info-display [name]="'Email'" [data]="employee().email || 'Brak'" [iconName]="'envelope'" [iconSize]="'outline'"></app-info-display>
+
+      <app-info-display [name]="'Numer telefonu'" [data]="employee().phone || 'Brak'" [iconName]="'phone'" [iconSize]="'outline'"></app-info-display>
+
+      <app-info-display [name]="'Rodzaj umowy'" [data]="employee().agreement_type || 'Brak'" [iconName]="'document'" [iconSize]="'outline'"></app-info-display>
+
+      <app-info-display [name]="'Czas trwania umowy'" [data]="`${employee().contract_date_start} - ${employee().contract_date_end}`" [iconName]="'clock'" [iconSize]="'outline'"></app-info-display>
+
+      <app-info-display [name]="'Stawka etatowa'" [data]="employee().job_rate || 'Brak'" [iconName]="'banknotes'" [iconSize]="'outline'"></app-info-display>
+
+      <app-info-display [name]="'Stawka godzinowa'" [data]="employee().hour_rate || 'Brak'" [iconName]="'banknotes'" [iconSize]="'outline'"></app-info-display>
+
     </div>
 
+  <mat-accordion>
+    <mat-expansion-panel hideToggle class="!shadow-none border border-warm-gray-400">
+      <mat-expansion-panel-header class="bg-warm-gray-100">
+        <mat-panel-title> Godziny urlopowe </mat-panel-title>
+        <mat-panel-description> </mat-panel-description>
+      </mat-expansion-panel-header>
+      <div class="flex flex-col gap-2">
+        <div class="w-full flex flex-row justify-between">
+          <p>Bieżący urlop pracownika</p>
+          <div class=""> 20 dni / 160 h</div>
+        </div>
+        <mat-divider class="!border-warm-gray-400"></mat-divider>
+
+        <table mat-table [dataSource]="vacationTableData()" class="mat-elevation-z8">
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let vacationLeaves"> {{vacationLeaves.type}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="remaining">
+            <th mat-header-cell *matHeaderCellDef> Zaległy urlop </th>
+            <td mat-cell *matCellDef="let vacationLeaves"> {{vacationLeaves.remaining_vacation_hours}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="used">
+            <th mat-header-cell *matHeaderCellDef> Wykorzystano </th>
+            <td mat-cell *matCellDef="let vacationLeaves"> {{vacationLeaves.used_vacation_hours}} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef> Pozostało </th>
+            <td mat-cell *matCellDef="let vacationLeaves"> {{vacationLeaves.current_vacation_hours - vacationLeaves.used_vacation_hours}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <mat-divider class="!border-warm-gray-400"></mat-divider>
+
+        <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Złóż wniosek</span></button>
+
+
+
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
 </div>
+
+

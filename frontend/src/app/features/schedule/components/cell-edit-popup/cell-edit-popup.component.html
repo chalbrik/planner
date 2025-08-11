@@ -1,5 +1,10 @@
-<div class="popup-container bg-blue-gray-400 shadow-lg rounded-lg flex flex-row items-center justify-between gap-1 p-2">
+<div class="popup-container bg-cool-gray-200 shadow-lg rounded-lg flex flex-row items-center justify-between gap-1 p-2">
 
+  <button mat-icon-button class="delete-button" (click)="onDelete()">
+    <div class="flex justify-center items-center">
+      <app-icon iconName="trash" iconSize="outline"></app-icon>
+    </div>
+  </button>
 
     <mat-form-field appearance="fill" class="time-field">
       <!--            <mat-label>Od</mat-label>-->
@@ -26,20 +31,17 @@
 
 
     <button mat-icon-button color="primary" (click)="onSave()">
-      <app-icon iconName="check" iconSize="outline" ></app-icon>
-    </button>
-
-    <button mat-icon-button (click)="onCancel()">
-      <app-icon iconName="x-mark" iconSize="outline"></app-icon>
+      <div class="flex items-center justify-center">
+        <app-icon iconName="check" iconSize="outline" ></app-icon>
+      </div>
     </button>
 
     <mat-divider [vertical]="true" class="h-8 border-gray-800"></mat-divider>
 
-    <button mat-icon-button class="delete-button" (click)="onDelete()">
-      <app-icon iconName="trash" iconSize="outline"></app-icon>
+    <button mat-icon-button (click)="onCancel()">
+      <div class="flex items-center justify-center">
+        <app-icon iconName="x-mark" iconSize="outline"></app-icon>
+      </div>
     </button>
-
-
-
 
 </div>
