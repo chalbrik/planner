@@ -62,13 +62,13 @@ interface Agreemnet {
     MatIcon,
     MatSuffix
   ],
-  templateUrl: './employee-form-dialog.component.html',
-  styleUrl: './employee-form-dialog.component.scss',
+  templateUrl: './employee-form.component.html',
+  styleUrl: './employee-form.component.scss',
   providers: [provideNativeDateAdapter()],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class EmployeeFormDialogComponent implements OnInit {
+export class EmployeeFormComponent implements OnInit {
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly employeesService = inject(EmployeesService)
@@ -89,9 +89,7 @@ export class EmployeeFormDialogComponent implements OnInit {
 
       //Pola wypełniane przez pracownika
 
-      first_name: ['', Validators.required],
-      second_name: [''],
-      last_name: ['', Validators.required],
+      full_name: ['', Validators.required],
       birth_date: ['', Validators.required],
       phone: ['', Validators.required],
       email: ['', [Validators.required,  Validators.email]],

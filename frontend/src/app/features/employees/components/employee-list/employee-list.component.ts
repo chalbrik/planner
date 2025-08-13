@@ -3,7 +3,7 @@ import {Employee} from '../../../../core/services/employees/employee.types';
 import {MatIcon, MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatDialog} from '@angular/material/dialog';
-import {EmployeeFormDialogComponent} from '../employee-form-dialog/employee-form-dialog.component';
+import {EmployeeFormComponent} from '../employee-form-dialog/employee-form.component';
 import {EmployeesService} from '../../../../core/services/employees/employees.service';
 import {MatFormField, MatInput, MatSuffix} from '@angular/material/input';
 
@@ -37,7 +37,7 @@ export class EmployeeListComponent implements OnInit {
 
 
   openAddEmployeeDialog(): void {
-    const dialogRef = this.addEmployeeDialog.open(EmployeeFormDialogComponent, {
+    const dialogRef = this.addEmployeeDialog.open(EmployeeFormComponent, {
       width: '800px',
     });
 

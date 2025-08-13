@@ -16,7 +16,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSidenav, MatSidenavContainer, MatSidenavContent, MatSidenavModule} from '@angular/material/sidenav';
 import {MatIcon, MatIconModule} from '@angular/material/icon';
-import {EmployeeFormDialogComponent} from './components/employee-form-dialog/employee-form-dialog.component';
+import {EmployeeFormComponent} from './components/employee-form-dialog/employee-form.component';
 import {MatDialog} from '@angular/material/dialog';
 import {IconComponent} from '../../shared/components/icon';
 import {MatIconButton} from '@angular/material/button';
@@ -127,7 +127,7 @@ export class EmployeesComponent implements OnInit {
   }
 
   openAddEmployeeDialog(): void {
-    const dialogRef = this.dialog.open(EmployeeFormDialogComponent, {
+    const dialogRef = this.dialog.open(EmployeeFormComponent, {
       width: '800px',
     });
 

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'authentication',
     'schedule',
+    'employees',
 
     'silk',
 ]
