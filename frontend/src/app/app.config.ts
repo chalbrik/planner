@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { jwtInterceptor } from './interceptors/jwt.interceptor';
 import {MAT_DIALOG_DEFAULT_OPTIONS} from '@angular/material/dialog';
 import {AuthService} from './core/services/auth.service';
+import {provideNativeDateAdapter} from '@angular/material/core';
 
 function initializeAuth(authService: AuthService) {
   return () => authService.init();
@@ -14,6 +15,7 @@ function initializeAuth(authService: AuthService) {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideNativeDateAdapter(),
     provideRouter(routes),
     provideHttpClient(
       withInterceptors([jwtInterceptor])

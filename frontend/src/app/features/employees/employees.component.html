@@ -37,27 +37,27 @@
       <div class="mat-elevation-z8">
         <table mat-table [dataSource]="dataSource" matSort>
 
+          <!-- Kolumna Nazwa Numer ewidencyjny -->
+          <ng-container matColumnDef="identification_number">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Numer ewidencyjny </th>
+            <td mat-cell *matCellDef="let employee">
+              {{employee.identification_number || 'Brak'}}
+            </td>
+          </ng-container>
+
           <!-- Kolumna Nazwa (Imię + Nazwisko) -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Nazwa </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Imię Nazwisko </th>
             <td mat-cell *matCellDef="let employee">
               {{employee.first_name}} {{employee.last_name}}
             </td>
           </ng-container>
 
           <!-- Kolumna Email -->
-          <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+          <ng-container matColumnDef="job">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Etat </th>
             <td mat-cell *matCellDef="let employee">
-              {{employee.email || 'Brak'}}
-            </td>
-          </ng-container>
-
-          <!-- Kolumna Telefon -->
-          <ng-container matColumnDef="phone">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Telefon </th>
-            <td mat-cell *matCellDef="let employee">
-              {{employee.phone || 'Brak'}}
+              {{employee.job || 'Brak'}}
             </td>
           </ng-container>
 
@@ -73,11 +73,10 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Akcje </th>
             <td mat-cell *matCellDef="let employee">
-              <button mat-icon-button
-                      color="warn"
-                      (click)="onDeleteEmployee(employee, $event)"
-                      matTooltip="Usuń pracownika">
-                <mat-icon>delete</mat-icon>
+              <button mat-icon-button class="delete-button" (click)="onDeleteEmployee(employee, $event)">
+                <div class="flex justify-center items-center">
+                  <app-icon iconName="trash" iconSize="outline"></app-icon>
+                </div>
               </button>
             </td>
           </ng-container>

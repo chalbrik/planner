@@ -10,3 +10,34 @@ table {
 td, th {
   width: 25%;
 }
+
+.mdc-text-field{
+  background-color: transparent !important;
+  border: 1px solid #57534e !important;
+  border-radius: 10px !important;
+  //width: 200px !important;
+  //height: 44px !important;
+}
+
+
+.mdc-text-field--filled{
+  background-color: transparent !important;
+  border: 1px solid #57534e !important;
+  border-radius: 10px !important;
+  //width: 200px !important;
+  //height: 44px !important;
+}
+
+//Tabela
+
+.mat-elevation-z8 {
+  border-radius: 12px !important;
+  overflow: hidden; // Ważne dla zaokrąglonych rogów
+  border: 2px solid #A8A29E ; // tailwind warm-gray-400
+}
+
+.mat-mdc-cell {
+  background-color: #F5F5F4 !important; // tailwind warm-gray-100
+  border-bottom-color: #A8A29E !important; // tailwind warm-gray-400
+}
+

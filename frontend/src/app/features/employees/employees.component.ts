@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewChild, ViewEncapsulation} from '@angular/core';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {Employee} from '../../core/services/employees/employee.types';
 import {EmployeeInfoComponent} from './components/employee-info/employee-info.component';
@@ -15,9 +15,11 @@ import {
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSidenav, MatSidenavContainer, MatSidenavContent, MatSidenavModule} from '@angular/material/sidenav';
-import {MatIcon} from '@angular/material/icon';
+import {MatIcon, MatIconModule} from '@angular/material/icon';
 import {EmployeeFormDialogComponent} from './components/employee-form-dialog/employee-form-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
+import {IconComponent} from '../../shared/components/icon';
+import {MatIconButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-employees',
@@ -42,17 +44,22 @@ import {MatDialog} from '@angular/material/dialog';
     MatIcon,
     MatSidenavContainer,
     MatSidenavContent,
-    EmployeeInfoComponent
+    EmployeeInfoComponent,
+    IconComponent,
+    MatIconModule,
+    MatIcon,
+    MatIconButton
   ],
   templateUrl: './employees.component.html',
-  styleUrl: './employees.component.scss'
+  styleUrl: './employees.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class EmployeesComponent implements OnInit {
 
   private readonly employeesService = inject(EmployeesService);
   private readonly dialog = inject(MatDialog);
 
-  displayedColumns: string[] = ['name', 'email', 'phone', 'agreement_type', 'actions'];
+  displayedColumns: string[] = ['identification_number', 'name', 'job', 'agreement_type', 'actions'];
   dataSource: MatTableDataSource<Employee>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;

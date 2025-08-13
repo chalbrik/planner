@@ -1,74 +1,146 @@
-<h2 mat-dialog-title>Dodaj nowego <span class="">pracownika</span></h2>
+<form class="w-2/3 p-10 mx-auto bg-white rounded-xl font-geist" [formGroup]="addEmployeeForm">
 
-<form class="p-10" [formGroup]="addEmployeeForm">
+  <mat-divider class="bg-warm-gray-400"></mat-divider>
+  <p class="font-bold text-base py-2">Dane osobowe</p>
+
+  <div class="grid grid-cols-6 gap-2">
+    <mat-form-field class="col-span-3">
+      <mat-label>Imię</mat-label>
+      <input matInput formControlName="first_name">
+      <mat-error>Pole obowiązkowe</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="col-span-3">
+      <mat-label>Nazwisko</mat-label>
+      <input matInput formControlName="last_name">
+      <mat-error>Pole obowiązkowe</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="col-span-2">
+      <mat-label>Telefon</mat-label>
+      <input matInput formControlName="phone">
+      <mat-error>Pole obowiązkowe</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="col-span-2">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email">
+      <mat-error>Pole obowiązkowe</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="col-span-2">
+      <mat-label>Data urodzenia</mat-label>
+      <input matInput [matDatepicker]="datepicker" formControlName="birth_date"/>
+      <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+      <mat-datepicker #datepicker>
+      </mat-datepicker>
+    </mat-form-field>
+  </div>
+
+  <mat-divider class="bg-warm-gray-400"></mat-divider>
+  <p class="font-bold text-base py-2">Wykształcenie</p>
+
+  <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Dodaj szkołę</span></button>
 
   <div class="flex flex-col">
+    <mat-form-field class="col-span-3">
+      <mat-label>Typ szkoły</mat-label>
+      <input matInput formControlName="school_type">
+      <mat-error>Pole obowiązkowe</mat-error>
+    </mat-form-field>
 
-    <div class="flex flex-row justify-between gap-2">
-      <mat-form-field class="example-full-width w-full">
-        <mat-label>Imię</mat-label>
-        <input matInput formControlName="first_name">
-      </mat-form-field>
+    <mat-form-field class="col-span-3">
+      <mat-label>Nazwa szkoły</mat-label>
+      <input matInput formControlName="school_name">
+      <mat-error>Pole obowiązkowe</mat-error>
+    </mat-form-field>
 
-      <mat-form-field class="example-full-width w-full">
-        <mat-label>Nazwisko</mat-label>
-        <input matInput formControlName="last_name">
-      </mat-form-field>
-    </div>
-
-    <div class="flex flex-row justify-between gap-2">
-      <mat-form-field class="example-full-width w-full">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="email">
-      </mat-form-field>
-
-      <mat-form-field class="example-full-width w-full">
-        <mat-label>Telefon</mat-label>
-        <input matInput formControlName="phone">
-      </mat-form-field>
-    </div>
-
-    <div class="flex flex-row justify-between gap-2">
-      <mat-form-field class="w-full">
-        <mat-label>Rodzaj umowy</mat-label>
-        <mat-select formControlName="agreement_type" name="agreement">
-          @for (agreemnet of agreemnetsTypeValues; track agreemnet) {
-            <mat-option [value]="agreemnet.value">{{agreemnet.viewValue}}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field class="example-full-width w-full">
-        <mat-label>Stawka godzinowa</mat-label>
-        <input matInput formControlName="hourlyRate" type="number">
-      </mat-form-field>
-
-      <mat-form-field class="w-full">
-        <mat-label>Okres umowy</mat-label>
-        <mat-date-range-input [rangePicker]="picker">
-          <input matStartDate formControlName="workStart" placeholder="Start date">
-          <input matEndDate formControlName="workEnd" placeholder="End date">
-        </mat-date-range-input>
-<!--        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>-->
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-date-range-picker #picker></mat-date-range-picker>
-
-<!--        @if (addEmployeeForm.get("workStart").hasError('matStartDateInvalid')) {-->
-<!--          <mat-error>Invalid start date</mat-error>-->
-<!--        }-->
-<!--        @if (addEmployeeForm.controls.workEnd.hasError('matEndDateInvalid')) {-->
-<!--          <mat-error>Invalid end date</mat-error>-->
-<!--        }-->
-      </mat-form-field>
-    </div>
+    <mat-form-field class="col-span-2">
+      <mat-label>Rok ukończenia</mat-label>
+      <input matInput [matDatepicker]="datepicker" formControlName="graduation_year"/>
+      <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+      <mat-datepicker #datepicker>
+      </mat-datepicker>
+    </mat-form-field>
 
   </div>
+
+  <mat-divider class="bg-warm-gray-400"></mat-divider>
+  <p class="font-bold text-base py-2">Przebieg dotychczasowego zatrudnienia</p>
+
+  <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Dodaj szkołę</span></button>
+
+
+
+  <!--  <div class="flex flex-col">-->
+
+<!--    <div class="flex flex-row justify-between gap-2">-->
+<!--      <mat-form-field class="example-full-width w-full">-->
+<!--        <mat-label>Imię</mat-label>-->
+<!--        <input matInput formControlName="first_name">-->
+<!--      </mat-form-field>-->
+
+<!--      <mat-form-field class="example-full-width w-full">-->
+<!--        <mat-label>Nazwisko</mat-label>-->
+<!--        <input matInput formControlName="last_name">-->
+<!--      </mat-form-field>-->
+<!--    </div>-->
+
+<!--    <div class="flex flex-row justify-between gap-2">-->
+<!--      <mat-form-field class="example-full-width w-full">-->
+<!--        <mat-label>Email</mat-label>-->
+<!--        <input matInput formControlName="email">-->
+<!--      </mat-form-field>-->
+
+<!--      <mat-form-field class="example-full-width w-full">-->
+<!--        <mat-label>Telefon</mat-label>-->
+<!--        <input matInput formControlName="phone">-->
+<!--      </mat-form-field>-->
+<!--    </div>-->
+
+<!--    <div class="flex flex-row justify-between gap-2">-->
+<!--      <mat-form-field class="w-full">-->
+<!--        <mat-label>Rodzaj umowy</mat-label>-->
+<!--        <mat-select formControlName="agreement_type" name="agreement">-->
+<!--          @for (agreemnet of agreemnetsTypeValues; track agreemnet) {-->
+<!--            <mat-option [value]="agreemnet.value">{{agreemnet.viewValue}}</mat-option>-->
+<!--          }-->
+<!--        </mat-select>-->
+<!--      </mat-form-field>-->
+
+<!--      <mat-form-field class="example-full-width w-full">-->
+<!--        <mat-label>Stawka godzinowa</mat-label>-->
+<!--        <input matInput formControlName="hourlyRate" type="number">-->
+<!--      </mat-form-field>-->
+
+<!--      <mat-form-field class="w-full">-->
+<!--        <mat-label>Okres umowy</mat-label>-->
+<!--        <mat-date-range-input [rangePicker]="picker">-->
+<!--          <input matStartDate formControlName="workStart" placeholder="Start date">-->
+<!--          <input matEndDate formControlName="workEnd" placeholder="End date">-->
+<!--        </mat-date-range-input>-->
+<!--        &lt;!&ndash;        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>&ndash;&gt;-->
+<!--        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>-->
+<!--        <mat-date-range-picker #picker></mat-date-range-picker>-->
+
+<!--        &lt;!&ndash;        @if (addEmployeeForm.get("workStart").hasError('matStartDateInvalid')) {&ndash;&gt;-->
+<!--        &lt;!&ndash;          <mat-error>Invalid start date</mat-error>&ndash;&gt;-->
+<!--        &lt;!&ndash;        }&ndash;&gt;-->
+<!--        &lt;!&ndash;        @if (addEmployeeForm.controls.workEnd.hasError('matEndDateInvalid')) {&ndash;&gt;-->
+<!--        &lt;!&ndash;          <mat-error>Invalid end date</mat-error>&ndash;&gt;-->
+<!--        &lt;!&ndash;        }&ndash;&gt;-->
+<!--      </mat-form-field>-->
+<!--    </div>-->
+
+<!--  </div>-->
+
+ <mat-dialog-actions>
+   <button mat-button mat-dialog-close>Anuluj</button>
+   <button mat-button (click)="onAddEmployee()">Dodaj</button>
+ </mat-dialog-actions>
 
 
 </form>
 
-<mat-dialog-actions>
-  <button mat-button mat-dialog-close>Anuluj</button>
-  <button mat-button (click)="onAddEmployee()">Dodaj</button>
-</mat-dialog-actions>
+
 

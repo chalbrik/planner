@@ -1,4 +1,4 @@
-import {Component, computed, effect, inject, input, signal} from '@angular/core';
+import {Component, computed, effect, inject, input, signal, ViewEncapsulation} from '@angular/core';
 import {Employee} from '../../../../core/services/employees/employee.types';
 import {MatDivider} from '@angular/material/divider';
 import {InfoDisplayComponent} from '../../../../shared/components/info-display/info-display.component';
@@ -44,23 +44,23 @@ import {VacationLeaves} from '../../../../core/services/vacation_leaves/vacation
     MatRowDef
   ],
   templateUrl: './employee-info.component.html',
-  styleUrl: './employee-info.component.scss'
+  styleUrl: './employee-info.component.scss',
+  encapsulation: ViewEncapsulation.None
 })
 export class EmployeeInfoComponent {
   readonly employee = input.required<Employee>();
 
   private readonly vacationLeavesService = inject(VacationLeavesService);
 
-  employeeVacationLeaves = signal<VacationLeaves>({
-    id: '',
-    employee: '',
-    employee_name: '',
-    current_vacation_days: 0,
-    used_vacation_days: 0,
-    remaining_vacation_days: 0,
-    current_vacation_hours: 0,
-    used_vacation_hours: 0,
-    remaining_vacation_hours: 0,
+  // Computed signal który znajdzie urlop dla aktualnego pracownika
+  employeeVacationLeaves = computed(() => {
+    const employeeId = this.employee().id;
+    const allVacationLeaves = this.vacationLeavesService.vacationLeaves();
+
+    const employeeVacation = allVacationLeaves.find(vacation => vacation.employee === employeeId);
+
+    // Zwróć znaleziony urlop lub domyślny obiekt
+    return employeeVacation || this.getDefaultVacationLeaves();
   });
 
   displayedColumns: string[] = ['type', 'remaining', 'used', 'total'];
@@ -84,7 +84,6 @@ export class EmployeeInfoComponent {
     ];
   });
 
-
   constructor() {
     effect(() => {
       const employee = this.employee();
@@ -94,20 +93,29 @@ export class EmployeeInfoComponent {
     });
   }
 
-  ngOnInit() {
-    console.log('Employee: ',  this.employee());
-  }
-
   private loadEmployeeVacationLeaves(employeeId: string): void {
     this.vacationLeavesService.getVacationLeaves({ employee_id: employeeId }).subscribe({
       next: (vacationLeaves) => {
-        console.log("Urlopy: ", vacationLeaves)
-        this.employeeVacationLeaves.set(vacationLeaves);
+        console.log("Urlopy: ", vacationLeaves);
+        // Dane są już zapisane w serwisie przez tap() operator
       },
       error: (error) => {
         console.error('Błąd ładowania urlopów:', error);
       }
     });
   }
-}
 
+  private getDefaultVacationLeaves(): VacationLeaves {
+    return {
+      id: '',
+      employee: '',
+      employee_name: '',
+      current_vacation_days: 0,
+      used_vacation_days: 0,
+      remaining_vacation_days: 0,
+      current_vacation_hours: 0,
+      used_vacation_hours: 0,
+      remaining_vacation_hours: 0,
+    };
+  }
+}

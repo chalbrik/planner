@@ -3,6 +3,9 @@ import { AuthGuard } from './core/guards/auth.guard';
 import {DashboardComponent} from './features/dashboard/dashboard.component';
 import {DashboardLayoutComponent} from './layout/dashboard-layout/dashboard-layout.component';
 import {EmployeesRoutes} from './features/employees/employees.routes';
+import {
+  EmployeeFormDialogComponent
+} from './features/employees/components/employee-form-dialog/employee-form-dialog.component';
 
 //trzeba bedzie dodac pozniej te linike do poszczegolnych patch zeby logowanie dzialalo
 //canActivate: [AuthGuard],
@@ -30,6 +33,11 @@ export const routes: Routes = [
       {
         path: 'employees',
         loadChildren: () => import('./features/employees/employees.routes').then(m => m.EmployeesRoutes),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'add-employee',
+        component: EmployeeFormDialogComponent,
         canActivate: [AuthGuard],
       },
       {

@@ -11,17 +11,7 @@ import {VacationLeaves} from './vacation-leaves.types';
 export class VacationLeavesService {
   http = inject(HttpClient);
 
-  private _vacationLeaves = signal<VacationLeaves>({
-    id: '',
-    employee: '',
-    employee_name: '',
-    current_vacation_days: 0,
-    used_vacation_days: 0,
-    remaining_vacation_days: 0,
-    current_vacation_hours: 0,
-    used_vacation_hours: 0,
-    remaining_vacation_hours: 0,
-  })
+  _vacationLeaves = signal<VacationLeaves[]>([])
 
   private apiUrl = environment.apiUrl + 'schedule/';
 
@@ -29,8 +19,8 @@ export class VacationLeavesService {
 
   public vacationLeaves = this._vacationLeaves.asReadonly();
 
-  getVacationLeaves(filters?: any): Observable<VacationLeaves> {
-    return this.http.get<any>(`${this.apiUrl}vacation-leaves/`, { params: filters }).pipe(
+  getVacationLeaves(filters?: any): Observable<VacationLeaves[]> {
+    return this.http.get<any[]>(`${this.apiUrl}vacation-leaves/`, { params: filters }).pipe(
       tap(responseData => {
         this._vacationLeaves.set(responseData)
       })
