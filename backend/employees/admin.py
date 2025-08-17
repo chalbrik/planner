@@ -3,7 +3,7 @@ from .models import Employee, VacationLeave
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'first_name', 'last_name', 'email', 'phone', 'agreement_type', 'identification_number', 'job', 'contract_date_start', 'contract_date_end', 'job_rate', 'hour_rate')
+    list_display = ('id', 'full_name', 'email', 'phone', 'agreement_type', 'identification_number', 'job', 'contract_date_start', 'contract_date_end', 'job_rate', 'hour_rate')
     search_fields = ('first_name', 'last_name', 'email', 'phone', 'agreement_type', 'identification_number', 'job', 'contract_date_start', 'contract_date_end', 'job_rate', 'hour_rate')
 
 

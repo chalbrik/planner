@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime
 from .models import WorkHours
-from .serializers import EmployeeSerializer, WorkHoursSerializer, VacationLeaveSerializer
+from .serializers import WorkHoursSerializer
 
 
 class WorkHoursViewSet(viewsets.ModelViewSet):

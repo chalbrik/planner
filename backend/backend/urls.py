@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/schedule/', include('schedule.urls')),
+    path('api/employees/', include('employees.urls')),
 
     path('silk/', include('silk.urls', namespace='silk')),
 ]

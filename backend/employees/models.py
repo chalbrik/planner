@@ -11,8 +11,7 @@ User = get_user_model()
 class Employee(models.Model):
     objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     agreement_type = models.CharField(
@@ -121,3 +120,70 @@ class VacationLeave(models.Model):
     class Meta:
         verbose_name = "Urlop"
         verbose_name_plural = "Urlopy"
+
+
+class School(models.Model):
+    objects = models.Manager()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False)
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name="Szkoła",
+        verbose_name="Pracownik"
+    )
+    school_type = models.CharField(
+        max_length=100,
+        verbose_name="Typ szkoły",
+        null=True,
+        blank=True
+    )
+    school_name = models.CharField(
+        max_length=200,
+        verbose_name="Nazwa szkoły",
+        null=True,
+        blank=True
+    )
+    gradution_year = models.DateField(
+        verbose_name="Rok ukończenia szkoły",
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return f"{self.employee} - Szkoła"
+
+    class Meta:
+        verbose_name = "Szkoła"
+        verbose_name_plural = "Szkoły"
+
+class PreviousEmployers(models.Model):
+    objects = models.Manager()
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name="Porzedni pracodawca",
+        verbose_name="Pracownik"
+    )
+    employer_name = models.CharField(
+        max_length=200,
+        verbose_name="Pracodawca/Nazwa firmy",
+        null=True,
+        blank=True
+    )
+    employee_position = models.CharField(
+        max_length=200,
+        verbose_name="Stanowisko",
+        null=True,
+        blank=True
+    )
+    work_date_start = models.DateField(
+        verbose_name="Data rozpoczęcia pracy",
+        null=True,
+        blank=True
+    )
+    work_date_end = models.DateField(
+        verbose_name="Data zakończenia pracy",
+        null=True,
+        blank=True
+    )
