@@ -366,7 +366,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
       return {
         id: employee.id,
-        name: `${employee.first_name} ${employee.last_name}`,
+        name: `${employee.full_name}`,
         workHours: workHoursMap,
         agreement_type: employee.agreement_type
       };
@@ -384,7 +384,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
       return {
         id: employee.id,
-        name: `${employee.first_name} ${employee.last_name}`,
+        name: `${employee.full_name}`,
         workHours: workHoursMap,
         agreement_type: employee.agreement_type
       };

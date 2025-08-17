@@ -124,26 +124,24 @@ class VacationLeave(models.Model):
 
 class School(models.Model):
     objects = models.Manager()
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False)
-    employee = models.ForeignKey(
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    employee = models.OneToOneField(
         Employee,
         on_delete=models.CASCADE,
-        related_name="Szkoła",
+        related_name="School",
         verbose_name="Pracownik"
     )
     school_type = models.CharField(
         max_length=100,
         verbose_name="Typ szkoły",
-        null=True,
-        blank=True
+        default='Nieznany'
     )
     school_name = models.CharField(
         max_length=200,
         verbose_name="Nazwa szkoły",
-        null=True,
-        blank=True
+        default='Nieznany'
     )
-    gradution_year = models.DateField(
+    graduation_year = models.DateField(
         verbose_name="Rok ukończenia szkoły",
         null=True,
         blank=True
@@ -162,7 +160,7 @@ class PreviousEmployers(models.Model):
     employee = models.ForeignKey(
         Employee,
         on_delete=models.CASCADE,
-        related_name="Porzedni pracodawca",
+        related_name="previous_employers",
         verbose_name="Pracownik"
     )
     employer_name = models.CharField(

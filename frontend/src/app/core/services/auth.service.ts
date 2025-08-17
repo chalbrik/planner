@@ -22,54 +22,39 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   init(): void {
-    console.log('🔧 AuthService init() - start');
-
     // Odczytaj token z localStorage przy starcie
     this.accessToken = localStorage.getItem('access_token');
-    console.log('🔑 Token z localStorage:', this.accessToken ? 'JEST' : 'BRAK');
 
     // Sprawdź czy token istnieje i czy jest ważny
     if (this.accessToken && !this.isTokenExpired(this.accessToken)) {
-      console.log('✅ Token ważny - sprawdzam auth');
       this.checkAuth();
     } else if (this.accessToken && this.isTokenExpired(this.accessToken)) {
-      console.log('⏰ Token wygasł - odświeżam');
       this.refreshToken().subscribe({
         next: () => {
-          console.log('✅ Token odświeżony pomyślnie');
           this.checkAuth();
         },
         error: (err) => {
-          console.log('❌ Błąd odświeżania tokenu:', err);
           this.clearAuthData();
         }
       });
     } else {
-      console.log('🚫 Brak tokenu lub token nieprawidłowy');
       this.currentUserSubject.next(null);
     }
   }
 
   checkAuth(): void {
-    console.log('🔍 checkAuth() - start');
-
     // Jeśli nie ma tokenu dostępu, nie próbuj sprawdzać autoryzacji
     if (!this.accessToken) {
-      console.log('❌ checkAuth: brak tokenu');
       this.currentUserSubject.next(null);
       return;
     }
 
-    console.log('📡 Wysyłam żądanie do /user/');
     this.http.get<User>(`${this.apiUrl}user/`, {withCredentials: true}).subscribe({
       next: (user: User) => {
-        console.log('✅ checkAuth: otrzymano użytkownika', user);
         this.currentUserSubject.next(user);
       },
       error: (err) => {
-        console.log('❌ checkAuth: błąd', err);
         this.currentUserSubject.next(null);
-        console.error("Błąd statusu autentykacji użytkownika: ", err);
       }
     })
   }

@@ -1,29 +1,21 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation} from '@angular/core';
 import {
   MatDialogActions,
   MatDialogClose,
-  MatDialogRef,
-  MatDialogTitle
 } from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
-import {MatError, MatFormField, MatInput, MatLabel, MatSuffix} from '@angular/material/input';
+import {MatError, MatFormField, MatInput, MatSuffix} from '@angular/material/input';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatSelect} from '@angular/material/select';
-import {MatNativeDateModule, MatOption, provideNativeDateAdapter} from '@angular/material/core';
+import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 import {
-  MatDatepicker, MatDatepickerActions, MatDatepickerApply, MatDatepickerCancel,
+  MatDatepicker,
   MatDatepickerInput,
   MatDatepickerToggle,
-  MatDateRangeInput,
-  MatDateRangePicker,
-  MatEndDate,
-  MatStartDate
 } from '@angular/material/datepicker';
-import {environment} from '../../../../../environments/environment';
 import {EmployeesService} from '../../../../core/services/employees/employees.service';
 import {MatDivider} from '@angular/material/divider';
-import {MatHint} from '@angular/material/form-field';
-import {MatIcon} from '@angular/material/icon';
+import {CreateEmployeeRequest} from '../../../../core/services/employees/employee.types';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 interface Agreemnet {
@@ -35,31 +27,18 @@ interface Agreemnet {
   selector: 'app-employee-form-dialog',
   imports: [
     MatDialogActions,
-
     MatDialogClose,
     MatButton,
     MatFormField,
-    MatLabel,
     MatInput,
     ReactiveFormsModule,
-    MatSelect,
-    MatOption,
     FormsModule,
-    MatDateRangeInput,
     MatDatepickerToggle,
-    MatDateRangePicker,
-    MatStartDate,
-    MatEndDate,
     MatDivider,
     MatDatepickerInput,
     MatDatepicker,
-    MatDatepickerActions,
-    MatDatepickerCancel,
-    MatDatepickerApply,
-    MatHint,
     MatError,
     MatNativeDateModule,
-    MatIcon,
     MatSuffix
   ],
   templateUrl: './employee-form.component.html',
@@ -71,7 +50,8 @@ interface Agreemnet {
 export class EmployeeFormComponent implements OnInit {
 
   private readonly formBuilder = inject(FormBuilder);
-  private readonly employeesService = inject(EmployeesService)
+  private readonly employeesService = inject(EmployeesService);
+  private readonly snackBar = inject(MatSnackBar);
 
   addEmployeeForm!: FormGroup;
 
@@ -114,23 +94,32 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   onAddEmployee() {
-    console.log("Hello", this.addEmployeeForm.getRawValue());
-    console.log('Current API URL:', environment.apiUrl);
-    if(this.addEmployeeForm.valid){
+    console.log("Dane formularza:", this.addEmployeeForm.getRawValue());
 
-      this.employeesService.addEmployee(this.addEmployeeForm.value).subscribe({
+    if (this.addEmployeeForm.valid) {
+      const formData = this.addEmployeeForm.getRawValue() as CreateEmployeeRequest;
+
+      this.employeesService.addEmployee(formData).subscribe({
         next: (newEmployee) => {
-          // Dodaj do dataSource
-          // const currentData = this.dataSource.data;
-          // this.dataSource.data = [...currentData, newEmployee];
-          console.log("Nowy pracownik", newEmployee);
+          // Pokaż sukces
+          this.snackBar.open('Pracownik został dodany pomyślnie!', 'Zamknij', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
         },
         error: (error) => {
-          console.error('Błąd podczas dodawania pracownika: ', error);
+          console.error('Błąd podczas dodawania pracownika:', error);
+          // Pokaż błąd
+          this.snackBar.open(
+            `Błąd: ${error.error?.detail || 'Nie udało się dodać pracownika'}`,
+            'Zamknij',
+            {
+              duration: 5000,
+              panelClass: ['error-snackbar']
+            }
+          );
         }
       });
-
-      console.log(this.addEmployeeForm.value);
     }
   }
 
@@ -142,10 +131,10 @@ export class EmployeeFormComponent implements OnInit {
 // Tworzy nową grupę pól dla pracodawcy
   private createEmployerGroup(): FormGroup {
     return this.formBuilder.group({
-      previous_employer: ['', Validators.required],
-      previous_position: ['', Validators.required],
-      previous_working_period_start: ['', Validators.required],
-      previous_working_period_end: ['', Validators.required]
+      previous_employer: [''],
+      previous_position: [''],
+      previous_working_period_start: [''],
+      previous_working_period_end: ['']
     });
   }
 
@@ -158,6 +147,11 @@ export class EmployeeFormComponent implements OnInit {
   removeEmployer(index: number): void {
     this.previousEmployers.removeAt(index);
   }
+
+private formatDate(date: Date): string {
+  if (!date) return '';
+  return date.toISOString().split('T')[0];  // YYYY-MM-DD
+}
 
 
 }
