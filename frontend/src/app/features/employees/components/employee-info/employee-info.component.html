@@ -17,7 +17,7 @@
 
       <app-info-display [name]="'Numer telefonu'" [data]="employee().phone || 'Brak'" [iconName]="'phone'" [iconSize]="'outline'"></app-info-display>
 
-      <app-info-display [name]="'Rodzaj umowy'" [data]="employee().agreement_type || 'Brak'" [iconName]="'document'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Rodzaj umowy'" [data]="(employee().agreement_type === 'permanent') ? 'Umowa o pracę' : 'Umowa cywilno prawna'" [iconName]="'document'" [iconSize]="'outline'"></app-info-display>
 
       <app-info-display [name]="'Czas trwania umowy'" [data]="`${employee().contract_date_start} - ${employee().contract_date_end}`" [iconName]="'clock'" [iconSize]="'outline'"></app-info-display>
 
@@ -36,7 +36,7 @@
       <div class="flex flex-col gap-3 py-3">
         <div class="w-full flex flex-row justify-between items-center">
           <p class="text-base font-bold">Bieżący urlop pracownika</p>
-          <div class="bg-amber-300 h-12 px-5 rounded-2xl font-bold text-base flex items-center"> 20 dni / 160 h</div>
+          <div class="bg-amber-300 h-12 px-5 rounded-2xl font-bold text-base flex items-center">   {{+employeeVacationLeaves().current_vacation_days}} dni | {{+employeeVacationLeaves().current_vacation_hours}} h</div>
         </div>
         <mat-divider class="!border-warm-gray-400"></mat-divider>
 
@@ -49,17 +49,17 @@
 
           <ng-container matColumnDef="remaining">
             <th mat-header-cell *matHeaderCellDef> Zaległy urlop </th>
-            <td mat-cell *matCellDef="let vacationRow"> {{vacationRow.remaining}} </td>
+            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.remaining}} </td>
           </ng-container>
 
           <ng-container matColumnDef="used">
             <th mat-header-cell *matHeaderCellDef> Wykorzystano </th>
-            <td mat-cell *matCellDef="let vacationRow"> {{vacationRow.used}} </td>
+            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.used}} </td>
           </ng-container>
 
           <ng-container matColumnDef="total">
             <th mat-header-cell *matHeaderCellDef> Pozostało </th>
-            <td mat-cell *matCellDef="let vacationRow"> {{vacationRow.current - vacationRow.used}} </td>
+            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.current - +vacationRow.used}} </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -52,7 +52,14 @@
       <div class="flex flex-col">
         <label>Typ szkoły</label>
         <mat-form-field>
-          <input matInput formControlName="school_type">
+          <mat-select formControlName="school_type" placeholder="Wybierz typ szkoły">
+            <mat-option value="basic_vocational">Zasadnicza lub inna równorzędna szkoła zawodowa</mat-option>
+            <mat-option value="secondary_vocational">Średnia szkoła zawodowa</mat-option>
+            <mat-option value="secondary_vocational_graduates">Średnia szkoła zawodowa dla absolwentów zasadniczych i równorzędnych szkół zawodowych</mat-option>
+            <mat-option value="secondary_general">Średnia szkoła ogólnokształcąca</mat-option>
+            <mat-option value="post_secondary">Szkoła policealna</mat-option>
+            <mat-option value="higher_education">Szkoła wyższa</mat-option>
+          </mat-select>
           <mat-error>Pole obowiązkowe</mat-error>
         </mat-form-field>
       </div>
@@ -92,7 +99,7 @@
             <div class="flex flex-col">
               <label>Pracodawca / Nazwa firmy</label>
               <mat-form-field>
-                <input matInput formControlName="previous_employer">
+                <input matInput formControlName="employer_name">
                 <mat-error>Pole obowiązkowe</mat-error>
               </mat-form-field>
             </div>
@@ -100,7 +107,7 @@
             <div class="flex flex-col">
               <label>Stanowisko</label>
               <mat-form-field>
-                <input matInput formControlName="previous_position">
+                <input matInput formControlName="employee_position">
                 <mat-error>Pole obowiązkowe</mat-error>
               </mat-form-field>
             </div>
@@ -108,7 +115,7 @@
             <div class="flex flex-col">
               <label>Data rozpoczęcia pracy</label>
               <mat-form-field>
-                <input matInput [matDatepicker]="startPicker" formControlName="previous_working_period_start">
+                <input matInput [matDatepicker]="startPicker" formControlName="work_date_start">
                 <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
                 <mat-datepicker #startPicker></mat-datepicker>
               </mat-form-field>
@@ -117,7 +124,7 @@
             <div class="flex flex-col">
               <label>Data zakończenia pracy</label>
               <mat-form-field>
-                <input matInput [matDatepicker]="endPicker" formControlName="previous_working_period_end">
+                <input matInput [matDatepicker]="endPicker" formControlName="work_date_end">
                 <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
                 <mat-datepicker #endPicker></mat-datepicker>
               </mat-form-field>

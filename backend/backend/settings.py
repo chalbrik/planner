@@ -218,3 +218,41 @@ SESSION_COOKIE_SAMESITE = 'Strict'
 # def SILKY_PERMISSIONS(user):
 #     return user.is_staff
 
+
+# Konfiguracja logowania
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': '/app/logs/django.log',  # ✅ Zmapowany na lokalny folder
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'employees.services': {
+            'handlers': ['console', 'file'],  # ✅ Oba - console i plik
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

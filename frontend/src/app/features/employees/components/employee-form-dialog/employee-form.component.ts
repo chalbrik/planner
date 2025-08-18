@@ -6,7 +6,7 @@ import {
 import {MatButton} from '@angular/material/button';
 import {MatError, MatFormField, MatInput, MatSuffix} from '@angular/material/input';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
+import {MatNativeDateModule, MatOption, provideNativeDateAdapter} from '@angular/material/core';
 import {
   MatDatepicker,
   MatDatepickerInput,
@@ -16,6 +16,7 @@ import {EmployeesService} from '../../../../core/services/employees/employees.se
 import {MatDivider} from '@angular/material/divider';
 import {CreateEmployeeRequest} from '../../../../core/services/employees/employee.types';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatSelect} from '@angular/material/select';
 
 
 interface Agreemnet {
@@ -39,7 +40,9 @@ interface Agreemnet {
     MatDatepicker,
     MatError,
     MatNativeDateModule,
-    MatSuffix
+    MatSuffix,
+    MatSelect,
+    MatOption,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -85,39 +88,45 @@ export class EmployeeFormComponent implements OnInit {
 
       //Pola wypełniane przez kierownika
 
-      agreement_type: [''],
-      hourlyRate: [''],
-      workStart: [''],
-      workEnd: [''],
+      // agreement_type: ['permanent'],
+      // hour_rate: [''],
+      // contract_date_start: [''],
+      // contract_date_end: [''],
     })
 
   }
 
   onAddEmployee() {
-    console.log("Dane formularza:", this.addEmployeeForm.getRawValue());
-
     if (this.addEmployeeForm.valid) {
-      const formData = this.addEmployeeForm.getRawValue() as CreateEmployeeRequest;
+      const formData = this.addEmployeeForm.getRawValue();
+
+      // ✅ Prosto: popraw daty
+      if (formData.birth_date) {
+        formData.birth_date = formData.birth_date.toISOString().split('T')[0];
+      }
+
+      if (formData.graduation_year) {
+        formData.graduation_year = formData.graduation_year.toISOString().split('T')[0];
+      }
+
+      if (formData.previous_employers) {
+        formData.previous_employers.forEach((employer: any) => {
+          if (employer.work_date_start) {
+            employer.work_date_start = employer.work_date_start.toISOString().split('T')[0];
+          }
+          if (employer.work_date_end) {
+            employer.work_date_end = employer.work_date_end.toISOString().split('T')[0];
+          }
+        });
+      }
 
       this.employeesService.addEmployee(formData).subscribe({
         next: (newEmployee) => {
-          // Pokaż sukces
-          this.snackBar.open('Pracownik został dodany pomyślnie!', 'Zamknij', {
-            duration: 3000,
-            panelClass: ['success-snackbar']
-          });
+          this.snackBar.open('Dodano pracownika!', 'OK', { duration: 3000 });
         },
         error: (error) => {
-          console.error('Błąd podczas dodawania pracownika:', error);
-          // Pokaż błąd
-          this.snackBar.open(
-            `Błąd: ${error.error?.detail || 'Nie udało się dodać pracownika'}`,
-            'Zamknij',
-            {
-              duration: 5000,
-              panelClass: ['error-snackbar']
-            }
-          );
+          console.error('Błąd:', error);
+          this.snackBar.open('Błąd!', 'OK', { duration: 3000 });
         }
       });
     }
@@ -131,10 +140,10 @@ export class EmployeeFormComponent implements OnInit {
 // Tworzy nową grupę pól dla pracodawcy
   private createEmployerGroup(): FormGroup {
     return this.formBuilder.group({
-      previous_employer: [''],
-      previous_position: [''],
-      previous_working_period_start: [''],
-      previous_working_period_end: ['']
+      employer_name: [''],
+      employee_position: [''],
+      work_date_start: [''],
+      work_date_end: ['']
     });
   }
 

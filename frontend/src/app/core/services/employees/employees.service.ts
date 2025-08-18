@@ -9,7 +9,7 @@ import {tap} from 'rxjs/operators';
   providedIn: 'root'
 })
 export class EmployeesService {
-  private apiUrl = environment.apiUrl;
+  private apiUrl = environment.apiUrl + 'employees/';
 
   _http = inject(HttpClient);
 

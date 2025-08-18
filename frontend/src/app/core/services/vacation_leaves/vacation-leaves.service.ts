@@ -13,7 +13,7 @@ export class VacationLeavesService {
 
   _vacationLeaves = signal<VacationLeaves[]>([])
 
-  private apiUrl = environment.apiUrl + 'schedule/';
+  private apiUrl = environment.apiUrl + 'employees/';
 
   constructor() { }
 
