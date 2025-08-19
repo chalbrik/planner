@@ -240,7 +240,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': '/app/logs/django.log',  # ✅ Zmapowany na lokalny folder
+            'filename': '/app/backend/logs/django.log',  # ✅ Zmapowany na lokalny folder
             'formatter': 'verbose',
         },
     },

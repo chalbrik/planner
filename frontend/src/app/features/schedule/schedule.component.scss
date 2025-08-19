@@ -142,6 +142,7 @@ mat-table .mat-column-hoursSum {
 // 2. KONFLIKT 11H - CZERWONY (nadpisuje fioletowy)
 .conflict-cell {
   background-color: rgba(248, 113, 113, 0.5) !important;
+  //border: 2px solid #10B981 !important;
 
   &:hover {
     background-color: rgba(248, 113, 113, 0.7) !important;
@@ -151,11 +152,14 @@ mat-table .mat-column-hoursSum {
 
 // 3. PRZEKROCZENIE 12H PRACY - ŻÓŁTY
 .exceeding-12h-cell {
-  background-color: rgba(245, 158, 11, 0.5) !important;
+  //background-color: rgba(245, 158, 11, 0.5) !important;
+  color: #D223FA !important;
+  font-weight: 600 !important;
 
   &:hover {
-    background-color: rgba(245, 158, 11, 0.7) !important;
+    //background-color: rgba(245, 158, 11, 0.7) !important;
     border-radius: 0 !important;
+    font-weight: 600 !important;
   }
 }
 

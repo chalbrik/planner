@@ -4,9 +4,9 @@
     <mat-divider class="bg-warm-gray-400"></mat-divider>
     <p class="font-bold text-base py-2">Dane osobowe</p>
 
-    <div class="grid grid-cols-3 gap-2">
+    <div class="grid grid-cols-2 gap-2">
 
-      <div class="col-span-3 flex flex-col">
+      <div class="col-span-1 flex flex-col">
         <label>Pełne imię i nazwisko</label>
         <mat-form-field>
           <input matInput formControlName="full_name">
@@ -14,6 +14,15 @@
         </mat-form-field>
       </div>
 
+      <div class="col-span-1 flex flex-col">
+        <label>Data urodzenia</label>
+        <mat-form-field>
+          <input matInput [matDatepicker]="datepicker" formControlName="birth_date"/>
+          <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
+          <mat-datepicker #datepicker>
+          </mat-datepicker>
+        </mat-form-field>
+      </div>
 
       <div class="col-span-1 flex flex-col">
         <label>Telefon</label>
@@ -32,15 +41,6 @@
         </mat-form-field>
       </div>
 
-      <div class="col-span-1 flex flex-col">
-        <label>Data urodzenia</label>
-        <mat-form-field>
-          <input matInput [matDatepicker]="datepicker" formControlName="birth_date"/>
-          <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
-          <mat-datepicker #datepicker>
-          </mat-datepicker>
-        </mat-form-field>
-      </div>
     </div>
 
     <mat-divider class="bg-warm-gray-400"></mat-divider>
@@ -89,11 +89,9 @@
     <mat-divider class="bg-warm-gray-400"></mat-divider>
     <p class="font-bold text-base py-2">Przebieg dotychczasowego zatrudnienia</p>
 
-    <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400" (click)="addEmployer()"><span class="font-geist text-base text-warm-gray-400">Dodaj okres zatrudnienia</span></button>
-
     <div formArrayName="previous_employers">
       @for (employer of previousEmployers.controls; track $index) {
-        <div [formGroupName]="$index">
+        <div [formGroupName]="$index" class="my-6 border-b border-warm-gray-400">
 
           <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
@@ -130,15 +128,26 @@
               </mat-form-field>
             </div>
           </div>
+
+          <div class="w-full flex flex-row justify-end mb-6">
+            <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400" (click)="removeEmployer($index)"><span class="font-geist text-base text-warm-gray-400">Usuń okres zatrudnienia</span></button>
+          </div>
+
         </div>
       }
+
+      <div class="w-full flex flex-row justify-end">
+        <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400" (click)="addEmployer()"><span class="font-geist text-base text-warm-gray-400">Dodaj okres zatrudnienia</span></button>
+      </div>
+
     </div>
 
 
-    <mat-dialog-actions>
-      <button mat-button mat-dialog-close>Anuluj</button>
-      <button mat-button (click)="onAddEmployee()">Dodaj</button>
-    </mat-dialog-actions>
+
+    <div class="py-6 w-full flex flex-row justify-center items-center gap-6">
+      <button matButton="filled" class="px-2 !rounded-md !bg-warm-gray-400"><span class="font-geist text-base text-white" (click)="onAddEmployee()">Wyślij</span></button>
+      <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Anuluj</span></button>
+    </div>
 
 
   </form>

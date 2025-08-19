@@ -41,3 +41,13 @@ td, th {
   border-bottom-color: #A8A29E !important; // tailwind warm-gray-400
 }
 
+.mdc-line-ripple {
+  display: none !important;
+}
+
+mat-sidenav {
+  border-left: 1px solid #A8A29E !important; // warm-gray-400 jak w reszcie aplikacji
+  border-radius: 0 !important;
+}
+
+

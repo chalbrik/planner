@@ -48,8 +48,8 @@
 </div>
 
 <ng-template #ScheduleTable let-dataSource="dataSource" let-title="title">
-  <section class="example-container mat-elevation-z8 border-4 border-white rounded-lg overflow-hidden" tabindex="0">
-    <div class="bg-white p-2 sticky left-0 font-semibold">{{ title }}</div>
+  <section class="example-container mat-elevation-z8 border-2 border-warm-gray-400 rounded-lg overflow-hidden" tabindex="0">
+    <div class="bg-white h-14 p-2 sticky left-0 font-medium text-sm flex flex-row items-center">{{ title }}</div>
 
     <mat-table [dataSource]="dataSource">
       <!-- Kolumna z pracownikami -->
