@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,9 +43,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
 
-    'authentication',
-    'schedule',
-    'employees',
+    'backend.apps.authentication',
+    'backend.apps.schedule',
+    'backend.apps.employees',
+    'backend.apps.locations',
+    'backend.apps.core',
 
     'silk',
 ]
@@ -219,6 +222,11 @@ SESSION_COOKIE_SAMESITE = 'Strict'
 #     return user.is_staff
 
 
+
+# Utworzenie folderu logs jeśli nie istnieje
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
 # Konfiguracja logowania
 LOGGING = {
     'version': 1,
@@ -232,16 +240,41 @@ LOGGING = {
             'format': '{levelname} {message}',
             'style': '{',
         },
+        'detailed': {
+            'format': '{asctime} [{levelname}] {name} {filename}:{lineno} {funcName}() {message}',
+            'style': '{',
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
+            'filters': ['require_debug_true'],
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': '/app/backend/logs/django.log',  # ✅ Zmapowany na lokalny folder
+            'filename': LOGS_DIR / 'django.log',
+            'formatter': 'detailed',
+            'encoding': 'utf-8',
+        },
+        'file_debug': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'debug.log',
             'formatter': 'verbose',
+            'level': 'DEBUG',
+            'encoding': 'utf-8',
+        },
+        'file_errors': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'errors.log',
+            'formatter': 'detailed',
+            'level': 'ERROR',
+            'encoding': 'utf-8',
         },
     },
     'root': {
@@ -249,9 +282,88 @@ LOGGING = {
         'level': 'INFO',
     },
     'loggers': {
+        # Twoje aplikacje - Employees
+        'employees': {
+            'handlers': ['console', 'file', 'file_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         'employees.services': {
-            'handlers': ['console', 'file'],  # ✅ Oba - console i plik
+            'handlers': ['console', 'file', 'file_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'employees.views': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'employees.models': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        # Twoje aplikacje - Schedule
+        'schedule': {
+            'handlers': ['console', 'file', 'file_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'schedule.services': {
+            'handlers': ['console', 'file', 'file_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'schedule.views': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'schedule.models': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        # Django system loggers
+        'django': {
+            'handlers': ['console', 'file'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'file_errors'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['file_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console', 'file_errors'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+
+        # DRF (jeśli używasz)
+        'rest_framework': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+
+        # Custom loggers
+        'api': {
+            'handlers': ['console', 'file', 'file_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'authentication': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },

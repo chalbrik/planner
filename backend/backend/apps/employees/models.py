@@ -4,6 +4,7 @@ from django.db import models
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
+from ..locations.models import Location
 
 User = get_user_model()
 
@@ -63,6 +64,14 @@ class Employee(models.Model):
         verbose_name="Stawka godzinowa",
         null=True,
         blank=True
+    )
+    location = models.ManyToManyField(
+        Location,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="employees",
+        verbose_name="Lokacja"
     )
 
     def __str__(self):
