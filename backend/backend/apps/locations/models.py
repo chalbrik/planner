@@ -8,6 +8,12 @@ from django.db import models
 class Location(models.Model):
     objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    identification_number = models.CharField(
+        max_length=50,
+        verbose_name="Numer lokacji",
+        null=True,
+        blank=True
+    )
     name = models.CharField(max_length=100, verbose_name="Nazwa lokacji")
     address = models.TextField(blank=True, verbose_name="Adres")
 

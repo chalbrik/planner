@@ -9,10 +9,21 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        # Filtruj tylko pracowników z przypisanymi lokacjami
+        queryset = Employee.objects.filter(locations__isnull=False).distinct()
+
+        # Dodatkowe filtrowanie po konkretnej lokacji (opcjonalne)
+        location_id = self.request.query_params.get('location')
+        if location_id:
+            queryset = queryset.filter(locations=location_id)
+
+        return queryset
+
     def get_serializer_class(self):
         if self.action == 'create':
             return EmployeeCreateSerializer
-        elif self.action == 'retrive':
+        elif self.action == 'retrieve':  # ← Popraw literówkę: 'retrive' na 'retrieve'
             return EmployeeDetailSerializer
         return EmployeeSerializer
 

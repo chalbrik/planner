@@ -9,18 +9,17 @@ import {tap} from 'rxjs/operators';
   providedIn: 'root'
 })
 export class EmployeesService {
-  private apiUrl = environment.apiUrl + 'employees/';
-
-  _http = inject(HttpClient);
+  private readonly http = inject(HttpClient);
+  private apiUrl = environment.apiUrl + 'employees'; // ← Usuń slash na końcu
 
   private _employees = signal<Employee[]>([])
 
-  constructor(private http: HttpClient) { }
+  constructor() { } // ← Usuń konstruktor z http
 
   public employees = this._employees.asReadonly();
 
-  getEmployees(): Observable<Employee[]> {
-    return this.http.get<Employee[]>(`${this.apiUrl}employees`).pipe(
+  getEmployees(params?: any): Observable<Employee[]> {
+    return this.http.get<Employee[]>(`${this.apiUrl}/`, { params }).pipe( // ← OK
       tap(responseData => {
         this._employees.set(responseData)
       })
@@ -28,24 +27,18 @@ export class EmployeesService {
   }
 
   addEmployee(employee: CreateEmployeeRequest): Observable<Employee> {
-    return this.http.post<Employee>(`${this.apiUrl}employees/`, employee).pipe(
+    return this.http.post<Employee>(`${this.apiUrl}/`, employee).pipe( // ← Zmień URL
       tap(newEmployee => {
-        // Dodaj nowego pracownika do sygnału
         this._employees.update(current => [...current, newEmployee]);
       })
     );
   }
 
   deleteEmployee(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}employees/${id}/`).pipe(
+    return this.http.delete<void>(`${this.apiUrl}/${id}/`).pipe( // ← OK
       tap(() => {
-        // Usuń pracownika z sygnału
         this._employees.update(current => current.filter(emp => emp.id !== id));
       })
     );
   }
-
-
-
-
 }

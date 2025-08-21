@@ -4,4 +4,5 @@ export interface WorkHours {
   hours: string;
   employee: string;
   employee_name: string;
+  location?: string;
 }

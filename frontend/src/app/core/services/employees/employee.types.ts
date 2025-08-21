@@ -10,6 +10,7 @@ export interface Employee {
   contract_date_end: string;
   job_rate: string;
   hour_rate: string;
+  locations: string[];
 }
 
 // Nowy interfejs dla szczegółów pracownika z zagnieżdżonymi danymi
@@ -27,6 +28,7 @@ export interface EmployeeDetail {
   hour_rate?: number;
   school: School;
   previous_employers: PreviousEmployer[];
+  locations: string[];
 }
 
 // Interfejs do tworzenia pracownika

@@ -19,6 +19,11 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {CellEditPopupComponent} from './components/cell-edit-popup/cell-edit-popup.component';
 import {timer} from 'rxjs';
+import {MatFormField, MatLabel} from '@angular/material/input';
+import {MatSelect} from '@angular/material/select';
+import {MatOption} from '@angular/material/core';
+import {LocationService} from '../../core/services/locations/location.service';
+import {Location} from '../../core/services/locations/location.types';
 
 
 interface Day {
@@ -59,6 +64,10 @@ interface EmployeeRow {
     MatHeaderRowDef,
     IconComponent,
     MatIconButton,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -71,6 +80,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private readonly scheduleService = inject(ScheduleService);
   private readonly employeesService = inject(EmployeesService);
   private readonly overlay = inject(Overlay);
+  private readonly locationService = inject(LocationService);
 
   employees: any[] = [];
   workHours: any[] = [];
@@ -144,11 +154,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   permanentDataSource = signal<EmployeeRow[]>([]);
   contractDataSource = signal<EmployeeRow[]>([]);
 
+  locations = signal<Location[]>([]);
+  selectedLocationId = signal<string>('');
+
   constructor() {}
 
   ngOnInit() {
     this.loadEmployees();
     this.loadWorkHours();
+    this.loadLocations();
 
     this.setupResponsiveColumns();
 
@@ -217,11 +231,22 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadEmployees() {
+  loadEmployees(): void {
     this.isLoading = true;
-    this.employeesService.getEmployees().subscribe({
+    const selectedLocationId = this.selectedLocationId();
+    const params = selectedLocationId ? { location: selectedLocationId } : {};
+
+    this.employeesService.getEmployees(params).subscribe({
       next: (data) => {
-        this.employees = data;
+        console.log('Otrzymane dane:', data); // ← Dodaj to żeby zobaczyć co przychodzi
+        console.log('Czy to tablica?', Array.isArray(data)); // ← I to też
+
+        if (Array.isArray(data)) {
+          this.employees = data;
+        } else {
+          console.error('Otrzymane dane nie są tablicą:', data);
+          this.employees = []; // Ustaw pustą tablicę jako fallback
+        }
         this.prepareTableData();
         this.isLoading = false;
       },
@@ -252,6 +277,22 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Nie udało się załadować harmonogramu';
         this.isLoading = false;
         console.error('Błąd ładowania harmonogramu:', error);
+      }
+    });
+  }
+
+  loadLocations(): void {
+    this.locationService.getLocations().subscribe({
+      next: (data) => {
+        this.locations.set(data);
+        // Automatycznie wybierz pierwszą lokację
+        if (data.length > 0) {
+          this.selectedLocationId.set(data[0].id);
+          this.prepareTableData();
+        }
+      },
+      error: (error) => {
+        console.error('Błąd ładowania lokacji:', error);
       }
     });
   }
@@ -350,14 +391,29 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Podziel pracowników na grupy
-    const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
-    const contractEmployees = this.employees.filter(emp => emp.agreement_type === 'contract');
+    // Filtruj pracowników po wybranej lokacji
+    let filteredEmployees = this.employees;
+    const selectedLocationId = this.selectedLocationId();
+
+    if (selectedLocationId) {
+      filteredEmployees = this.employees.filter(emp =>
+        emp.locations && emp.locations.includes(selectedLocationId)
+      );
+    }
+
+    // Podziel przefiltrowanych pracowników na grupy
+    const permanentEmployees = filteredEmployees.filter(emp => emp.agreement_type === 'permanent');
+    const contractEmployees = filteredEmployees.filter(emp => emp.agreement_type === 'contract');
 
     // Przygotuj dane dla UoP (Umowa o Pracę)
     const permanentRows = permanentEmployees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
-      const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+      let employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+
+      // Jeśli wybrana lokacja, filtruj też godziny pracy po lokacji
+      if (selectedLocationId) {
+        employeeWorkHours = employeeWorkHours.filter(wh => wh.location === selectedLocationId);
+      }
 
       employeeWorkHours.forEach(wh => {
         workHoursMap[wh.date] = wh.hours;
@@ -375,7 +431,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Przygotuj dane dla UZ (Umowa na Zlecenie)
     const contractRows = contractEmployees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
-      const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+      let employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+
+      // Jeśli wybrana lokacja, filtruj też godziny pracy po lokacji
+      if (selectedLocationId) {
+        employeeWorkHours = employeeWorkHours.filter(wh => wh.location === selectedLocationId);
+      }
 
       employeeWorkHours.forEach(wh => {
         workHoursMap[wh.date] = wh.hours;
@@ -400,7 +461,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.checkRestTimeConflicts();
     this.check35HourRestInAllWeeks();
   }
-
 
   // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
   getWorkHoursForDay(employee: EmployeeRow, dayNumber: number): string {
@@ -794,6 +854,22 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       }
     });
 
+  }
+
+
+  onLocationChange(locationId: string): void {
+    if (!locationId) {
+      // Jeśli nie wybrano lokacji, wymuś wybór pierwszej dostępnej
+      const firstLocation = this.locations()[0];
+      if (firstLocation) {
+        this.selectedLocationId.set(firstLocation.id);
+        this.loadEmployees(); // ← Zmień na loadEmployees()
+      }
+      return;
+    }
+
+    this.selectedLocationId.set(locationId);
+    this.loadEmployees(); // ← Zmień na loadEmployees()
   }
 
 

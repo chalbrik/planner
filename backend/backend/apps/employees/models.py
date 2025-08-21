@@ -65,10 +65,8 @@ class Employee(models.Model):
         null=True,
         blank=True
     )
-    location = models.ManyToManyField(
+    locations = models.ManyToManyField(
         Location,
-        on_delete=models.SET_NULL,
-        null=True,
         blank=True,
         related_name="employees",
         verbose_name="Lokacja"
