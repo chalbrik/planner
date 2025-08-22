@@ -24,3 +24,52 @@
   display: none !important;
 }
 
+//.mat-calendar-table {
+//  border-spacing: 0 !important;
+//  border-collapse: separate !important;
+//}
+
+//.mat-calendar-table-header th {
+//  text-align: center !important;
+//  padding: 8px !important;
+//}
+
+//.mat-calendar-body-cell {
+//  position: relative !important;
+//  height: 40px !important;
+//  width: 40px !important;
+//  text-align: center !important;
+  //outline: none !important;
+  //cursor: pointer !important;
+//}
+
+//.mat-calendar-body-cell-content {
+//  position: absolute !important;
+//  top: 50% !important;
+//  left: 50% !important;
+//  transform: translate(-50%, -50%) !important;
+//  display: flex !important;
+//  align-items: center !important;
+//  justify-content: center !important;
+//}
+
+.mat-calendar-body-cell {
+  height: 32px !important;
+  width: 32px !important;
+  padding: 0 !important;
+}
+
+.mat-calendar-body-cell-content {
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  border-radius: 50% !important;
+}
+
+.mat-calendar-table {
+  width: 280px !important;
+}
+
+.mat-calendar-body {
+  min-width: 280px !important;
+}

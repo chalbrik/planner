@@ -238,13 +238,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     this.employeesService.getEmployees(params).subscribe({
       next: (data) => {
-        console.log('Otrzymane dane:', data); // ← Dodaj to żeby zobaczyć co przychodzi
-        console.log('Czy to tablica?', Array.isArray(data)); // ← I to też
+        // console.log('Otrzymane dane:', data); // ← Dodaj to żeby zobaczyć co przychodzi
+        // console.log('Czy to tablica?', Array.isArray(data)); // ← I to też
 
         if (Array.isArray(data)) {
           this.employees = data;
         } else {
-          console.error('Otrzymane dane nie są tablicą:', data);
+          // console.error('Otrzymane dane nie są tablicą:', data);
           this.employees = []; // Ustaw pustą tablicę jako fallback
         }
         this.prepareTableData();
@@ -253,7 +253,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.errorMessage = 'Nie udało się załadować pracowników';
         this.isLoading = false;
-        console.error('Błąd ładowania pracowników: ', error);
+        // console.error('Błąd ładowania pracowników: ', error);
       },
     });
   }

@@ -19,7 +19,8 @@ import {MatIcon, MatIconModule} from '@angular/material/icon';
 import {EmployeeFormComponent} from './components/employee-form-dialog/employee-form.component';
 import {MatDialog} from '@angular/material/dialog';
 import {IconComponent} from '../../shared/components/icon';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatFabButton, MatIconButton} from '@angular/material/button';
+import {MatBottomSheet} from '@angular/material/bottom-sheet';
 
 @Component({
   selector: 'app-employees',
@@ -48,7 +49,8 @@ import {MatIconButton} from '@angular/material/button';
     IconComponent,
     MatIconModule,
     MatIcon,
-    MatIconButton
+    MatIconButton,
+    MatButton,
   ],
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss',
@@ -58,6 +60,7 @@ export class EmployeesComponent implements OnInit {
 
   private readonly employeesService = inject(EmployeesService);
   private readonly dialog = inject(MatDialog);
+  private readonly bottomSheet = inject(MatBottomSheet);
 
   displayedColumns: string[] = ['identification_number', 'name', 'job', 'agreement_type', 'actions'];
   dataSource: MatTableDataSource<Employee>;
@@ -79,6 +82,7 @@ export class EmployeesComponent implements OnInit {
 
   ngOnInit() {
     this.loadEmployees();
+    console.log("Hello");
   }
 
   ngAfterViewInit() {
@@ -127,11 +131,12 @@ export class EmployeesComponent implements OnInit {
   }
 
   openAddEmployeeDialog(): void {
-    const dialogRef = this.dialog.open(EmployeeFormComponent, {
-      width: '800px',
+    // Zmiana z dialog.open na bottomSheet.open
+    const bottomSheetRef = this.bottomSheet.open(EmployeeFormComponent, {
+      ariaLabel: 'Dodaj nowego pracownika',
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    bottomSheetRef.afterDismissed().subscribe(result => {
       if (result) {
         this.employeesService.addEmployee(result).subscribe({
           next: (newEmployee) => {

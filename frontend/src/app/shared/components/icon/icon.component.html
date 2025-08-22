@@ -1,8 +1,10 @@
-<span
-  [innerHTML]="sanitizedSvg()"
-  [class]="computedClasses()"
-  [attr.aria-label]="ariaLabel() || null"
-  [attr.aria-hidden]="ariaHidden() ? 'true' : null"
-  [style.width.px]="computedSize()"
-  [style.height.px]="computedSize()"
-></span>
+<div class="flex justify-center items-center">
+  <div
+    [innerHTML]="sanitizedSvg()"
+    [class]="computedClasses()"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-hidden]="ariaHidden() ? 'true' : null"
+    [style.width.px]="computedSize()"
+    [style.height.px]="computedSize()"
+  ></div>
+</div>

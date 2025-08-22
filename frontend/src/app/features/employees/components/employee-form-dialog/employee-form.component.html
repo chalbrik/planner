@@ -1,101 +1,192 @@
-<div class="h-full w-full overflow-y-auto">
-  <form class="w-2/5 p-10 mx-auto bg-white rounded-xl font-geist" [formGroup]="addEmployeeForm">
+<div class="h-full w-full">
+  <form class="rounded-xl font-geist" [formGroup]="addEmployeeForm">
 
-    <mat-divider class="bg-warm-gray-400"></mat-divider>
-    <p class="font-bold text-base py-2">Dane osobowe</p>
-
-    <div class="grid grid-cols-2 gap-2">
-
+    <div class="grid grid-cols-3 gap-6">
       <div class="col-span-1 flex flex-col">
-        <label>Pełne imię i nazwisko</label>
-        <mat-form-field>
-          <input matInput formControlName="full_name">
-          <mat-error>Pole obowiązkowe</mat-error>
-        </mat-form-field>
+        <div class="flex flex-row items-center gap-2">
+          <app-icon [iconName]="'user-circle'" iconSize="outline"></app-icon>
+          <p class="font-bold text-base py-2">Dane osobowe</p>
+        </div>
+        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div class="col-span-1 flex flex-col">
+            <label>Pełne imię i nazwisko</label>
+            <mat-form-field>
+              <input matInput formControlName="full_name">
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <label>Data urodzenia</label>
+            <mat-form-field>
+              <input matInput [matDatepicker]="birthDatePicker" formControlName="birth_date"/>
+              <mat-datepicker-toggle matIconSuffix [for]="birthDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #birthDatePicker>
+              </mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <label>Telefon</label>
+            <mat-form-field>
+              <input matInput formControlName="phone">
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+
+          <div class="col-span-1 flex flex-col">
+            <label>Email</label>
+            <mat-form-field>
+              <input matInput formControlName="email">
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+        </div>
+
+      </div>
+      <div class="col-span-1 flex flex-col">
+        <div class="flex flex-row gap-2">
+          <app-icon [iconName]="'academic-cap'" iconSize="outline"></app-icon>
+          <p class="font-bold text-base py-2">Wykształcenie</p>
+        </div>
+        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
+
+        <div class="flex flex-col">
+          <div class="flex flex-col">
+            <label>Typ szkoły</label>
+            <mat-form-field>
+              <mat-select formControlName="school_type" placeholder="Wybierz typ szkoły">
+                <mat-option value="basic_vocational">Zasadnicza lub inna równorzędna szkoła zawodowa</mat-option>
+                <mat-option value="secondary_vocational">Średnia szkoła zawodowa</mat-option>
+                <mat-option value="secondary_vocational_graduates">Średnia szkoła zawodowa dla absolwentów zasadniczych i równorzędnych szkół zawodowych</mat-option>
+                <mat-option value="secondary_general">Średnia szkoła ogólnokształcąca</mat-option>
+                <mat-option value="post_secondary">Szkoła policealna</mat-option>
+                <mat-option value="higher_education">Szkoła wyższa</mat-option>
+              </mat-select>
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+
+          <div class="flex flex-col">
+            <label>Nazwa szkoły</label>
+            <mat-form-field>
+              <input matInput formControlName="school_name">
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+
+          <div class="flex flex-col">
+            <label>Rok ukończenia</label>
+            <mat-form-field>
+              <input matInput [matDatepicker]="graduationPicker" formControlName="graduation_year"/>
+              <mat-datepicker-toggle matIconSuffix [for]="graduationPicker"></mat-datepicker-toggle>
+              <mat-datepicker #graduationPicker></mat-datepicker>  <!-- ZAMKNIJ TAGIEM -->
+            </mat-form-field>
+          </div>
+        </div>
       </div>
 
       <div class="col-span-1 flex flex-col">
-        <label>Data urodzenia</label>
-        <mat-form-field>
-          <input matInput [matDatepicker]="datepicker" formControlName="birth_date"/>
-          <mat-datepicker-toggle matIconSuffix [for]="datepicker"></mat-datepicker-toggle>
-          <mat-datepicker #datepicker>
-          </mat-datepicker>
-        </mat-form-field>
+        <div class="flex flex-row items-center gap-2">
+          <app-icon [iconName]="'document-text'" iconSize="outline"></app-icon>
+          <p class="font-bold text-base py-2">Dane dotyczące zatrudnienia</p>
+        </div>
+        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
+        <div class="grid grid-cols-2 gap-2">
+
+          <div class="col-span-1 flex flex-col">
+            <div class="flex flex-col">
+              <label>Rodzaj umowy</label>
+              <mat-form-field>
+                <mat-select formControlName="agreement_type" placeholder="Wybierz rodzaj umowy">
+                  <mat-option value="permament">Umowa o pracę</mat-option>
+                  <mat-option value="contract">Umowa cywilno-prawna</mat-option>
+                </mat-select>
+                <mat-error>Pole obowiązkowe</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <label>Początek okresu umowy</label>
+            <mat-form-field>
+              <input matInput [matDatepicker]="contractStartPicker" formControlName="contract_date_start"/>
+              <mat-datepicker-toggle matIconSuffix [for]="contractStartPicker"></mat-datepicker-toggle>
+              <mat-datepicker #contractStartPicker>
+              </mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <label>Koniec okresu umowy</label>
+            <mat-form-field>
+              <input matInput [matDatepicker]="contractEndPicker" formControlName="contract_date_end"/>
+              <mat-datepicker-toggle matIconSuffix [for]="contractEndPicker"></mat-datepicker-toggle>
+              <mat-datepicker #contractEndPicker>
+              </mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <label>Stawka etatowa</label>
+            <mat-form-field>
+              <input matInput formControlName="job_rate">
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <label>Etat</label>
+            <mat-form-field>
+              <input matInput formControlName="job">
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-1 flex flex-col">
+            <label>Stawka godzinowa</label>
+            <mat-form-field>
+              <input matInput formControlName="hour_rate">
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+        </div>
       </div>
-
-      <div class="col-span-1 flex flex-col">
-        <label>Telefon</label>
-        <mat-form-field>
-          <input matInput formControlName="phone">
-          <mat-error>Pole obowiązkowe</mat-error>
-        </mat-form-field>
-      </div>
-
-
-      <div class="col-span-1 flex flex-col">
-        <label>Email</label>
-        <mat-form-field>
-          <input matInput formControlName="email">
-          <mat-error>Pole obowiązkowe</mat-error>
-        </mat-form-field>
-      </div>
-
     </div>
 
-    <mat-divider class="bg-warm-gray-400"></mat-divider>
-    <p class="font-bold text-base py-2">Wykształcenie</p>
-
-    <!--  <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Dodaj szkołę</span></button>-->
-
-    <div class="flex flex-col">
-      <div class="flex flex-col">
-        <label>Typ szkoły</label>
-        <mat-form-field>
-          <mat-select formControlName="school_type" placeholder="Wybierz typ szkoły">
-            <mat-option value="basic_vocational">Zasadnicza lub inna równorzędna szkoła zawodowa</mat-option>
-            <mat-option value="secondary_vocational">Średnia szkoła zawodowa</mat-option>
-            <mat-option value="secondary_vocational_graduates">Średnia szkoła zawodowa dla absolwentów zasadniczych i równorzędnych szkół zawodowych</mat-option>
-            <mat-option value="secondary_general">Średnia szkoła ogólnokształcąca</mat-option>
-            <mat-option value="post_secondary">Szkoła policealna</mat-option>
-            <mat-option value="higher_education">Szkoła wyższa</mat-option>
-          </mat-select>
-          <mat-error>Pole obowiązkowe</mat-error>
-        </mat-form-field>
-      </div>
-
-
-      <div class="flex flex-col">
-        <label>Nazwa szkoły</label>
-        <mat-form-field>
-          <input matInput formControlName="school_name">
-          <mat-error>Pole obowiązkowe</mat-error>
-        </mat-form-field>
-      </div>
-
-
-      <div class="flex flex-col">
-        <label>Rok ukończenia</label>
-        <mat-form-field>
-          <input matInput [matDatepicker]="graduationPicker" formControlName="graduation_year"/>
-          <mat-datepicker-toggle matIconSuffix [for]="graduationPicker"></mat-datepicker-toggle>
-          <mat-datepicker #graduationPicker></mat-datepicker>  <!-- ZAMKNIJ TAGIEM -->
-        </mat-form-field>
-      </div>
-
+    <div class="flex flex-flex gap-2">
+      <app-icon [iconName]="'briefcase'" iconSize="outline"></app-icon>
+      <p class="font-bold text-base py-2">Przebieg dotychczasowego zatrudnienia</p>
+      <button mat-icon-button (click)="addEmployer()">
+        <app-icon iconName="plus" iconSize="outline" class="text-warm-gray-400"></app-icon>
+      </button>
 
     </div>
+    <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
 
-    <mat-divider class="bg-warm-gray-400"></mat-divider>
-    <p class="font-bold text-base py-2">Przebieg dotychczasowego zatrudnienia</p>
-
-    <div formArrayName="previous_employers">
+    <div formArrayName="previous_employers" class="grid grid-cols-3 gap-6 mb-6">
       @for (employer of previousEmployers.controls; track $index) {
-        <div [formGroupName]="$index" class="my-6 border-b border-warm-gray-400">
+        <div [formGroupName]="$index" class="border-warm-gray-400 col-span-1">
+
+          <div class="flex flex-flex gap-2">
+<!--            <app-icon [iconName]="'briefcase'" iconSize="outline"></app-icon>-->
+            <p class="font-bold text-base py-2">Pracodawca </p>
+            <button mat-icon-button (click)="removeEmployer($index)">
+              <app-icon iconName="trash" iconSize="outline" class="text-warm-gray-400"></app-icon>
+            </button>
+
+          </div>
 
           <div class="grid grid-cols-2 gap-2">
             <div class="flex flex-col">
-              <label>Pracodawca / Nazwa firmy</label>
+              <label>Nazwa firmy</label>
               <mat-form-field>
                 <input matInput formControlName="employer_name">
                 <mat-error>Pole obowiązkowe</mat-error>
@@ -128,18 +219,105 @@
               </mat-form-field>
             </div>
           </div>
-
-          <div class="w-full flex flex-row justify-end mb-6">
-            <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400" (click)="removeEmployer($index)"><span class="font-geist text-base text-warm-gray-400">Usuń okres zatrudnienia</span></button>
-          </div>
-
         </div>
       }
+    </div>
 
-      <div class="w-full flex flex-row justify-end">
-        <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400" (click)="addEmployer()"><span class="font-geist text-base text-warm-gray-400">Dodaj okres zatrudnienia</span></button>
+    <div class="grid grid-cols-2 gap-6">
+<!--      <div class="col-span-1 flex flex-col">-->
+<!--        <div class="flex flex-row items-center gap-2">-->
+<!--          <app-icon [iconName]="'document-text'" iconSize="outline"></app-icon>-->
+<!--          <p class="font-bold text-base py-2">Dane dotyczące zatrudnienia</p>-->
+<!--        </div>-->
+<!--        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>-->
+<!--        <div class="grid grid-cols-3 gap-2">-->
+
+<!--          <div class="col-span-1 flex flex-col">-->
+<!--            <div class="flex flex-col">-->
+<!--              <label>Rodzaj umowy</label>-->
+<!--              <mat-form-field>-->
+<!--                <mat-select formControlName="agreement_type" placeholder="Wybierz rodzaj umowy">-->
+<!--                  <mat-option value="permament">Umowa o pracę</mat-option>-->
+<!--                  <mat-option value="contract">Umowa cywilno-prawna</mat-option>-->
+<!--                </mat-select>-->
+<!--                <mat-error>Pole obowiązkowe</mat-error>-->
+<!--              </mat-form-field>-->
+<!--            </div>-->
+<!--          </div>-->
+
+<!--          <div class="col-span-1 flex flex-col">-->
+<!--            <label>Początek okresu umowy</label>-->
+<!--            <mat-form-field>-->
+<!--              <input matInput [matDatepicker]="contractStartPicker" formControlName="contract_date_start"/>-->
+<!--              <mat-datepicker-toggle matIconSuffix [for]="contractStartPicker"></mat-datepicker-toggle>-->
+<!--              <mat-datepicker #contractStartPicker>-->
+<!--              </mat-datepicker>-->
+<!--            </mat-form-field>-->
+<!--          </div>-->
+
+<!--          <div class="col-span-1 flex flex-col">-->
+<!--            <label>Koniec okresu umowy</label>-->
+<!--            <mat-form-field>-->
+<!--              <input matInput [matDatepicker]="contractEndPicker" formControlName="contract_date_end"/>-->
+<!--              <mat-datepicker-toggle matIconSuffix [for]="contractEndPicker"></mat-datepicker-toggle>-->
+<!--              <mat-datepicker #contractEndPicker>-->
+<!--              </mat-datepicker>-->
+<!--            </mat-form-field>-->
+<!--          </div>-->
+
+<!--          <div class="col-span-1 flex flex-col">-->
+<!--            <label>Stawka etatowa</label>-->
+<!--            <mat-form-field>-->
+<!--              <input matInput formControlName="job_rate">-->
+<!--              <mat-error>Pole obowiązkowe</mat-error>-->
+<!--            </mat-form-field>-->
+<!--          </div>-->
+
+<!--          <div class="col-span-1 flex flex-col">-->
+<!--            <label>Etat</label>-->
+<!--            <mat-form-field>-->
+<!--              <input matInput formControlName="job">-->
+<!--              <mat-error>Pole obowiązkowe</mat-error>-->
+<!--            </mat-form-field>-->
+<!--          </div>-->
+
+<!--          <div class="col-span-1 flex flex-col">-->
+<!--            <label>Stawka godzinowa</label>-->
+<!--            <mat-form-field>-->
+<!--              <input matInput formControlName="hour_rate">-->
+<!--              <mat-error>Pole obowiązkowe</mat-error>-->
+<!--            </mat-form-field>-->
+<!--          </div>-->
+
+<!--        </div>-->
+<!--      </div>-->
+
+      <div class="col-span-1 flex flex-col">
+        <div class="flex flex-row gap-2">
+          <app-icon [iconName]="'academic-cap'" iconSize="outline"></app-icon>
+          <p class="font-bold text-base py-2">Informacje dodatkowe</p>
+        </div>
+        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
+
+        <div class="flex flex-col">
+
+          <div class="flex flex-col">
+            <label>Niepełnosprawności</label>
+            <mat-form-field>
+              <input matInput>
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="flex flex-col">
+            <label>KP-188</label>
+            <mat-form-field>
+              <input matInput>
+              <mat-error>Pole obowiązkowe</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
       </div>
-
     </div>
 
 

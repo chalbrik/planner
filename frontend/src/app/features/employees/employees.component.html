@@ -28,10 +28,19 @@
     <mat-sidenav-content class="p-4">
 
       <!-- Pole filtrowania -->
-      <mat-form-field class="w-full mb-4">
-        <mat-label>Szukaj pracowników</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="Wpisz imię, nazwisko, email..." #input>
-      </mat-form-field>
+      <div class="flex flex-row gap-4">
+        <mat-form-field class="w-full mb-4">
+          <mat-label>Szukaj pracowników</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Wpisz imię, nazwisko, email..." #input>
+        </mat-form-field>
+        <button mat-stroked-button class="px-2 !rounded-md !border-warm-gray-400 gap-2 whitespace-nowrap w-60 !h-14" (click)="openAddEmployeeDialog()">
+          <div class="flex flex-row justify-start items-center h-full w-full gap-2">
+            <app-icon iconName="plus" iconSize="outline" class="text-warm-gray-400"></app-icon>
+            <span class="font-geist text-base text-warm-gray-400">Dodaj pracownika</span>
+          </div>
+        </button>
+
+      </div>
 
       <!-- Tabela -->
       <div class="mat-elevation-z8">
@@ -74,9 +83,7 @@
             <th mat-header-cell *matHeaderCellDef> Akcje </th>
             <td mat-cell *matCellDef="let employee">
               <button mat-icon-button class="delete-button" (click)="onDeleteEmployee(employee, $event)">
-                <div class="flex justify-center items-center">
-                  <app-icon iconName="trash" iconSize="outline"></app-icon>
-                </div>
+                <app-icon iconName="trash" iconSize="outline"></app-icon>
               </button>
             </td>
           </ng-container>
@@ -126,9 +133,8 @@
           <app-employee-info [employee]="selectedEmployee()!"></app-employee-info>
         </div>
       }
-
     </mat-sidenav>
-
   </mat-sidenav-container>
+
 
 </div>

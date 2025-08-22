@@ -3,7 +3,7 @@ import {
   MatDialogActions,
   MatDialogClose,
 } from '@angular/material/dialog';
-import {MatButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatError, MatFormField, MatInput, MatSuffix} from '@angular/material/input';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatNativeDateModule, MatOption, provideNativeDateAdapter} from '@angular/material/core';
@@ -17,6 +17,8 @@ import {MatDivider} from '@angular/material/divider';
 import {CreateEmployeeRequest} from '../../../../core/services/employees/employee.types';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatSelect} from '@angular/material/select';
+import {IconComponent} from '../../../../shared/components/icon';
+import {MatIcon} from '@angular/material/icon';
 
 
 interface Agreemnet {
@@ -43,6 +45,8 @@ interface Agreemnet {
     MatSuffix,
     MatSelect,
     MatOption,
+    IconComponent,
+    MatIconButton,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -88,15 +92,19 @@ export class EmployeeFormComponent implements OnInit {
 
       //Pola wypełniane przez kierownika
 
-      // agreement_type: ['permanent'],
-      // hour_rate: [''],
-      // contract_date_start: [''],
-      // contract_date_end: [''],
+      agreement_type: ['permanent'],
+      job: [''],
+      hour_rate: [''],
+      job_rate: [''],
+      contract_date_start: [''],
+      contract_date_end: [''],
     })
 
   }
 
   onAddEmployee() {
+    console.log('Form valid:', this.addEmployeeForm.valid);
+    console.log('Form data:', this.addEmployeeForm.getRawValue());
     if (this.addEmployeeForm.valid) {
       const formData = this.addEmployeeForm.getRawValue();
 
@@ -107,6 +115,14 @@ export class EmployeeFormComponent implements OnInit {
 
       if (formData.graduation_year) {
         formData.graduation_year = formData.graduation_year.toISOString().split('T')[0];
+      }
+
+      if (formData.contract_date_start) {
+        formData.contract_date_start = formData.contract_date_start.toISOString().split('T')[0];
+      }
+
+      if (formData.contract_date_end) {
+        formData.contract_date_end = formData.contract_date_end.toISOString().split('T')[0];
       }
 
       if (formData.previous_employers) {
