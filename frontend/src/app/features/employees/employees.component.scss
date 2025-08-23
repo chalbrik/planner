@@ -54,7 +54,8 @@ mat-sidenav {
 .mat-bottom-sheet-container {
   width: 100vw !important;
   max-width: 100vw !important;
-  min-width: 10vw !important;
+  height: 95vw !important;
+  max-height: 95vh !important;
   padding: 40px !important;
 }
 

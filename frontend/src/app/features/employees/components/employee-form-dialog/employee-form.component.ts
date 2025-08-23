@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit, ViewEncapsulation} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {
   MatDialogActions,
   MatDialogClose,
@@ -19,6 +19,9 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatSelect} from '@angular/material/select';
 import {IconComponent} from '../../../../shared/components/icon';
 import {MatIcon} from '@angular/material/icon';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {LocationService} from '../../../../core/services/locations/location.service';
+import {Location} from '../../../../core/services/locations/location.types';
 
 
 interface Agreemnet {
@@ -47,6 +50,7 @@ interface Agreemnet {
     MatOption,
     IconComponent,
     MatIconButton,
+    MatCheckbox,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -59,13 +63,12 @@ export class EmployeeFormComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly employeesService = inject(EmployeesService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly locationService = inject(LocationService);
 
   addEmployeeForm!: FormGroup;
 
-  agreemnetsTypeValues: Agreemnet[] = [
-    {value: 'permanent', viewValue: 'Umowa o prace'},
-    {value: 'contract', viewValue: 'Umowa na zlecenie'},
-  ];
+  locations = signal<Location[]>([]);
+
 
 
   constructor() {
@@ -98,7 +101,11 @@ export class EmployeeFormComponent implements OnInit {
       job_rate: [''],
       contract_date_start: [''],
       contract_date_end: [''],
+
+      locations: this.formBuilder.array([]),
     })
+
+    this.loadLocations();
 
   }
 
@@ -176,6 +183,32 @@ export class EmployeeFormComponent implements OnInit {
 private formatDate(date: Date): string {
   if (!date) return '';
   return date.toISOString().split('T')[0];  // YYYY-MM-DD
+}
+
+private loadLocations(): void {
+    this.locationService.getLocations().subscribe({
+      next: (data) => {
+      this.locations.set(data)
+        console.log("Lokacje: ", data);
+      },
+      error: (error) => {
+        console.error("Błąd ładowania lokacji: ", error);
+      }
+    })
+}
+
+onLocationChange(locationId: string, event: any): void {
+    const assignedLocations = this.addEmployeeForm.get('locations') as FormArray;
+
+  if (event.checked) {
+    assignedLocations.push(this.formBuilder.control(locationId));
+  } else {
+    const index = assignedLocations.controls.findIndex(x => x.value === locationId);
+    if (index !== -1) {
+      assignedLocations.removeAt(index);
+    }
+  }
+
 }
 
 

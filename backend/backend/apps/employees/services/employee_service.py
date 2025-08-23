@@ -18,6 +18,9 @@ class EmployeeService:
             'school_name': validated_data.pop('school_name', ''),
             'graduation_year': validated_data.pop('graduation_year', None)
         }
+
+        locations_data = validated_data.pop('locations', [])
+
         previous_employers_data = validated_data.pop('previous_employers', [])
 
         # Generuj numer ewidencyjny
@@ -30,6 +33,10 @@ class EmployeeService:
         # Utwórz szkołę
         if school_data.get('school_type'):
             School.objects.create(employee=employee, **school_data)
+
+        # Przypisz lokacje
+        if locations_data:
+            employee.locations.set(locations_data)
 
         # Utwórz poprzednich pracodawców
         for employer_data in previous_employers_data:

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Employee, VacationLeave, PreviousEmployers, School
 from .services import EmployeeService
+from ..locations.models import Location
+
 
 class PreviousEmployerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -53,7 +55,7 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
             'identification_number', 'job', 'contract_date_start',
             'contract_date_end', 'job_rate', 'hour_rate',
             'school_type', 'school_name', 'graduation_year',
-            'previous_employers', 'birth_date'
+            'previous_employers', 'birth_date', 'locations'
         ]
 
     def create(self, validated_data):
