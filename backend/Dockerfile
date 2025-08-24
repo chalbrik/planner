@@ -1,6 +1,14 @@
 # Używamy oficjalnego obrazu Python 3.11
 FROM python:3.11
 
+# Instalujemy system dependencies potrzebne dla PostgreSQL
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        postgresql-client \
+        build-essential \
+        libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Ustawiamy katalog roboczy w kontenerze
 WORKDIR /app
 

@@ -22,6 +22,7 @@ export class LocationService {
   getLocations(): Observable<Location[]> {
     return this.http.get<Location[]>(`${this.apiUrl}/`).pipe(
       tap(responseData => {
+        console.log("Response data: ", responseData);
         this._locations.set(responseData);
       })
     );
@@ -33,7 +34,7 @@ export class LocationService {
   }
 
   // Dodaj nową lokację
-  createLocation(location: Partial<Location>): Observable<Location> {
+  addLocation(location: Partial<Location>): Observable<Location> {
     return this.http.post<Location>(`${this.apiUrl}/`, location).pipe(
       tap(newLocation => {
         this._locations.update(current => [...current, newLocation]);

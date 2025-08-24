@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
     if (typeof window !== 'undefined' && !environment.production && this.autoLogin) {
       // Ustaw dane dla trybu deweloperskiego
       this.loginForm.setValue({
-        username: 'chalbrik',  // Zmień na własne dane testowe
+        username: 'pawel',  // Zmień na własne dane testowe
         password: 'alpachino'  // Zmień na własne dane testowe
       });
 

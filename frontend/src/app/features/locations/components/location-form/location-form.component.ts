@@ -1,0 +1,73 @@
+import {Component, inject, OnInit} from '@angular/core';
+import {IconComponent} from '../../../../shared/components/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {MatDatepicker, MatDatepickerInput, MatDatepickerToggle} from '@angular/material/datepicker';
+import {MatDivider} from '@angular/material/divider';
+import {MatError, MatFormField, MatInput, MatSuffix} from '@angular/material/input';
+import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {MatOption} from '@angular/material/core';
+import {MatSelect} from '@angular/material/select';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {LocationService} from '../../../../core/services/locations/location.service';
+import {MatBottomSheet} from '@angular/material/bottom-sheet';
+
+@Component({
+  selector: 'app-location-form',
+  imports: [
+    IconComponent,
+    MatButton,
+    MatCheckbox,
+    MatDatepicker,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatDivider,
+    MatError,
+    MatFormField,
+    MatIconButton,
+    MatInput,
+    MatOption,
+    MatSelect,
+    MatSuffix,
+    ReactiveFormsModule,
+    MatFormField
+  ],
+  templateUrl: './location-form.component.html',
+  styleUrl: './location-form.component.scss'
+})
+export class LocationFormComponent implements OnInit {
+
+  private readonly formBuilder = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly locationService = inject(LocationService);
+  private readonly bottomSheet = inject(MatBottomSheet);
+
+  addLocationForm!: FormGroup;
+
+  ngOnInit() {
+
+    this.addLocationForm = this.formBuilder.group({
+
+      name: [''],
+      address: [''],
+
+    })
+
+  }
+
+  onAddLocation() {
+    if(this.addLocationForm.valid) {
+      this.locationService.addLocation(this.addLocationForm.getRawValue()).subscribe({
+        next: (newLocation) => {
+          this.snackBar.open('Dodano nowy obiekt!', 'OK', { duration: 3000 });
+          this.bottomSheet.dismiss(newLocation);
+        },
+        error: (error) => {
+          console.error('Błąd:', error);
+          this.snackBar.open('Błąd!', 'OK', { duration: 3000 });
+        }
+      })
+    }
+  }
+
+}

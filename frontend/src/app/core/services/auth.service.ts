@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, BehaviorSubject, throwError, catchError, of} from 'rxjs';
+import { Observable, BehaviorSubject, throwError, catchError, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { User, AuthTokens} from './auth.model';
+import { User, AuthTokens } from './auth.model';
 import { environment } from '../../../environments/environment';
-
 
 @Injectable({
   providedIn: 'root'
@@ -29,15 +28,18 @@ export class AuthService {
     if (this.accessToken && !this.isTokenExpired(this.accessToken)) {
       this.checkAuth();
     } else if (this.accessToken && this.isTokenExpired(this.accessToken)) {
+      console.log('Token expired, trying to refresh...');
       this.refreshToken().subscribe({
         next: () => {
           this.checkAuth();
         },
         error: (err) => {
+          console.log('Token refresh failed, clearing auth data');
           this.clearAuthData();
         }
       });
     } else {
+      console.log('No token found, user not authenticated');
       this.currentUserSubject.next(null);
     }
   }
@@ -49,18 +51,21 @@ export class AuthService {
       return;
     }
 
-    this.http.get<User>(`${this.apiUrl}user/`, {withCredentials: true}).subscribe({
+    this.http.get<User>(`${this.apiUrl}user/`, { withCredentials: true }).subscribe({
       next: (user: User) => {
+        console.log('Auth check successful, user logged in');
         this.currentUserSubject.next(user);
       },
       error: (err) => {
-        this.currentUserSubject.next(null);
+        console.log('Auth check failed, clearing auth data:', err.status);
+        // POPRAWKA: Wyczyść wszystkie dane auth przy błędzie
+        this.clearAuthData();
       }
-    })
+    });
   }
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post<{access: string}>(`${this.apiUrl}token/`,
+    return this.http.post<{ access: string }>(`${this.apiUrl}token/`,
       { username, password },
       { withCredentials: true }
     ).pipe(
@@ -83,19 +88,19 @@ export class AuthService {
 
     this.isRefreshing = true;
 
-    return this.http.post<{access: string}>(`${this.apiUrl}token/refresh/`,
+    return this.http.post<{ access: string }>(`${this.apiUrl}token/refresh/`,
       {},
-      {withCredentials: true}
+      { withCredentials: true }
     ).pipe(
       tap(response => {
         this.accessToken = response.access;
-        // DODANE: Zapisz nowy token do localStorage
         localStorage.setItem('access_token', response.access);
         this.isRefreshing = false;
+        console.log('Token refreshed successfully');
       }),
       catchError(error => {
         this.isRefreshing = false;
-        // DODANE: Wyczyść dane przy błędzie
+        console.log('Token refresh failed:', error.status);
         this.clearAuthData();
         return throwError(() => error);
       })
@@ -103,7 +108,7 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    localStorage.removeItem('access_token');
+    console.log('Logging out user');
 
     if (!this.accessToken) {
       this.clearAuthData();
@@ -112,7 +117,7 @@ export class AuthService {
 
     return this.http.post<any>(`${this.apiUrl}logout/`,
       {},
-      {withCredentials: true}
+      { withCredentials: true }
     ).pipe(
       tap(() => {
         this.clearAuthData();
@@ -126,21 +131,40 @@ export class AuthService {
 
   private loadUserProfile(): void {
     this.http.get<User>(`${this.apiUrl}user/`,
-      {withCredentials: true}
-    ).subscribe(user => {
-      this.currentUserSubject.next(user);
+      { withCredentials: true }
+    ).subscribe({
+      next: (user) => {
+        this.currentUserSubject.next(user);
+      },
+      error: (err) => {
+        console.log('Failed to load user profile:', err.status);
+        this.clearAuthData();
+      }
     });
   }
 
   isAuthenticated(): boolean {
-    return !!this.accessToken;
+    // Sprawdź czy token istnieje
+    if (!this.accessToken) {
+      return false;
+    }
+
+    // Sprawdź czy token nie wygasł
+    if (this.isTokenExpired(this.accessToken)) {
+      console.log('Token expired, clearing auth data');
+      this.clearAuthData();
+      return false;
+    }
+
+    // POPRAWKA: Sprawdź też czy mamy dane użytkownika
+    return this.currentUserSubject.value !== null;
   }
 
   getAccessToken(): string | null {
     return this.accessToken;
   }
 
-  private isTokenExpired(token: string): boolean {
+  isTokenExpired(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const currentTime = Math.floor(Date.now() / 1000);
@@ -150,11 +174,10 @@ export class AuthService {
     }
   }
 
-  private clearAuthData(): void {
+  clearAuthData(): void {
+    console.log('Clearing all auth data');
     this.accessToken = null;
     this.currentUserSubject.next(null);
     localStorage.removeItem('access_token');
   }
-
 }
-

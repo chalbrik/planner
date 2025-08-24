@@ -1,0 +1,16 @@
+<div class="flex flex-col">
+  <label>{{ label() }}</label>
+  <mat-form-field>
+    <input
+      matInput
+      [value]="value()"
+      [disabled]="disabled()"
+      [placeholder]="placeholder()"
+      (input)="handleInput($event)"
+      (blur)="handleBlur()">
+
+    @if(showError()) {
+      <mat-error>{{ errorMessage() }}</mat-error>
+    }
+  </mat-form-field>
+</div>

@@ -565,14 +565,19 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
 
+    const currentLocationId = this.selectedLocationId();
+
     const workHoursObject = this.workHours.find(wh =>
-      wh.employee === employee.id && wh.date === dateString
+      wh.employee === employee.id &&
+      wh.date === dateString &&
+      wh.location === currentLocationId
     );
 
     const selectedCellData = {
       employee: employee,
       workHours: workHoursObject || null,
-      date: dateString
+      date: dateString,
+      location: currentLocationId
     };
 
     // Pobierz element komórki
@@ -641,7 +646,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.scheduleService.updateWorkHours(data.id, {
         hours: data.hours,
         employee: data.employee,
-        date: data.date
+        date: data.date,
+        location: this.selectedLocationId()
       }).subscribe({
         next: (updatedData) => {
           this.scheduleService.emitScheduleUpdate(updatedData);
@@ -657,7 +663,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.scheduleService.addWorkHours({
         hours: data.hours,
         employee: data.employee,
-        date: data.date
+        date: data.date,
+        location: this.selectedLocationId()
       }).subscribe({
         next: (newData) => {
           this.scheduleService.emitScheduleUpdate(newData);
@@ -852,7 +859,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         top: `${50 + (openDialogs * 80)}px`,  // Każdy kolejny o 120px niżej
         right: '20px'                           // Wszystkie po prawej stronie
       }
-    });
+    })
 
   }
 

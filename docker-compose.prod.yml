@@ -1,13 +1,71 @@
 services:
+  # Baza danych PostgreSQL - Produkcja
+  postgres:
+    image: postgres:15
+    container_name: planner_postgres_prod
+    env_file:
+      - .env.prod
+    environment:
+      POSTGRES_DB: planner_prod_db
+      POSTGRES_USER: planner_prod_user
+      POSTGRES_PASSWORD: SecureProd2024!PlannerDB#PostgreSQL
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./postgres-backup:/backup
+    ports:
+      - "5432:5432"
+    networks:
+      - planner_prod_network
+    restart: unless-stopped
+    command: >
+      postgres 
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=200
+      -c log_statement=all
+
+  # Backend Django - Produkcja
   backend:
     image: chalbrik/planner-backend:latest
+    container_name: planner_backend_prod
     ports:
       - "8000:8000"
-    environment:
-      - DJANGO_IN_DOCKER=True
-    command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - .env.prod
+    volumes:
+      - ./logs:/app/logs
+      - static_files:/app/static
+      - ./media:/app/media
+    networks:
+      - planner_prod_network
+    command: >
+      sh -c "
+      sleep 10 &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000 --insecure
+      "
+    restart: unless-stopped
 
+  # Frontend Angular - Produkcja
   frontend:
     image: chalbrik/planner-frontend:latest
+    container_name: planner_frontend_prod
     ports:
       - "4200:80"
+    networks:
+      - planner_prod_network
+    restart: unless-stopped
+
+# Persistent volumes dla produkcji
+volumes:
+  postgres_prod_data:
+    driver: local
+  static_files:
+    driver: local
+
+# Production network
+networks:
+  planner_prod_network:
+    driver: bridge

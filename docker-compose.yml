@@ -1,19 +1,59 @@
 services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: planner_postgres
+    environment:
+      POSTGRES_DB: planner_db
+      POSTGRES_USER: planner_user
+      POSTGRES_PASSWORD: planner_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - planner_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planner_user -d planner_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Django Backend
   backend:
     build: ./backend
+    container_name: planner_backend
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
       - ./backend/logs:/app/logs
-    environment:
-      - DJANGO_IN_DOCKER=True
-    command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - .env.local
+    networks:
+      - planner_network
+    command: >
+      sh -c "
+      echo 'Waiting for postgres...' &&
+      sleep 5 &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+    restart: unless-stopped
 
+  # Angular Frontend
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev  # <-- używaj development Dockerfile
+      dockerfile: Dockerfile.dev
+    container_name: planner_frontend
+    depends_on:
+      - backend
     ports:
       - "4200:4200"
     volumes:
@@ -21,3 +61,16 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+    networks:
+      - planner_network
+    restart: unless-stopped
+
+# Persistent volumes
+volumes:
+  postgres_data:
+    driver: local
+
+# Custom network
+networks:
+  planner_network:
+    driver: bridge

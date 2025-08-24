@@ -15,7 +15,6 @@ class WorkHours(models.Model):
     class Meta:
         verbose_name = "Godziny pracy"
         verbose_name_plural = "Godziny pracy"
-        unique_together = ('employee', 'location', 'date')  # Jeden wpis na pracownika na dzień
 
     def __str__(self):
         return f"{self.employee} - {self.date} - {self.hours}"

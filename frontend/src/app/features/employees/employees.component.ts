@@ -16,7 +16,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSidenav, MatSidenavContainer, MatSidenavContent, MatSidenavModule} from '@angular/material/sidenav';
 import {MatIcon, MatIconModule} from '@angular/material/icon';
-import {EmployeeFormComponent} from './components/employee-form-dialog/employee-form.component';
+import {EmployeeFormComponent} from './components/employee-form/employee-form.component';
 import {MatDialog} from '@angular/material/dialog';
 import {IconComponent} from '../../shared/components/icon';
 import {MatButton, MatFabButton, MatIconButton} from '@angular/material/button';
@@ -82,7 +82,6 @@ export class EmployeesComponent implements OnInit {
 
   ngOnInit() {
     this.loadEmployees();
-    console.log("Hello");
   }
 
   ngAfterViewInit() {
@@ -138,16 +137,7 @@ export class EmployeesComponent implements OnInit {
 
     bottomSheetRef.afterDismissed().subscribe(result => {
       if (result) {
-        this.employeesService.addEmployee(result).subscribe({
-          next: (newEmployee) => {
-            // Dodaj do dataSource
-            const currentData = this.dataSource.data;
-            this.dataSource.data = [...currentData, newEmployee];
-          },
-          error: (error) => {
-            console.error('Błąd podczas dodawania pracownika: ', error);
-          }
-        });
+        this.loadEmployees();
       }
     });
   }

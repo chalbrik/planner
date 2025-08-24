@@ -22,6 +22,8 @@ import {MatIcon} from '@angular/material/icon';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {LocationService} from '../../../../core/services/locations/location.service';
 import {Location} from '../../../../core/services/locations/location.types';
+import {MatBottomSheet} from '@angular/material/bottom-sheet';
+import {InputComponent} from '../../../../shared/components/input/input.component';
 
 
 interface Agreemnet {
@@ -30,7 +32,7 @@ interface Agreemnet {
 }
 
 @Component({
-  selector: 'app-employee-form-dialog',
+  selector: 'app-employee-form',
   imports: [
     MatDialogActions,
     MatDialogClose,
@@ -51,6 +53,7 @@ interface Agreemnet {
     IconComponent,
     MatIconButton,
     MatCheckbox,
+    InputComponent,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -64,6 +67,7 @@ export class EmployeeFormComponent implements OnInit {
   private readonly employeesService = inject(EmployeesService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly locationService = inject(LocationService);
+  private readonly bottomSheet = inject(MatBottomSheet);
 
   addEmployeeForm!: FormGroup;
 
@@ -146,6 +150,7 @@ export class EmployeeFormComponent implements OnInit {
       this.employeesService.addEmployee(formData).subscribe({
         next: (newEmployee) => {
           this.snackBar.open('Dodano pracownika!', 'OK', { duration: 3000 });
+          this.bottomSheet.dismiss(newEmployee);
         },
         error: (error) => {
           console.error('Błąd:', error);
@@ -210,6 +215,21 @@ onLocationChange(locationId: string, event: any): void {
   }
 
 }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.addEmployeeForm.get(controlName);
+
+    if (control?.errors) {
+      return 'Pole obowiązkowe';
+    }
+
+    return '';
+  }
+
+  shouldShowError(controlName: string): boolean {
+    const control = this.addEmployeeForm.get(controlName);
+    return !!(control?.invalid && control?.touched);
+  }
 
 
 }

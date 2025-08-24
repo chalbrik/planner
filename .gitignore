@@ -24,6 +24,9 @@ var/
 venv/
 ENV/
 .env
+.env.local
+.env.prod
+*.env
 
 # Database
 *.sqlite3

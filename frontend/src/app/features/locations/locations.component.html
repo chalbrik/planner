@@ -24,26 +24,26 @@
 
   <mat-sidenav-container class="h-full">
 
-    <!-- Sidenav ze szczegółami pracownika -->
-    <mat-sidenav
-      mode="side"
-      position="end"
-      [opened]="isSidenavOpen()"
-      class="!w-1/3 overflow-y-auto">
+<!--    &lt;!&ndash; Sidenav ze szczegółami pracownika &ndash;&gt;-->
+<!--    <mat-sidenav-->
+<!--      mode="side"-->
+<!--      position="end"-->
+<!--      [opened]="isSidenavOpen()"-->
+<!--      class="!w-1/3 overflow-y-auto">-->
 
-      @if (selectedEmployee()) {
-        <div class="p-4">
+<!--      @if (selectedEmployee()) {-->
+<!--        <div class="p-4">-->
 
-          <button mat-icon-button (click)="closeSidenav()">
-            <mat-icon>close</mat-icon>
-          </button>
+<!--          <button mat-icon-button (click)="closeSidenav()">-->
+<!--            <mat-icon>close</mat-icon>-->
+<!--          </button>-->
 
 
-          <!-- Tutaj użyjemy istniejący komponent employee-info -->
-          <app-employee-info [employee]="selectedEmployee()!"></app-employee-info>
-        </div>
-      }
-    </mat-sidenav>
+<!--          &lt;!&ndash; Tutaj użyjemy istniejący komponent employee-info &ndash;&gt;-->
+<!--          <app-employee-info [employee]="selectedEmployee()!"></app-employee-info>-->
+<!--        </div>-->
+<!--      }-->
+<!--    </mat-sidenav>-->
 
     <!-- Główna zawartość z tabelą -->
     <mat-sidenav-content class="p-4">
@@ -51,13 +51,13 @@
       <!-- Pole filtrowania -->
       <div class="flex flex-row gap-4">
         <mat-form-field class="w-full mb-4">
-          <mat-label>Szukaj pracowników</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Wpisz imię, nazwisko, email..." #input>
+          <mat-label>Szukaj Obiekt</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Wpisz nazwę, adres..." #input>
         </mat-form-field>
-        <button mat-stroked-button class="px-2 !rounded-md !border-warm-gray-400 gap-2 whitespace-nowrap w-60 !h-14" (click)="openAddEmployeeDialog()">
+        <button mat-stroked-button class="px-2 !rounded-md !border-warm-gray-400 gap-2 whitespace-nowrap w-60 !h-14" (click)="onAddLocation()">
           <div class="flex flex-row justify-start items-center h-full w-full gap-2">
             <app-icon iconName="plus" iconSize="outline" class="text-warm-gray-400"></app-icon>
-            <span class="font-geist text-base text-warm-gray-400">Dodaj pracownika</span>
+            <span class="font-geist text-base text-warm-gray-400">Dodaj Obiekt</span>
           </div>
         </button>
 
@@ -69,41 +69,34 @@
 
           <!-- Kolumna Nazwa Numer ewidencyjny -->
           <ng-container matColumnDef="identification_number">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Numer ewidencyjny </th>
-            <td mat-cell *matCellDef="let employee">
-              {{employee.identification_number || 'Brak'}}
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Numer obiektu </th>
+            <td mat-cell *matCellDef="let location">
+              {{location.identification_number || 'Brak'}}
             </td>
           </ng-container>
 
-          <!-- Kolumna Nazwa (Imię + Nazwisko) -->
+          <!-- Kolumna Nazwa (Nazwa obiektu) -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Imię Nazwisko </th>
-            <td mat-cell *matCellDef="let employee">
-              {{employee.full_name}}
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Nazwa </th>
+            <td mat-cell *matCellDef="let location">
+              {{location.name}}
             </td>
           </ng-container>
 
           <!-- Kolumna Email -->
-          <ng-container matColumnDef="job">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Etat </th>
-            <td mat-cell *matCellDef="let employee">
-              {{employee.job || 'Brak'}}
+          <ng-container matColumnDef="address">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header> Adres </th>
+            <td mat-cell *matCellDef="let location">
+              {{location.address || 'Brak'}}
             </td>
           </ng-container>
 
-          <!-- Kolumna Rodzaj umowy -->
-          <ng-container matColumnDef="agreement_type">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Rodzaj umowy </th>
-            <td mat-cell *matCellDef="let employee">
-              {{getAgreementTypeLabel(employee.agreement_type)}}
-            </td>
-          </ng-container>
 
           <!-- Kolumna Actions -->
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef> Akcje </th>
             <td mat-cell *matCellDef="let employee">
-              <button mat-icon-button class="delete-button" (click)="onDeleteEmployee(employee, $event)">
+              <button mat-icon-button class="delete-button">
                 <app-icon iconName="trash" iconSize="outline"></app-icon>
               </button>
             </td>
@@ -113,7 +106,6 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row
               *matRowDef="let employee; columns: displayedColumns;"
-              (click)="onRowClick(employee)"
               class="cursor-pointer hover:bg-gray-100">
           </tr>
 
@@ -129,7 +121,7 @@
         <mat-paginator
           [pageSizeOptions]="[5, 10, 25, 50]"
           [pageSize]="10"
-          aria-label="Wybierz stronę pracowników">
+          aria-label="Wybierz stronę lokacji">
         </mat-paginator>
       </div>
 
@@ -138,3 +130,4 @@
 
 
 </div>
+

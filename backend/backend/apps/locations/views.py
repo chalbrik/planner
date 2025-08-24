@@ -15,8 +15,5 @@ class LocationViewSet(viewsets.ModelViewSet):
     serializer_class = LocationSerializer
 
     def get_queryset(self):
-        # Zwróć tylko lokacje które mają przypisane godziny pracy
-        return Location.objects.filter(
-            Exists(WorkHours.objects.filter(location=OuterRef('pk')))
-        ).distinct()
+        return Location.objects.all()
 
