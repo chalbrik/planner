@@ -31,4 +31,12 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
         if employee_id:
             queryset = queryset.filter(employee_id=employee_id)
 
+        # ✅ DODANE: Filtrowanie po lokacji
+        location_id = self.request.query_params.get('location')
+        if location_id:
+            try:
+                queryset = queryset.filter(location_id=location_id)
+            except (ValueError, TypeError):
+                pass
+
         return queryset

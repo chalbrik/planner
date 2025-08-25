@@ -13,7 +13,7 @@
 
           <app-input
             [label]="'Pełne imię i nazwisko'"
-            [placeholder]="'Wprowadź imię i nazwisko'"
+            [placeholder]="''"
             [showError]="shouldShowError('full_name')"
             [errorMessage]="getErrorMessage('full_name')"
             formControlName="full_name">
@@ -29,12 +29,21 @@
             </mat-form-field>
           </div>
 
-          <app-input [label]="'Telefon'"
-                     formControlName="phone"></app-input>
+          <app-input
+            [label]="'Telefon'"
+            [placeholder]="''"
+            [showError]="shouldShowError('phone')"
+            [errorMessage]="getErrorMessage('phone')"
+            formControlName="phone">
+          </app-input>
 
-
-          <app-input [label]="'Email'"
-                     formControlName="email"></app-input>
+          <app-input
+            [label]="'Email'"
+            [placeholder]="''"
+            [showError]="shouldShowError('email')"
+            [errorMessage]="getErrorMessage('email')"
+            formControlName="email">
+          </app-input>
 
         </div>
 
@@ -62,8 +71,13 @@
             </mat-form-field>
           </div>
 
-          <app-input [label]="'Nazwa szkoły'"
-                     formControlName="school_name"></app-input>
+          <app-input
+            [label]="'Nazwa szkoły'"
+            [placeholder]="''"
+            [showError]="shouldShowError('school_name')"
+            [errorMessage]="getErrorMessage('school_name')"
+            formControlName="school_name">
+          </app-input>
 
 
           <div class="flex flex-col">
@@ -118,32 +132,35 @@
             </mat-form-field>
           </div>
 
-          <div class="col-span-1 flex flex-col">
-            <label>Stawka etatowa</label>
-            <mat-form-field>
-              <input matInput formControlName="job_rate">
-              <mat-error>Pole obowiązkowe</mat-error>
-            </mat-form-field>
-          </div>
+          <app-input
+            class="col-span-1"
+            [label]="'Stawka etatowa'"
+            [placeholder]="''"
+            [showError]="shouldShowError('job_rate')"
+            [errorMessage]="getErrorMessage('job_rate')"
+            formControlName="job_rate">
+          </app-input>
 
-          <div class="col-span-1 flex flex-col">
-            <label>Etat</label>
-            <mat-form-field>
-              <input matInput formControlName="job">
-              <mat-error>Pole obowiązkowe</mat-error>
-            </mat-form-field>
-          </div>
+          <app-input
+            class="col-span-1"
+            [label]="'Etat'"
+            [placeholder]="''"
+            [showError]="shouldShowError('job')"
+            [errorMessage]="getErrorMessage('job')"
+            formControlName="job">
+          </app-input>
 
-          <div class="col-span-1 flex flex-col">
-            <label>Stawka godzinowa</label>
-            <mat-form-field>
-              <input matInput formControlName="hour_rate">
-              <mat-error>Pole obowiązkowe</mat-error>
-            </mat-form-field>
-          </div>
+          <app-input
+            class="col-span-1"
+            [label]="'Stawka godzinowa'"
+            [placeholder]="''"
+            [showError]="shouldShowError('hour_rate')"
+            [errorMessage]="getErrorMessage('hour_rate')"
+            formControlName="hour_rate">
+          </app-input>
 
           <div class="col-span-2 flex flex-col">
-            <label>Stawka godzinowa</label>
+            <label>Przypisz pracownika do obiektu</label>
             <div class="w-full bg-warm-gray-50 border border-warm-gray-400 rounded-lg p-4">
               @for(location of locations(); track location.id){
                 <div class="flex flex-row items-center">
@@ -152,7 +169,6 @@
                   (change)="onLocationChange(location.id, $event)">
                     {{ location.name }}
                   </mat-checkbox>
-
                 </div>
 
               }
@@ -187,21 +203,24 @@
           </div>
 
           <div class="grid grid-cols-2 gap-2">
-            <div class="flex flex-col">
-              <label>Nazwa firmy</label>
-              <mat-form-field>
-                <input matInput formControlName="employer_name">
-                <mat-error>Pole obowiązkowe</mat-error>
-              </mat-form-field>
-            </div>
 
-            <div class="flex flex-col">
-              <label>Stanowisko</label>
-              <mat-form-field>
-                <input matInput formControlName="employee_position">
-                <mat-error>Pole obowiązkowe</mat-error>
-              </mat-form-field>
-            </div>
+            <app-input
+              class="col-span-1"
+              [label]="'Nazwa firmy'"
+              [placeholder]="''"
+              [showError]="shouldShowError('employer_name')"
+              [errorMessage]="getErrorMessage('employer_name')"
+              formControlName="employer_name">
+            </app-input>
+
+            <app-input
+              class="col-span-1"
+              [label]="'Stanowisko'"
+              [placeholder]="''"
+              [showError]="shouldShowError('employee_position')"
+              [errorMessage]="getErrorMessage('employee_position')"
+              formControlName="employee_position">
+            </app-input>
 
             <div class="flex flex-col">
               <label>Data rozpoczęcia pracy</label>
@@ -226,73 +245,6 @@
     </div>
 
     <div class="grid grid-cols-2 gap-6">
-<!--      <div class="col-span-1 flex flex-col">-->
-<!--        <div class="flex flex-row items-center gap-2">-->
-<!--          <app-icon [iconName]="'document-text'" iconSize="outline"></app-icon>-->
-<!--          <p class="font-bold text-base py-2">Dane dotyczące zatrudnienia</p>-->
-<!--        </div>-->
-<!--        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>-->
-<!--        <div class="grid grid-cols-3 gap-2">-->
-
-<!--          <div class="col-span-1 flex flex-col">-->
-<!--            <div class="flex flex-col">-->
-<!--              <label>Rodzaj umowy</label>-->
-<!--              <mat-form-field>-->
-<!--                <mat-select formControlName="agreement_type" placeholder="Wybierz rodzaj umowy">-->
-<!--                  <mat-option value="permament">Umowa o pracę</mat-option>-->
-<!--                  <mat-option value="contract">Umowa cywilno-prawna</mat-option>-->
-<!--                </mat-select>-->
-<!--                <mat-error>Pole obowiązkowe</mat-error>-->
-<!--              </mat-form-field>-->
-<!--            </div>-->
-<!--          </div>-->
-
-<!--          <div class="col-span-1 flex flex-col">-->
-<!--            <label>Początek okresu umowy</label>-->
-<!--            <mat-form-field>-->
-<!--              <input matInput [matDatepicker]="contractStartPicker" formControlName="contract_date_start"/>-->
-<!--              <mat-datepicker-toggle matIconSuffix [for]="contractStartPicker"></mat-datepicker-toggle>-->
-<!--              <mat-datepicker #contractStartPicker>-->
-<!--              </mat-datepicker>-->
-<!--            </mat-form-field>-->
-<!--          </div>-->
-
-<!--          <div class="col-span-1 flex flex-col">-->
-<!--            <label>Koniec okresu umowy</label>-->
-<!--            <mat-form-field>-->
-<!--              <input matInput [matDatepicker]="contractEndPicker" formControlName="contract_date_end"/>-->
-<!--              <mat-datepicker-toggle matIconSuffix [for]="contractEndPicker"></mat-datepicker-toggle>-->
-<!--              <mat-datepicker #contractEndPicker>-->
-<!--              </mat-datepicker>-->
-<!--            </mat-form-field>-->
-<!--          </div>-->
-
-<!--          <div class="col-span-1 flex flex-col">-->
-<!--            <label>Stawka etatowa</label>-->
-<!--            <mat-form-field>-->
-<!--              <input matInput formControlName="job_rate">-->
-<!--              <mat-error>Pole obowiązkowe</mat-error>-->
-<!--            </mat-form-field>-->
-<!--          </div>-->
-
-<!--          <div class="col-span-1 flex flex-col">-->
-<!--            <label>Etat</label>-->
-<!--            <mat-form-field>-->
-<!--              <input matInput formControlName="job">-->
-<!--              <mat-error>Pole obowiązkowe</mat-error>-->
-<!--            </mat-form-field>-->
-<!--          </div>-->
-
-<!--          <div class="col-span-1 flex flex-col">-->
-<!--            <label>Stawka godzinowa</label>-->
-<!--            <mat-form-field>-->
-<!--              <input matInput formControlName="hour_rate">-->
-<!--              <mat-error>Pole obowiązkowe</mat-error>-->
-<!--            </mat-form-field>-->
-<!--          </div>-->
-
-<!--        </div>-->
-<!--      </div>-->
 
       <div class="col-span-1 flex flex-col">
         <div class="flex flex-row gap-2">
@@ -303,21 +255,22 @@
 
         <div class="flex flex-col">
 
-          <div class="flex flex-col">
-            <label>Niepełnosprawności</label>
-            <mat-form-field>
-              <input matInput>
-              <mat-error>Pole obowiązkowe</mat-error>
-            </mat-form-field>
-          </div>
+          <app-input
+            [label]="'Niepełnosprawności'"
+            [placeholder]="''"
+            [showError]="shouldShowError('')"
+            [errorMessage]="getErrorMessage('')"
+            >
+          </app-input>
 
-          <div class="flex flex-col">
-            <label>KP-188</label>
-            <mat-form-field>
-              <input matInput>
-              <mat-error>Pole obowiązkowe</mat-error>
-            </mat-form-field>
-          </div>
+          <app-input
+            [label]="'KP-188'"
+            [placeholder]="''"
+            [showError]="shouldShowError('')"
+            [errorMessage]="getErrorMessage('')"
+          >
+          </app-input>
+
         </div>
       </div>
     </div>

@@ -96,11 +96,11 @@ export class EmployeeInfoComponent {
   private loadEmployeeVacationLeaves(employeeId: string): void {
     this.vacationLeavesService.getVacationLeaves({ employee_id: employeeId }).subscribe({
       next: (vacationLeaves) => {
-        console.log("Urlopy: ", vacationLeaves);
+        // console.log("Urlopy: ", vacationLeaves);
         // Dane są już zapisane w serwisie przez tap() operator
       },
       error: (error) => {
-        console.error('Błąd ładowania urlopów:', error);
+        // console.error('Błąd ładowania urlopów:', error);
       }
     });
   }

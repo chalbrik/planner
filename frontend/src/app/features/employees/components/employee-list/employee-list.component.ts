@@ -32,7 +32,7 @@ export class EmployeeListComponent implements OnInit {
   }
 
   ngOnInit () {
-    console.log(this.employees());
+    // console.log(this.employees());
   }
 
 

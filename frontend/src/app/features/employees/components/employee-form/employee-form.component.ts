@@ -26,16 +26,9 @@ import {MatBottomSheet} from '@angular/material/bottom-sheet';
 import {InputComponent} from '../../../../shared/components/input/input.component';
 
 
-interface Agreemnet {
-  value: string;
-  viewValue: string;
-}
-
 @Component({
   selector: 'app-employee-form',
   imports: [
-    MatDialogActions,
-    MatDialogClose,
     MatButton,
     MatFormField,
     MatInput,
@@ -114,8 +107,8 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   onAddEmployee() {
-    console.log('Form valid:', this.addEmployeeForm.valid);
-    console.log('Form data:', this.addEmployeeForm.getRawValue());
+    // console.log('Form valid:', this.addEmployeeForm.valid);
+    // console.log('Form data:', this.addEmployeeForm.getRawValue());
     if (this.addEmployeeForm.valid) {
       const formData = this.addEmployeeForm.getRawValue();
 
@@ -194,10 +187,10 @@ private loadLocations(): void {
     this.locationService.getLocations().subscribe({
       next: (data) => {
       this.locations.set(data)
-        console.log("Lokacje: ", data);
+        // console.log("Lokacje: ", data);
       },
       error: (error) => {
-        console.error("Błąd ładowania lokacji: ", error);
+        // console.error("Błąd ładowania lokacji: ", error);
       }
     })
 }

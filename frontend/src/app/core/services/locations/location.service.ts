@@ -22,7 +22,7 @@ export class LocationService {
   getLocations(): Observable<Location[]> {
     return this.http.get<Location[]>(`${this.apiUrl}/`).pipe(
       tap(responseData => {
-        console.log("Response data: ", responseData);
+        // console.log("Response data: ", responseData);
         this._locations.set(responseData);
       })
     );

@@ -7,7 +7,6 @@ import {FooterComponent} from '../footer/footer.component';
   selector: 'app-layout',
   imports: [
     HeaderComponent,
-    FooterComponent
 ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',

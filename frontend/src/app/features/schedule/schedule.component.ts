@@ -18,12 +18,15 @@ import { NotificationPopUpComponent } from './components/notification-pop-up/not
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {CellEditPopupComponent} from './components/cell-edit-popup/cell-edit-popup.component';
-import {timer} from 'rxjs';
+import {Subject, takeUntil, timer} from 'rxjs';
 import {MatFormField, MatLabel} from '@angular/material/input';
 import {MatSelect} from '@angular/material/select';
 import {MatOption} from '@angular/material/core';
 import {LocationService} from '../../core/services/locations/location.service';
 import {Location} from '../../core/services/locations/location.types';
+import {Employee} from '../../core/services/employees/employee.types';
+import {WorkHours} from '../../core/services/schedule/schedule.types';
+import {ConflictService} from '../../core/services/conflicts/conflict.service';
 
 
 interface Day {
@@ -81,9 +84,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private readonly employeesService = inject(EmployeesService);
   private readonly overlay = inject(Overlay);
   private readonly locationService = inject(LocationService);
+  private readonly conflictService = inject(ConflictService);
 
-  employees: any[] = [];
-  workHours: any[] = [];
+  employees: Employee[] = [];
+  workHours: WorkHours[] = [];
   isLoading = false;
   errorMessage: string | null = null;
 
@@ -157,29 +161,19 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   locations = signal<Location[]>([]);
   selectedLocationId = signal<string>('');
 
+  private subscriptions = new Subject<void>();
+
   constructor() {}
 
-  ngOnInit() {
-    this.loadEmployees();
-    this.loadWorkHours();
+  ngOnInit(): void {
     this.loadLocations();
-
     this.setupResponsiveColumns();
-
-    this.scheduleService.scheduleUpdated$.subscribe((updatedData) => {
-      this.loadWorkHours();
-
-      // Użyj timer Observable
-      timer(800).subscribe(() => {
-        this.checkRestTimeConflicts();
-        this.validateAndShowErrors(updatedData);
-      });
-
-      this.selectedCell.set(undefined);
-    });
+    this.setupSubscriptions();
   }
 
   ngOnDestroy() {
+    this.subscriptions.next();
+    this.subscriptions.complete();
     if (typeof window !== 'undefined') {
       window.removeEventListener('resize', this.calculateDayColumnWidth.bind(this));
     }
@@ -231,158 +225,24 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadEmployees(): void {
-    this.isLoading = true;
-    const selectedLocationId = this.selectedLocationId();
-    const params = selectedLocationId ? { location: selectedLocationId } : {};
-
-    this.employeesService.getEmployees(params).subscribe({
-      next: (data) => {
-        // console.log('Otrzymane dane:', data); // ← Dodaj to żeby zobaczyć co przychodzi
-        // console.log('Czy to tablica?', Array.isArray(data)); // ← I to też
-
-        if (Array.isArray(data)) {
-          this.employees = data;
-        } else {
-          // console.error('Otrzymane dane nie są tablicą:', data);
-          this.employees = []; // Ustaw pustą tablicę jako fallback
-        }
-        this.prepareTableData();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Nie udało się załadować pracowników';
-        this.isLoading = false;
-        // console.error('Błąd ładowania pracowników: ', error);
-      },
-    });
-  }
-
-  loadWorkHours(): void {
-    this.isLoading = true;
-    const currentDate = this.currentMonthDate();
-    const filters = {
-      month: currentDate.getMonth() + 1,
-      year: currentDate.getFullYear()
-    };
-
-    this.scheduleService.getWorkHours(filters).subscribe({
-      next: (data) => {
-        // console.log("workHours", data);
-        this.workHours = data;
-        this.prepareTableData();
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Nie udało się załadować harmonogramu';
-        this.isLoading = false;
-        console.error('Błąd ładowania harmonogramu:', error);
-      }
-    });
-  }
-
-  loadLocations(): void {
+  private loadLocations(): void {
     this.locationService.getLocations().subscribe({
-      next: (data) => {
-        this.locations.set(data);
-        // Automatycznie wybierz pierwszą lokację
-        if (data.length > 0) {
-          this.selectedLocationId.set(data[0].id);
-          this.prepareTableData();
+      next: (locations) => {
+        this.locations.set(locations);
+
+        if (locations && locations.length > 0) {
+          const firstLocationId = locations[0].id;
+          this.onLocationChange(firstLocationId);
+        } else {
+          this.errorMessage = 'Brak dostępnych lokacji';
         }
       },
       error: (error) => {
+        this.errorMessage = 'Nie udało się załadować lokacji';
         console.error('Błąd ładowania lokacji:', error);
       }
     });
   }
-
-  // prepareTableData() {
-  //   if (this.employees.length === 0) return;
-  //
-  //   this.dataSource = this.employees.map(employee => {
-  //     const workHoursMap: { [key: string]: string } = {};
-  //     const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
-  //
-  //     employeeWorkHours.forEach(wh => {
-  //       workHoursMap[wh.date] = wh.hours;
-  //       this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
-  //     });
-  //
-  //     return {
-  //       id: employee.id,
-  //       name: `${employee.first_name} ${employee.last_name}`,
-  //       workHours: workHoursMap
-  //     };
-  //   });
-  //
-  //   this.checkRestTimeConflicts();
-  //   this.check35HourRestInAllWeeks();
-  // }
-
-  // prepareTableData() {
-  //   if (this.employees.length === 0) return;
-  //
-  //   // Podziel pracowników na grupy
-  //   const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
-  //   const contractEmployees = this.employees.filter(emp => emp.agreement_type === 'contract');
-  //
-  //   // Przygotuj dane dla UoP (Umowa o Pracę)
-  //   const permanentRows = permanentEmployees.map(employee => {
-  //     const workHoursMap: { [key: string]: string } = {};
-  //     const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
-  //
-  //     employeeWorkHours.forEach(wh => {
-  //       workHoursMap[wh.date] = wh.hours;
-  //       this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
-  //     });
-  //
-  //     return {
-  //       id: employee.id,
-  //       name: `${employee.first_name} ${employee.last_name}`,
-  //       workHours: workHoursMap,
-  //       agreement_type: employee.agreement_type
-  //     };
-  //   });
-  //
-  //   // Separator - tylko jeśli są pracownicy w obu grupach
-  //   const rows: EmployeeRow[] = [...permanentRows];
-  //
-  //   if (contractEmployees.length > 0 && permanentEmployees.length > 0) {
-  //     const separatorRow: EmployeeRow = {
-  //       id: 'separator',
-  //       name: '',
-  //       workHours: {},
-  //       isSeparator: true
-  //     };
-  //     rows.push(separatorRow);
-  //   }
-  //
-  //   // Przygotuj dane dla UZ (Umowa na Zlecenie)
-  //   const contractRows = contractEmployees.map(employee => {
-  //     const workHoursMap: { [key: string]: string } = {};
-  //     const employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
-  //
-  //     employeeWorkHours.forEach(wh => {
-  //       workHoursMap[wh.date] = wh.hours;
-  //       this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
-  //     });
-  //
-  //     return {
-  //       id: employee.id,
-  //       name: `${employee.first_name} ${employee.last_name}`,
-  //       workHours: workHoursMap,
-  //       agreement_type: employee.agreement_type
-  //     };
-  //   });
-  //
-  //   // Połącz wszystko
-  //   rows.push(...contractRows);
-  //   this.dataSource = rows;
-  //
-  //   this.checkRestTimeConflicts();
-  //   this.check35HourRestInAllWeeks();
-  // }
 
   prepareTableData() {
     if (this.employees.length === 0) {
@@ -500,7 +360,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const current = this.currentMonthDate();
     const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 1);
     this.currentMonthDate.set(newDate);
-    this.loadWorkHours();
+    this.loadWorkHoursForLocation();
 
     // Przelicz szerokość dla nowego miesiąca
     this.calculateDayColumnWidth();
@@ -518,21 +378,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   }
 
-  // onCellClick(employee: EmployeeRow, dayNumber: number) {
-  //   const currentDate = this.currentMonthDate();
-  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-  //
-  //   const workHoursObject = this.workHours.find(wh =>
-  //     wh.employee === employee.id && wh.date === dateString
-  //   );
-  //   this.selectedCell.set({
-  //     employee: employee,
-  //     workHours: workHoursObject || null,
-  //     date: dateString
-  //   });
-  //
-  // }
-
   onCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
     if (this.overlayRef) {
       this.overlayRef.dispose();
@@ -541,7 +386,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
 
-    const workHoursObject = this.workHours.find(wh =>
+    const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
       wh.employee === employee.id && wh.date === dateString
     );
 
@@ -567,7 +412,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     const currentLocationId = this.selectedLocationId();
 
-    const workHoursObject = this.workHours.find(wh =>
+    const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
       wh.employee === employee.id &&
       wh.date === dateString &&
       wh.location === currentLocationId
@@ -679,7 +524,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   private onPopupCancel() {
-    console.log('Popup cancel');
+    // console.log('Popup cancel');
     this.closePopup();
   }
 
@@ -709,41 +554,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.selectedCell.set(undefined);
   }
 
-
-  //Pobieranie godzin z dnia poprzedniego oraz nastepnego
-  private getAdjacentDaysHours(employeeId: string, currentDate: string): { previousDay: string | null, nextDay: string | null } {
-    const currentDateObj = new Date(currentDate);
-    // console.log('employeeId', employeeId);
-    // console.log('currentDate ', currentDate);
-
-    // Poprzedni dzień
-    const previousDateObj = new Date(currentDateObj);
-    previousDateObj.setDate(previousDateObj.getDate() - 1);
-    const previousDateString = previousDateObj.toISOString().split('T')[0];
-
-    // Następny dzień
-    const nextDateObj = new Date(currentDateObj);
-    nextDateObj.setDate(nextDateObj.getDate() + 1);
-    const nextDateString = nextDateObj.toISOString().split('T')[0];
-
-    // Pobierz godziny z workHours
-    const previousDayHours = this.workHours.find(wh =>
-      wh.employee === employeeId && wh.date === previousDateString
-    )?.hours || null;
-
-    const nextDayHours = this.workHours.find(wh =>
-      wh.employee === employeeId && wh.date === nextDateString
-    )?.hours || null;
-
-    return {
-      previousDay: previousDayHours,
-      nextDay: nextDayHours
-    };
-  }
-
   private checkRestTimeConflicts(): void {
-    const conflicts = this.scheduleService.validateRestTimeConflicts();
+    const selectedLocationId = this.selectedLocationId();
+    if (!selectedLocationId) return;
 
+    const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
+
+    const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
     this.conflictingCells.set(conflicts);
   }
 
@@ -764,8 +581,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 // Główna metoda sprawdzająca
 
   private check35HourRestInAllWeeks(): void {
-    const badWeeksMap = this.scheduleService.validate35HourRestInAllWeeks(this.currentMonthDate());
+    const selectedLocationId = this.selectedLocationId();
+    if (!selectedLocationId) return;
 
+    const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
+
+    const badWeeksMap = this.conflictService.validate35HourRest(locationWorkHours, this.employees, this.currentMonthDate());
     this.badWeeks.set(badWeeksMap);
   }
 
@@ -786,9 +607,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
   }
 
-  private checkWorkHoursExceed12h(hoursString: string, employeeId: number, date: string): void {
+  private checkWorkHoursExceed12h(hoursString: string, employeeId: string, date: string): void {
     // Użyj metody z serwisu zamiast lokalnej logiki
-    const validationResult = this.scheduleService.validateWorkHoursExceed12h(hoursString);
+    const validationResult = this.conflictService.validateWorkHoursExceed12h(hoursString);
     const cellKey = `${employeeId}-${date}`;
 
     if (validationResult) {
@@ -821,14 +642,16 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
 
     // 1. Walidacja przekroczenia 12h
-    const exceed12hError = this.scheduleService.validateWorkHoursExceed12h(hoursString);
+    const exceed12hError = this.conflictService.validateWorkHoursExceed12h(hoursString);
 
     // 2. Walidacja konfliktów 11h
-    const conflicts = this.scheduleService.validateRestTimeConflicts();
+    const selectedLocationId = this.selectedLocationId();
+    const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
+    const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
     const hasConflict11h = conflicts.has(`${employeeId}-${date}`);
 
     // 3. Walidacja 35h w tygodniu
-    const badWeeks = this.scheduleService.validate35HourRestInAllWeeks(this.currentMonthDate());
+    const badWeeks = this.conflictService.validate35HourRest(locationWorkHours, this.employees, this.currentMonthDate());
     const dayNumber = new Date(date).getDate();
     const weekNumber = this.getWeekNumber(dayNumber);
     const employeeBadWeeks = badWeeks.get(employeeId.toString());
@@ -865,18 +688,150 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
 
   onLocationChange(locationId: string): void {
+    // console.log('onLocationChange wywołane z locationId:', locationId);
+
     if (!locationId) {
-      // Jeśli nie wybrano lokacji, wymuś wybór pierwszej dostępnej
       const firstLocation = this.locations()[0];
       if (firstLocation) {
         this.selectedLocationId.set(firstLocation.id);
-        this.loadEmployees(); // ← Zmień na loadEmployees()
+        this.onLocationChange(firstLocation.id);
       }
       return;
     }
 
+    // Zawsze czyść stan przy zmianie lokacji
+    this.clearConflicts();
+    this.clearTableState();
     this.selectedLocationId.set(locationId);
-    this.loadEmployees(); // ← Zmień na loadEmployees()
+    this.loadDataForLocation();
+  }
+
+  /**
+   * Czyści wszystkie sygnały związane z konfliktami
+   */
+  private clearConflicts(): void {
+    this.conflictingCells.set(new Set());
+    this.badWeeks.set(new Map());
+    this.exceedingWorkHours.set(new Set());
+
+    // Opcjonalnie - wyczyść cache jeśli używasz
+    // this.scheduleService.clearConflictCache(); // jeśli będziemy dodawać cache
+  }
+
+  /**
+   * Czyści stan tabeli i interfejsu użytkownika
+   */
+  private clearTableState(): void {
+    // Wyczyść wybrane komórki
+    this.selectedCell.set(undefined);
+
+    // Wyczyść dane tabeli
+    this.dataSource = [];
+    this.permanentDataSource.set([]);
+    this.contractDataSource.set([]);
+
+    // Zamknij popup edycji jeśli jest otwarty
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+      this.overlayRef = undefined;
+    }
+
+    // Zamknij wszystkie otwarte dialogi z powiadomieniami
+    this.dialog.closeAll();
+  }
+
+  private loadDataForLocation(): void {
+    this.isLoading = true;
+
+    Promise.all([
+      this.loadEmployeesForLocation(),
+      this.loadWorkHoursForLocation()
+    ]).then(() => {
+      this.prepareTableData();
+      this.checkAllConflictsForCurrentLocation();
+      this.isLoading = false;
+    }).catch((error) => {
+      this.errorMessage = 'Nie udało się załadować danych dla lokacji';
+      this.isLoading = false;
+      console.error('Błąd ładowania danych dla lokacji:', error);
+    });
+  }
+
+  private loadEmployeesForLocation(): Promise<Employee[]> {
+    return new Promise((resolve, reject) => {
+      const selectedLocationId = this.selectedLocationId();
+      const params = selectedLocationId ? { location: selectedLocationId } : {};
+
+      this.employeesService.getEmployees(params).subscribe({
+        next: (data) => {
+          if (Array.isArray(data)) {
+            this.employees = data;
+            resolve(data);
+          } else {
+            this.employees = [];
+            resolve([]);
+          }
+        },
+        error: (error) => {
+          console.error('Błąd ładowania pracowników:', error);
+          reject(error);
+        }
+      });
+    });
+  }
+
+  private loadWorkHoursForLocation(): Promise<WorkHours[]> {
+    return new Promise((resolve, reject) => {
+      const currentDate = this.currentMonthDate();
+      const selectedLocationId = this.selectedLocationId();
+
+      const filters = {
+        month: currentDate.getMonth() + 1,
+        year: currentDate.getFullYear(),
+        // ✅ KLUCZOWA ZMIANA: Dodaj filtrowanie według lokacji
+        location: selectedLocationId
+      };
+
+      this.scheduleService.getWorkHours(filters).subscribe({
+        next: (data) => {
+          this.workHours = data;
+          resolve(data);
+        },
+        error: (error) => {
+          console.error('Błąd ładowania harmonogramu:', error);
+          reject(error);
+        }
+      });
+    });
+  }
+
+  private checkAllConflictsForCurrentLocation(): void {
+    const selectedLocationId = this.selectedLocationId();
+
+    if (!selectedLocationId) {
+      console.warn('Brak wybranej lokacji - pomijam sprawdzanie konfliktów');
+      return;
+    }
+
+    // Sprawdź konflikty używając nowych metod serwisu z filtrowaniem
+    this.checkRestTimeConflicts();
+    this.check35HourRestInAllWeeks();
+  }
+
+
+  private setupSubscriptions(): void {
+    this.scheduleService.scheduleUpdated$.pipe(takeUntil(this.subscriptions)).subscribe((updatedData) => {
+      this.loadWorkHoursForLocation().then(() => {
+        this.prepareTableData();
+
+        timer(800).subscribe(() => {
+          this.checkAllConflictsForCurrentLocation();
+          this.validateAndShowErrors(updatedData);
+        });
+      });
+
+      this.selectedCell.set(undefined);
+    });
   }
 
 

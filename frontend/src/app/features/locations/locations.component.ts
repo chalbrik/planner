@@ -8,7 +8,7 @@ import {
   MatColumnDef,
   MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow,
-  MatHeaderRowDef,
+  MatHeaderRowDef, MatNoDataRow,
   MatRow, MatRowDef, MatTable, MatTableDataSource
 } from "@angular/material/table";
 import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
@@ -19,13 +19,11 @@ import {MatIcon} from '@angular/material/icon';
 import {LocationService} from '../../core/services/locations/location.service';
 import { Location } from '../../core/services/locations/location.types';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
-import {EmployeeFormComponent} from '../employees/components/employee-form/employee-form.component';
 import {LocationFormComponent} from './components/location-form/location-form.component';
 
 @Component({
   selector: 'app-locations',
   imports: [
-    EmployeeInfoComponent,
     IconComponent,
     MatButton,
     MatCell,
@@ -35,19 +33,18 @@ import {LocationFormComponent} from './components/location-form/location-form.co
     MatHeaderCell,
     MatHeaderRow,
     MatHeaderRowDef,
-    MatIcon,
     MatIconButton,
     MatInput,
     MatLabel,
     MatPaginator,
     MatRow,
     MatRowDef,
-    MatSidenav,
     MatSidenavContainer,
     MatSidenavContent,
     MatSort,
     MatTable,
-    MatHeaderCellDef
+    MatHeaderCellDef,
+    MatNoDataRow
   ],
   templateUrl: './locations.component.html',
   styleUrl: './locations.component.scss',
@@ -81,10 +78,10 @@ export class LocationsComponent implements OnInit {
     this.locationService.getLocations().subscribe({
       next: (data) => {
         this.dataSource.data = data;
-        console.log("Lokacje: ", data);
+        // console.log("Lokacje: ", data);
       },
       error: (error) => {
-        console.error("Błąd ładowania lokacji: ", error);
+        // console.error("Błąd ładowania lokacji: ", error);
       }
     })
   }
