@@ -2,28 +2,28 @@
 
 
 
-  <app-info-display [name]="'Imię Nazwisko'" [data]="`${employee().full_name}`" [iconName]="'user-circle'" [iconSize]="'outline'"></app-info-display>
+  <app-info-display [name]="'Imię Nazwisko'" [data]="`${employee().full_name}`" [iconName]="'user-circle'" [iconSize]="'mini'"></app-info-display>
 
 
   <mat-divider class="!border-warm-gray-400"></mat-divider>
 
     <div class="grid grid-cols-2 gap-3">
 
-      <app-info-display [name]="'Numer ewidencyjny'" [data]="employee().identification_number || 'Brak'" [iconName]="'identification'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Numer ewidencyjny'" [data]="employee().identification_number || 'Brak'" [iconName]="'identification'" [iconSize]="'mini'"></app-info-display>
 
-      <app-info-display [name]="'Etat'" [data]="employee().job || 'Brak'" [iconName]="'briefcase'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Etat'" [data]="employee().job || 'Brak'" [iconName]="'briefcase'" [iconSize]="'mini'"></app-info-display>
 
-      <app-info-display [name]="'Email'" [data]="employee().email || 'Brak'" [iconName]="'envelope'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Email'" [data]="employee().email || 'Brak'" [iconName]="'envelope'" [iconSize]="'mini'"></app-info-display>
 
-      <app-info-display [name]="'Numer telefonu'" [data]="employee().phone || 'Brak'" [iconName]="'phone'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Numer telefonu'" [data]="employee().phone || 'Brak'" [iconName]="'phone'" [iconSize]="'mini'"></app-info-display>
 
-      <app-info-display [name]="'Rodzaj umowy'" [data]="(employee().agreement_type === 'permanent') ? 'Umowa o pracę' : 'Umowa cywilno prawna'" [iconName]="'document'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Rodzaj umowy'" [data]="(employee().agreement_type === 'permanent') ? 'Umowa o pracę' : 'Umowa cywilno prawna'" [iconName]="'document'" [iconSize]="'mini'"></app-info-display>
 
-      <app-info-display [name]="'Czas trwania umowy'" [data]="`${employee().contract_date_start} - ${employee().contract_date_end}`" [iconName]="'clock'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Czas trwania umowy'" [data]="`${employee().contract_date_start} - ${employee().contract_date_end}`" [iconName]="'clock'" [iconSize]="'mini'"></app-info-display>
 
-      <app-info-display [name]="'Stawka etatowa'" [data]="employee().job_rate || 'Brak'" [iconName]="'banknotes'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Stawka etatowa'" [data]="employee().job_rate || 'Brak'" [iconName]="'banknotes'" [iconSize]="'mini'"></app-info-display>
 
-      <app-info-display [name]="'Stawka godzinowa'" [data]="employee().hour_rate || 'Brak'" [iconName]="'banknotes'" [iconSize]="'outline'"></app-info-display>
+      <app-info-display [name]="'Stawka godzinowa'" [data]="employee().hour_rate || 'Brak'" [iconName]="'banknotes'" [iconSize]="'mini'"></app-info-display>
 
     </div>
 

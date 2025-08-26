@@ -1,22 +1,21 @@
 <div class="h-full w-full">
   <form class="rounded-xl font-geist" [formGroup]="addLocationForm">
 
+    <app-input
+      [label]="'Nazwa'"
+      [placeholder]="''"
+      [showError]="shouldShowError('name')"
+      [errorMessage]="getErrorMessage('name')"
+      formControlName="name">
+    </app-input>
 
-    <div class="flex flex-col">
-      <label>Nazwa</label>
-      <mat-form-field>
-        <input matInput formControlName="name">
-        <mat-error>Pole obowiązkowe</mat-error>
-      </mat-form-field>
-    </div>
-
-    <div class="flex flex-col">
-      <label>Adres</label>
-      <mat-form-field>
-        <input matInput formControlName="address">
-        <mat-error>Pole obowiązkowe</mat-error>
-      </mat-form-field>
-    </div>
+    <app-input
+      [label]="'Adres'"
+      [placeholder]="''"
+      [showError]="shouldShowError('address')"
+      [errorMessage]="getErrorMessage('address')"
+      formControlName="address">
+    </app-input>
 
 
     <div class="py-6 w-full flex flex-row justify-center items-center gap-6">

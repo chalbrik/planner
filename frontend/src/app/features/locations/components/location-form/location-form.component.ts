@@ -11,6 +11,7 @@ import {MatSelect} from '@angular/material/select';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {LocationService} from '../../../../core/services/locations/location.service';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
+import {InputComponent} from '../../../../shared/components/input/input.component';
 
 @Component({
   selector: 'app-location-form',
@@ -30,7 +31,8 @@ import {MatBottomSheet} from '@angular/material/bottom-sheet';
     MatSelect,
     MatSuffix,
     ReactiveFormsModule,
-    MatFormField
+    MatFormField,
+    InputComponent
   ],
   templateUrl: './location-form.component.html',
   styleUrl: './location-form.component.scss'
@@ -68,6 +70,21 @@ export class LocationFormComponent implements OnInit {
         }
       })
     }
+  }
+
+  getErrorMessage(controlName: string): string {
+    const control = this.addLocationForm.get(controlName);
+
+    if (control?.errors) {
+      return 'Pole obowiązkowe';
+    }
+
+    return '';
+  }
+
+  shouldShowError(controlName: string): boolean {
+    const control = this.addLocationForm.get(controlName);
+    return !!(control?.invalid && control?.touched);
   }
 
 }

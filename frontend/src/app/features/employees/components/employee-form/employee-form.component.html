@@ -1,13 +1,9 @@
 <div class="h-full w-full">
   <form class="rounded-xl font-geist" [formGroup]="addEmployeeForm">
 
-    <div class="grid grid-cols-6 gap-6">
-      <div class="col-span-3 flex flex-col">
-        <div class="flex flex-row items-center gap-2">
-          <app-icon [iconName]="'user-circle'" iconSize="outline"></app-icon>
-          <p class="font-bold text-base py-2">Dane osobowe</p>
-        </div>
-        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
+    <div class="grid grid-cols-6 gap-x-6 gap-y-2">
+      <div class="col-span-2 flex flex-col">
+        <app-title-display [name]="'Dane osobowe'" [iconName]="'user-circle'" [iconSize]="'outline'"></app-title-display>
 
         <div class="grid grid-cols-2 gap-2">
 
@@ -19,15 +15,14 @@
             formControlName="full_name">
           </app-input>
 
-          <div class="col-span-1 flex flex-col">
-            <label>Data urodzenia</label>
-            <mat-form-field>
-              <input matInput [matDatepicker]="birthDatePicker" formControlName="birth_date"/>
-              <mat-datepicker-toggle matIconSuffix [for]="birthDatePicker"></mat-datepicker-toggle>
-              <mat-datepicker #birthDatePicker>
-              </mat-datepicker>
-            </mat-form-field>
-          </div>
+          <app-date-input
+            class="col-span-1"
+            [label]="'Data urodzenia'"
+            [placeholder]="''"
+            [showError]="shouldShowError('birth_date')"
+            [errorMessage]="getErrorMessage('birth_date')"
+            formControlName="birth_date">
+          </app-date-input>
 
           <app-input
             [label]="'Telefon'"
@@ -48,89 +43,39 @@
         </div>
 
       </div>
-      <div class="col-span-1 flex flex-col">
-        <div class="flex flex-row gap-2">
-          <app-icon [iconName]="'academic-cap'" iconSize="outline"></app-icon>
-          <p class="font-bold text-base py-2">Wykształcenie</p>
-        </div>
-        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
 
-        <div class="flex flex-col">
-          <div class="flex flex-col">
-            <label>Typ szkoły</label>
-            <mat-form-field>
-              <mat-select formControlName="school_type" placeholder="Wybierz typ szkoły">
-                <mat-option value="basic_vocational">Zasadnicza lub inna równorzędna szkoła zawodowa</mat-option>
-                <mat-option value="secondary_vocational">Średnia szkoła zawodowa</mat-option>
-                <mat-option value="secondary_vocational_graduates">Średnia szkoła zawodowa dla absolwentów zasadniczych i równorzędnych szkół zawodowych</mat-option>
-                <mat-option value="secondary_general">Średnia szkoła ogólnokształcąca</mat-option>
-                <mat-option value="post_secondary">Szkoła policealna</mat-option>
-                <mat-option value="higher_education">Szkoła wyższa</mat-option>
-              </mat-select>
-              <mat-error>Pole obowiązkowe</mat-error>
-            </mat-form-field>
-          </div>
-
-          <app-input
-            [label]="'Nazwa szkoły'"
-            [placeholder]="''"
-            [showError]="shouldShowError('school_name')"
-            [errorMessage]="getErrorMessage('school_name')"
-            formControlName="school_name">
-          </app-input>
-
-
-          <div class="flex flex-col">
-            <label>Rok ukończenia</label>
-            <mat-form-field>
-              <input matInput [matDatepicker]="graduationPicker" formControlName="graduation_year"/>
-              <mat-datepicker-toggle matIconSuffix [for]="graduationPicker"></mat-datepicker-toggle>
-              <mat-datepicker #graduationPicker></mat-datepicker>  <!-- ZAMKNIJ TAGIEM -->
-            </mat-form-field>
-          </div>
-        </div>
-      </div>
 
       <div class="col-span-2 flex flex-col">
-        <div class="flex flex-row items-center gap-2">
-          <app-icon [iconName]="'document-text'" iconSize="outline"></app-icon>
-          <p class="font-bold text-base py-2">Dane dotyczące zatrudnienia</p>
-        </div>
-        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
+        <app-title-display [name]="'Dane dotyczące zatrudnienia'" [iconName]="'document-text'" [iconSize]="'outline'"></app-title-display>
+
         <div class="grid grid-cols-2 gap-2">
 
-          <div class="col-span-1 flex flex-col">
-            <div class="flex flex-col">
-              <label>Rodzaj umowy</label>
-              <mat-form-field>
-                <mat-select formControlName="agreement_type" placeholder="Wybierz rodzaj umowy">
-                  <mat-option value="permanent">Umowa o pracę</mat-option>
-                  <mat-option value="contract">Umowa cywilno-prawna</mat-option>
-                </mat-select>
-                <mat-error>Pole obowiązkowe</mat-error>
-              </mat-form-field>
-            </div>
-          </div>
+          <app-select-input
+            [label]="'Rodzaj umowy'"
+            [placeholder]="'Wybierz rodzaj umowy'"
+            [options]="contractTypeOptions"
+            [showError]="shouldShowError('agreement_type')"
+            [errorMessage]="getErrorMessage('agreement_type')"
+            formControlName="agreement_type">
+          </app-select-input>
 
-          <div class="col-span-1 flex flex-col">
-            <label>Początek okresu umowy</label>
-            <mat-form-field>
-              <input matInput [matDatepicker]="contractStartPicker" formControlName="contract_date_start"/>
-              <mat-datepicker-toggle matIconSuffix [for]="contractStartPicker"></mat-datepicker-toggle>
-              <mat-datepicker #contractStartPicker>
-              </mat-datepicker>
-            </mat-form-field>
-          </div>
+          <app-date-input
+            class="col-span-1"
+            [label]="'Początek okresu umowy'"
+            [placeholder]="''"
+            [showError]="shouldShowError('contract_date_start')"
+            [errorMessage]="getErrorMessage('contract_date_start')"
+            formControlName="contract_date_start">
+          </app-date-input>
 
-          <div class="col-span-1 flex flex-col">
-            <label>Koniec okresu umowy</label>
-            <mat-form-field>
-              <input matInput [matDatepicker]="contractEndPicker" formControlName="contract_date_end"/>
-              <mat-datepicker-toggle matIconSuffix [for]="contractEndPicker"></mat-datepicker-toggle>
-              <mat-datepicker #contractEndPicker>
-              </mat-datepicker>
-            </mat-form-field>
-          </div>
+          <app-date-input
+            class="col-span-1"
+            [label]="'Koniec okresu umowy'"
+            [placeholder]="''"
+            [showError]="shouldShowError('contract_date_end')"
+            [errorMessage]="getErrorMessage('contract_date_end')"
+            formControlName="contract_date_end">
+          </app-date-input>
 
           <app-input
             class="col-span-1"
@@ -140,7 +85,69 @@
             [errorMessage]="getErrorMessage('job_rate')"
             formControlName="job_rate">
           </app-input>
+        </div>
+      </div>
 
+      <div class="col-span-2 flex flex-col">
+        <app-title-display [name]="'Informacje dodatkowe'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>
+        <div class="grid grid-cols-2 gap-2">
+          <app-input
+            class="col-span-2"
+            [label]="'Niepełnosprawności'"
+            [placeholder]="''"
+            [showError]="shouldShowError('')"
+            [errorMessage]="getErrorMessage('')"
+          >
+          </app-input>
+
+          <app-input
+            class="col-span-2"
+            [label]="'KP-188'"
+            [placeholder]="''"
+            [showError]="shouldShowError('')"
+            [errorMessage]="getErrorMessage('')"
+          >
+          </app-input>
+        </div>
+      </div>
+
+      <div class="col-span-2 flex flex-col">
+        <app-title-display [name]="'Wykształcenie'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>
+
+        <div class="grid grid-cols-2 gap-2">
+          <app-select-input
+            class="col-span-2"
+            [label]="'Typ szkoły'"
+            [placeholder]="'Wybierz typ szkoły'"
+            [options]="schoolTypeOptions"
+            [showError]="shouldShowError('school_type')"
+            [errorMessage]="getErrorMessage('school_type')"
+            formControlName="school_type">
+          </app-select-input>
+
+          <app-input
+            class="col-span-1"
+            [label]="'Nazwa szkoły'"
+            [placeholder]="''"
+            [showError]="shouldShowError('school_name')"
+            [errorMessage]="getErrorMessage('school_name')"
+            formControlName="school_name">
+          </app-input>
+
+          <app-date-input
+            class="col-span-1"
+            [label]="'Rok ukończenia'"
+            [placeholder]="''"
+            [showError]="shouldShowError('graduation_year')"
+            [errorMessage]="getErrorMessage('graduation_year')"
+            formControlName="graduation_year">
+          </app-date-input>
+
+        </div>
+      </div>
+
+      <div class="col-span-2 flex flex-col">
+        <div class="grid grid-cols-2 gap-2">
           <app-input
             class="col-span-1"
             [label]="'Etat'"
@@ -165,8 +172,8 @@
               @for(location of locations(); track location.id){
                 <div class="flex flex-row items-center">
                   <mat-checkbox
-                  [value]="location.id"
-                  (change)="onLocationChange(location.id, $event)">
+                    [value]="location.id"
+                    (change)="onLocationChange(location.id, $event)">
                     {{ location.name }}
                   </mat-checkbox>
                 </div>
@@ -174,9 +181,10 @@
               }
             </div>
           </div>
-
         </div>
       </div>
+
+
     </div>
 
     <div class="flex flex-flex gap-2">
@@ -222,57 +230,25 @@
               formControlName="employee_position">
             </app-input>
 
-            <div class="flex flex-col">
-              <label>Data rozpoczęcia pracy</label>
-              <mat-form-field>
-                <input matInput [matDatepicker]="startPicker" formControlName="work_date_start">
-                <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
-                <mat-datepicker #startPicker></mat-datepicker>
-              </mat-form-field>
-            </div>
+            <app-date-input
+              [label]="'Data rozpoczęcia pracy'"
+              [placeholder]="''"
+              [showError]="shouldShowError('work_start_date')"
+              [errorMessage]="getErrorMessage('work_start_date')"
+              formControlName="work_start_date">
+            </app-date-input>
 
-            <div class="flex flex-col">
-              <label>Data zakończenia pracy</label>
-              <mat-form-field>
-                <input matInput [matDatepicker]="endPicker" formControlName="work_date_end">
-                <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
-                <mat-datepicker #endPicker></mat-datepicker>
-              </mat-form-field>
-            </div>
+            <app-date-input
+              [label]="'Data zakończenia pracy'"
+              [placeholder]="''"
+              [showError]="shouldShowError('work_date_end')"
+              [errorMessage]="getErrorMessage('work_date_end')"
+              formControlName="work_date_end">
+            </app-date-input>
+
           </div>
         </div>
       }
-    </div>
-
-    <div class="grid grid-cols-2 gap-6">
-
-      <div class="col-span-1 flex flex-col">
-        <div class="flex flex-row gap-2">
-          <app-icon [iconName]="'academic-cap'" iconSize="outline"></app-icon>
-          <p class="font-bold text-base py-2">Informacje dodatkowe</p>
-        </div>
-        <mat-divider class="bg-warm-gray-400 !mb-2"></mat-divider>
-
-        <div class="flex flex-col">
-
-          <app-input
-            [label]="'Niepełnosprawności'"
-            [placeholder]="''"
-            [showError]="shouldShowError('')"
-            [errorMessage]="getErrorMessage('')"
-            >
-          </app-input>
-
-          <app-input
-            [label]="'KP-188'"
-            [placeholder]="''"
-            [showError]="shouldShowError('')"
-            [errorMessage]="getErrorMessage('')"
-          >
-          </app-input>
-
-        </div>
-      </div>
     </div>
 
 

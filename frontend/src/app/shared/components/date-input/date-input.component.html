@@ -3,11 +3,15 @@
   <mat-form-field>
     <input
       matInput
+      [matDatepicker]="datePicker"
       [value]="value()"
-      [disabled]="disabled()"
+      [attr.disabled]="disabled()"
       [placeholder]="placeholder()"
-      (input)="handleInput($event)"
+      (dateChange)="handleDateChange($event)"
       (blur)="handleBlur()">
+
+    <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+    <mat-datepicker #datePicker></mat-datepicker>
 
     @if(showError()) {
       <mat-error>{{ errorMessage() }}</mat-error>

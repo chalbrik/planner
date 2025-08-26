@@ -27,6 +27,7 @@ import {Location} from '../../core/services/locations/location.types';
 import {Employee} from '../../core/services/employees/employee.types';
 import {WorkHours} from '../../core/services/schedule/schedule.types';
 import {ConflictService} from '../../core/services/conflicts/conflict.service';
+import {SelectInputComponent} from '../../shared/components/select-input/select-input.component';
 
 
 interface Day {
@@ -71,6 +72,7 @@ interface EmployeeRow {
     MatLabel,
     MatSelect,
     MatOption,
+    SelectInputComponent,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -159,6 +161,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   contractDataSource = signal<EmployeeRow[]>([]);
 
   locations = signal<Location[]>([]);
+  locationOptions = computed(() =>
+    this.locations().map(location => ({
+      value: location.id,
+      label: location.name
+    }))
+  );
   selectedLocationId = signal<string>('');
 
   private subscriptions = new Subject<void>();

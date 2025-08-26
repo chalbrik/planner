@@ -20,14 +20,12 @@
       </button>
     </div>
 
-    <mat-form-field class="w-60">
-      <mat-label>Lokacja</mat-label>
-      <mat-select [(ngModel)]="selectedLocationId" (selectionChange)="onLocationChange($event.value)">
-        @for (location of locations(); track location.id) {
-          <mat-option [value]="location.id">{{location.name}}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+    <app-select-input
+      [label]="'Lokacja'"
+      [options]="locationOptions()"
+      [(ngModel)]="selectedLocationId"
+      (selectionChange)="onLocationChange($event)">
+    </app-select-input>
 
   </div>
 

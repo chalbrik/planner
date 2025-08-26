@@ -6,7 +6,7 @@ import {
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatError, MatFormField, MatInput, MatSuffix} from '@angular/material/input';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatNativeDateModule, MatOption, provideNativeDateAdapter} from '@angular/material/core';
+import {MatNativeDateModule, MatOption, MatOptionModule, provideNativeDateAdapter} from '@angular/material/core';
 import {
   MatDatepicker,
   MatDatepickerInput,
@@ -24,6 +24,10 @@ import {LocationService} from '../../../../core/services/locations/location.serv
 import {Location} from '../../../../core/services/locations/location.types';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
 import {InputComponent} from '../../../../shared/components/input/input.component';
+import {DateInputComponent} from '../../../../shared/components/date-input/date-input.component';
+import {SelectInputComponent} from '../../../../shared/components/select-input/select-input.component';
+import {InfoDisplayComponent} from '../../../../shared/components/info-display/info-display.component';
+import {TitleDisplayComponent} from '../../../../shared/components/title-display/title-display.component';
 
 
 @Component({
@@ -47,6 +51,12 @@ import {InputComponent} from '../../../../shared/components/input/input.componen
     MatIconButton,
     MatCheckbox,
     InputComponent,
+    DateInputComponent,
+    SelectInputComponent,
+    MatOptionModule,
+    MatOption,
+    InfoDisplayComponent,
+    TitleDisplayComponent
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -66,7 +76,19 @@ export class EmployeeFormComponent implements OnInit {
 
   locations = signal<Location[]>([]);
 
+  schoolTypeOptions = [
+    { value: 'basic_vocational', label: 'Zasadnicza lub inna równorzędna szkoła zawodowa' },
+    { value: 'secondary_vocational', label: 'Średnia szkoła zawodowa' },
+    { value: 'secondary_vocational_graduates', label: 'Średnia szkoła zawodowa dla absolwentów zasadniczych i równorzędnych szkół zawodowych' },
+    { value: 'secondary_general', label: 'Średnia szkoła ogólnokształcąca' },
+    { value: 'post_secondary', label: 'Szkoła policealna' },
+    { value: 'higher_education', label: 'Szkoła wyższa' }
+  ];
 
+  contractTypeOptions = [
+    { value: 'permanent', label: 'Umowa o pracę' },
+    { value: 'contract', label: 'Umowa cywilno-prawna' }
+  ];
 
   constructor() {
   }
