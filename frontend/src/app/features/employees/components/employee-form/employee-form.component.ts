@@ -1,24 +1,9 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {
-  MatDialogActions,
-  MatDialogClose,
-} from '@angular/material/dialog';
-import {MatButton, MatIconButton} from '@angular/material/button';
-import {MatError, MatFormField, MatInput, MatSuffix} from '@angular/material/input';
+import {ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewChild, ViewEncapsulation} from '@angular/core';
+import {MatButton} from '@angular/material/button';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatNativeDateModule, MatOption, MatOptionModule, provideNativeDateAdapter} from '@angular/material/core';
-import {
-  MatDatepicker,
-  MatDatepickerInput,
-  MatDatepickerToggle,
-} from '@angular/material/datepicker';
+import {MatNativeDateModule, MatOptionModule, provideNativeDateAdapter} from '@angular/material/core';
 import {EmployeesService} from '../../../../core/services/employees/employees.service';
-import {MatDivider} from '@angular/material/divider';
-import {CreateEmployeeRequest} from '../../../../core/services/employees/employee.types';
 import {MatSnackBar} from '@angular/material/snack-bar';
-import {MatSelect} from '@angular/material/select';
-import {IconComponent} from '../../../../shared/components/icon';
-import {MatIcon} from '@angular/material/icon';
 import {MatCheckbox} from '@angular/material/checkbox';
 import {LocationService} from '../../../../core/services/locations/location.service';
 import {Location} from '../../../../core/services/locations/location.types';
@@ -26,37 +11,29 @@ import {MatBottomSheet} from '@angular/material/bottom-sheet';
 import {InputComponent} from '../../../../shared/components/input/input.component';
 import {DateInputComponent} from '../../../../shared/components/date-input/date-input.component';
 import {SelectInputComponent} from '../../../../shared/components/select-input/select-input.component';
-import {InfoDisplayComponent} from '../../../../shared/components/info-display/info-display.component';
 import {TitleDisplayComponent} from '../../../../shared/components/title-display/title-display.component';
+import {MatStep, MatStepLabel, MatStepper, MatStepperPrevious} from '@angular/material/stepper';
+import {ButtonComponent} from '../../../../shared/components/button/button.component';
 
 
 @Component({
   selector: 'app-employee-form',
   imports: [
     MatButton,
-    MatFormField,
-    MatInput,
     ReactiveFormsModule,
     FormsModule,
-    MatDatepickerToggle,
-    MatDivider,
-    MatDatepickerInput,
-    MatDatepicker,
-    MatError,
     MatNativeDateModule,
-    MatSuffix,
-    MatSelect,
-    MatOption,
-    IconComponent,
-    MatIconButton,
     MatCheckbox,
     InputComponent,
     DateInputComponent,
     SelectInputComponent,
     MatOptionModule,
-    MatOption,
-    InfoDisplayComponent,
-    TitleDisplayComponent
+    TitleDisplayComponent,
+    MatStepper,
+    MatStep,
+    MatStepLabel,
+    MatStepperPrevious,
+    ButtonComponent,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -72,9 +49,13 @@ export class EmployeeFormComponent implements OnInit {
   private readonly locationService = inject(LocationService);
   private readonly bottomSheet = inject(MatBottomSheet);
 
+  @ViewChild('employerStepper') employerStepper!: MatStepper;
+
   addEmployeeForm!: FormGroup;
 
   locations = signal<Location[]>([]);
+
+  agreementType = signal<string>('');
 
   schoolTypeOptions = [
     { value: 'basic_vocational', label: 'Zasadnicza lub inna równorzędna szkoła zawodowa' },
@@ -114,7 +95,7 @@ export class EmployeeFormComponent implements OnInit {
 
       //Pola wypełniane przez kierownika
 
-      agreement_type: ['permanent'],
+      agreement_type: [''],
       job: [''],
       hour_rate: [''],
       job_rate: [''],
@@ -124,7 +105,13 @@ export class EmployeeFormComponent implements OnInit {
       locations: this.formBuilder.array([]),
     })
 
+    this.addEmployer();
+
     this.loadLocations();
+
+    this.addEmployeeForm.get('agreement_type')?.valueChanges.subscribe(value => {
+      this.agreementType.set(value);
+    });
 
   }
 
@@ -190,14 +177,42 @@ export class EmployeeFormComponent implements OnInit {
     });
   }
 
+  // Obsługuje kliknięcie "Następny" - dodaje nowego pracodawcę jeśli to ostatni krok
+  handleNextStep(currentIndex: number): void {
+    const isLastStep = currentIndex === this.previousEmployers.length - 1;
+
+    if (isLastStep) {
+      // Jeśli to ostatni krok, dodaj nowego pracodawcę
+      this.addEmployer();
+
+      // Przejdź do nowo dodanego kroku po krótkiej przerwie
+      setTimeout(() => {
+        this.employerStepper.selectedIndex = currentIndex + 1;
+      }, 300);
+    } else {
+      // Jeśli nie ostatni, przejdź do następnego istniejącego kroku
+      this.employerStepper.next();
+    }
+  }
+
 // Dodaje nowego pracodawcę
   addEmployer(): void {
     this.previousEmployers.push(this.createEmployerGroup());
   }
 
-// Usuwa pracodawcę po indeksie
   removeEmployer(index: number): void {
+    // Nie pozwalaj usunąć ostatniego pracodawcy - zawsze musi zostać przynajmniej jeden
+    if (this.previousEmployers.length <= 1) {
+      this.snackBar.open('Musi zostać przynajmniej jeden pracodawca', 'OK', { duration: 3000 });
+      return;
+    }
+
     this.previousEmployers.removeAt(index);
+  }
+
+  removeCurrentEmployer(): void {
+    const currentIndex = this.employerStepper.selectedIndex;
+    this.removeEmployer(currentIndex);
   }
 
 private formatDate(date: Date): string {
@@ -244,6 +259,10 @@ onLocationChange(locationId: string, event: any): void {
   shouldShowError(controlName: string): boolean {
     const control = this.addEmployeeForm.get(controlName);
     return !!(control?.invalid && control?.touched);
+  }
+
+  onCancel(): void {
+    this.bottomSheet.dismiss();
   }
 
 

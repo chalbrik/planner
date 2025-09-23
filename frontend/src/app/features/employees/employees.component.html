@@ -49,77 +49,76 @@
     <mat-sidenav-content class="p-4">
 
       <!-- Pole filtrowania -->
-      <div class="flex flex-row gap-4">
-        <mat-form-field class="w-full mb-4">
-          <mat-label>Szukaj pracowników</mat-label>
-          <input matInput (keyup)="applyFilter($event)" placeholder="Wpisz imię, nazwisko, email..." #input>
+      <div class="flex flex-row gap-4 h-16 !border-primary-800">
+        <mat-form-field class="w-full h-full !border-primary-800">
+          <input matInput class="h-11 !text-primary-800 !border-primary-800" (keyup)="applyFilter($event)" placeholder="Wyszukaj pracownika" #input>
         </mat-form-field>
-        <button mat-stroked-button class="px-2 !rounded-md !border-warm-gray-400 gap-2 whitespace-nowrap w-60 !h-14" (click)="openAddEmployeeDialog()">
+        <button mat-stroked-button class="px-2 !rounded-xl !border-primary-800 gap-2 whitespace-nowrap w-60 !h-11" (click)="openAddEmployeeDialog()">
           <div class="flex flex-row justify-start items-center h-full w-full gap-2">
-            <app-icon iconName="plus" iconSize="outline" class="text-warm-gray-400"></app-icon>
-            <span class="font-geist text-base text-warm-gray-400">Dodaj pracownika</span>
+            <app-icon iconName="plus" iconSize="outline" class="text-primary-800"></app-icon>
+            <span class="font-geist text-base text-primary-800">Dodaj pracownika</span>
           </div>
         </button>
 
       </div>
 
       <!-- Tabela -->
-      <div class="mat-elevation-z8">
+      <div class="mat-elevation-z8 border-2 border-primary-800 overflow-hidden rounded-xl">
         <table mat-table [dataSource]="dataSource" matSort>
 
           <!-- Kolumna Nazwa Numer ewidencyjny -->
           <ng-container matColumnDef="identification_number">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Numer ewidencyjny </th>
-            <td mat-cell *matCellDef="let employee">
+            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Numer ewidencyjny </th>
+            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
               {{employee.identification_number || 'Brak'}}
             </td>
           </ng-container>
 
           <!-- Kolumna Nazwa (Imię + Nazwisko) -->
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Imię Nazwisko </th>
-            <td mat-cell *matCellDef="let employee">
+            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Imię Nazwisko </th>
+            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
               {{employee.full_name}}
             </td>
           </ng-container>
 
           <!-- Kolumna Email -->
           <ng-container matColumnDef="job">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Etat </th>
-            <td mat-cell *matCellDef="let employee">
+            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Etat </th>
+            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
               {{employee.job || 'Brak'}}
             </td>
           </ng-container>
 
           <!-- Kolumna Rodzaj umowy -->
           <ng-container matColumnDef="agreement_type">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header> Rodzaj umowy </th>
-            <td mat-cell *matCellDef="let employee">
+            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Rodzaj umowy </th>
+            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
               {{getAgreementTypeLabel(employee.agreement_type)}}
             </td>
           </ng-container>
 
           <!-- Kolumna Actions -->
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef> Akcje </th>
-            <td mat-cell *matCellDef="let employee">
+            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Akcje </th>
+            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
               <button mat-icon-button class="delete-button" (click)="onDeleteEmployee(employee, $event)">
-                <app-icon iconName="trash" iconSize="outline"></app-icon>
+                <app-icon iconName="trash" iconSize="outline" class="text-primary-800"></app-icon>
               </button>
             </td>
           </ng-container>
 
           <!-- Wiersze z obsługą kliknięcia -->
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="!bg-primary-100 !h-11"></tr>
           <tr mat-row
               *matRowDef="let employee; columns: displayedColumns;"
               (click)="onRowClick(employee)"
-              class="cursor-pointer hover:bg-gray-100">
+              class="cursor-pointer !bg-primary-100 !h-11">
           </tr>
 
           <!-- Wiersz gdy brak danych -->
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          <tr class="mat-row !bg-primary-100 !h-11" *matNoDataRow>
+            <td class="mat-cell !bg-primary-100" [attr.colspan]="displayedColumns.length">
               Brak danych "{{input.value}}"
             </td>
           </tr>
@@ -127,6 +126,7 @@
 
         <!-- Paginator -->
         <mat-paginator
+          class="!bg-primary-100"
           [pageSizeOptions]="[5, 10, 25, 50]"
           [pageSize]="10"
           aria-label="Wybierz stronę pracowników">

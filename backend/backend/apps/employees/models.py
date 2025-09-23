@@ -197,3 +197,10 @@ class PreviousEmployers(models.Model):
         null=True,
         blank=True
     )
+
+    def __str__(self):
+        return f"{self.employee} - {self.employer_name}"
+
+    class Meta:
+        verbose_name = "Poprzedni pracodawca"
+        verbose_name_plural = "Poprzedni pracodawcy"

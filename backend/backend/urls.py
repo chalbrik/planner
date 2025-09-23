@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/schedule/', include('backend.apps.schedule.urls')),
     path('api/employees/', include('backend.apps.employees.urls')),
     path('api/', include('backend.apps.locations.urls')),
+    path('api/', include('backend.apps.holidays.urls')),
 
     path('silk/', include('silk.urls', namespace='silk')),
 ]

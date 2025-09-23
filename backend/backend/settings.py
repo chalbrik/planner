@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'backend.apps.schedule',
     'backend.apps.employees',
     'backend.apps.locations',
+    'backend.apps.holidays',
     'backend.apps.core',
 
     'silk',

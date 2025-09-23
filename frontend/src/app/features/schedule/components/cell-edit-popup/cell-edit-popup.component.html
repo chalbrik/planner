@@ -1,4 +1,4 @@
-<div class="popup-container bg-cool-gray-200 shadow-lg rounded-lg flex flex-row items-center justify-between gap-1 p-2">
+<div class="popup-container bg-primary-100 shadow-lg rounded-lg flex flex-row items-center justify-between gap-1 p-2">
 
   <button mat-icon-button class="delete-button" (click)="onDelete()">
     <div class="flex justify-center items-center">
@@ -17,7 +17,7 @@
       <mat-timepicker interval="15min" #fromTimePicker/>
     </mat-form-field>
 
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="fill" class="time-field">
       <!--            <mat-label>Do</mat-label>-->
       <input matInput
              [matTimepicker]="toTimePicker"
@@ -36,7 +36,7 @@
       </div>
     </button>
 
-    <mat-divider [vertical]="true" class="h-8 border-gray-800"></mat-divider>
+    <mat-divider [vertical]="true" class="h-8 border-primary-800"></mat-divider>
 
     <button mat-icon-button (click)="onCancel()">
       <div class="flex items-center justify-center">

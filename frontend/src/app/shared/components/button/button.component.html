@@ -1,0 +1,62 @@
+<!-- Używamy direktywy mat-stroked-button bezpośrednio jak w oryginale -->
+@if (variant() === 'fill') {
+  <button
+    mat-button
+    [class]="buttonClasses()"
+    [style]="buttonStyle()"
+    [disabled]="disabled()"
+    (click)="handleClick()">
+
+    <div class="flex flex-row justify-start items-center h-full w-full gap-2">
+      @if (showIconBefore()) {
+        <app-icon
+          [iconName]="iconName()!"
+          [iconSize]="iconSize()"
+          [class]="iconClasses()">
+        </app-icon>
+      }
+
+      @if (text()) {
+        <span class="font-geist text-base" [style]="textStyle()">{{ text() }}</span>
+      }
+
+      @if (showIconAfter()) {
+        <app-icon
+          [iconName]="iconName()!"
+          [iconSize]="iconSize()"
+          [class]="iconClasses()">
+        </app-icon>
+      }
+    </div>
+  </button>
+} @else {
+  <button
+    mat-stroked-button
+    [class]="buttonClasses()"
+    [style]="buttonStyle()"
+    [disabled]="disabled()"
+    (click)="handleClick()">
+
+    <div class="flex flex-row justify-start items-center h-full w-full gap-2">
+      @if (showIconBefore()) {
+        <app-icon
+          [iconName]="iconName()!"
+          [iconSize]="iconSize()"
+          [class]="iconClasses()">
+        </app-icon>
+      }
+
+      @if (text()) {
+        <span class="font-geist text-base" [style]="textStyle()">{{ text() }}</span>
+      }
+
+      @if (showIconAfter()) {
+        <app-icon
+          [iconName]="iconName()!"
+          [iconSize]="iconSize()"
+          [class]="iconClasses()">
+        </app-icon>
+      }
+    </div>
+  </button>
+}

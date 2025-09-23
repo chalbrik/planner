@@ -5,7 +5,7 @@
   <app-info-display [name]="'Imię Nazwisko'" [data]="`${employee().full_name}`" [iconName]="'user-circle'" [iconSize]="'mini'"></app-info-display>
 
 
-  <mat-divider class="!border-warm-gray-400"></mat-divider>
+  <mat-divider class="!border-primary-400"></mat-divider>
 
     <div class="grid grid-cols-2 gap-3">
 
@@ -28,8 +28,8 @@
     </div>
 
   <mat-accordion>
-    <mat-expansion-panel class="!shadow-none border border-warm-gray-400">
-      <mat-expansion-panel-header class="bg-warm-gray-100">
+    <mat-expansion-panel class="!shadow-none border border-primary-800">
+      <mat-expansion-panel-header class="bg-primary-100">
         <mat-panel-title> Godziny urlopowe </mat-panel-title>
         <mat-panel-description> </mat-panel-description>
       </mat-expansion-panel-header>
@@ -38,7 +38,7 @@
           <p class="text-base font-bold">Bieżący urlop pracownika</p>
           <div class="bg-amber-300 h-12 px-5 rounded-2xl font-bold text-base flex items-center">   {{+employeeVacationLeaves().current_vacation_days}} dni | {{+employeeVacationLeaves().current_vacation_hours}} h</div>
         </div>
-        <mat-divider class="!border-warm-gray-400"></mat-divider>
+        <mat-divider class="!border-primary-800"></mat-divider>
 
         <table mat-table [dataSource]="vacationTableData()" class="mat-elevation-z8 custom-table-styles">
 
@@ -66,9 +66,9 @@
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
 
-        <mat-divider class="!border-warm-gray-400"></mat-divider>
+        <mat-divider class="!border-primary-800"></mat-divider>
 
-        <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Złóż wniosek</span></button>
+        <button matButton="outlined" class="px-2 !rounded-md !border-primary-800"><span class="font-geist text-base text-primary-800">Złóż wniosek</span></button>
 
 
 
@@ -78,8 +78,8 @@
 
 
   <mat-accordion>
-    <mat-expansion-panel class="!shadow-none border border-warm-gray-400">
-      <mat-expansion-panel-header class="bg-warm-gray-100">
+    <mat-expansion-panel class="!shadow-none border border-primary-800">
+      <mat-expansion-panel-header class="bg-primary-100">
         <mat-panel-title> Niepełnosprawności </mat-panel-title>
         <mat-panel-description> </mat-panel-description>
       </mat-expansion-panel-header>
@@ -88,8 +88,8 @@
   </mat-accordion>
 
   <mat-accordion>
-    <mat-expansion-panel class="!shadow-none border border-warm-gray-400">
-      <mat-expansion-panel-header class="bg-warm-gray-100">
+    <mat-expansion-panel class="!shadow-none border border-primary-800">
+      <mat-expansion-panel-header class="bg-primary-100">
         <mat-panel-title> Przypisane obiekty </mat-panel-title>
         <mat-panel-description> </mat-panel-description>
       </mat-expansion-panel-header>
@@ -97,17 +97,17 @@
     </mat-expansion-panel>
   </mat-accordion>
 
-  <mat-divider class="!border-warm-gray-400"></mat-divider>
+  <mat-divider class="!border-primary-800"></mat-divider>
 
   <div class="w-full flex flex-row justify-start gap-2">
-    <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Pobierz deklarację PPK</span></button>
-    <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Pobierz rezygnację PPK</span></button>
+    <button matButton="outlined" class="px-2 !rounded-md !border-primary-800"><span class="font-geist text-base text-primary-800">Pobierz deklarację PPK</span></button>
+    <button matButton="outlined" class="px-2 !rounded-md !border-primary-800"><span class="font-geist text-base text-primary-800">Pobierz rezygnację PPK</span></button>
 
   </div>
 
   <div class="w-full flex flex-row justify-start gap-2">
-    <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Pobierz PUK</span></button>
-    <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400"><span class="font-geist text-base text-warm-gray-400">Wgraj PUK</span></button>
+    <button matButton="outlined" class="px-2 !rounded-md !border-primary-800"><span class="font-geist text-base text-primary-800">Pobierz PUK</span></button>
+    <button matButton="outlined" class="px-2 !rounded-md !border-primary-800"><span class="font-geist text-base text-primary-800">Wgraj PUK</span></button>
 
   </div>
 

@@ -1,0 +1,18 @@
+export interface Holiday {
+  date: string;
+  localName: string;
+  name: string;
+  countryCode: string;
+  fixed: boolean;
+  global: boolean;
+  counties: string[] | null;
+  launchYear: number | null;
+  types: string[];
+  day: string;
+}
+
+export interface MonthHolidaysResponse {
+  year: number;
+  month: number;
+  holidays: Holiday[];
+}

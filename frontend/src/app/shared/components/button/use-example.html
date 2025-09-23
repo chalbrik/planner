@@ -1,0 +1,48 @@
+<!-- 1. Twój oryginalny przykład jako nowy komponent -->
+<app-button
+  variant="outline"
+  text="Usuń pracodawcę"
+  iconName="trash"
+  iconSize="mini"
+  iconPosition="before">
+</app-button>
+
+<!-- 2. Wariant fill z ikoną przed tekstem -->
+<app-button
+  variant="fill"
+  text="Dodaj pracownika"
+  iconName="plus"
+  iconSize="mini"
+  iconPosition="before">
+</app-button>
+
+<!-- 3. Wariant outline z ikoną po tekście -->
+<app-button
+  variant="outline"
+  text="Zapisz zmiany"
+  iconName="check"
+  iconSize="mini"
+  iconPosition="after">
+</app-button>
+
+<!-- 4. Tylko tekst, bez ikony -->
+<app-button
+  variant="fill"
+  text="Anuluj">
+</app-button>
+
+<!-- 5. Tylko ikona, bez tekstu -->
+<app-button
+  variant="outline"
+  iconName="pencil"
+  iconSize="mini">
+</app-button>
+
+<!-- 6. Disabled button -->
+<app-button
+  variant="fill"
+  text="Zablokowany"
+  iconName="lock-closed"
+  iconSize="mini"
+  [disabled]="true">
+</app-button>

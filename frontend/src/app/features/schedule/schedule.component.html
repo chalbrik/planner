@@ -1,8 +1,8 @@
-<div class="h-full flex flex-col bg-warm-gray-200 px-2">
+<div class="h-full flex flex-col px-2 space-y-2 pt-2">
 
   <!-- Kontener do wyboru miesiąca -->
-  <div class="flex items-center justify-start gap-6 bg-warm-gray-50 p-2">
-    <h2 class="text-xl font-semibold text-gray-800 w-40 flex-shrink-0">
+  <div class="flex items-center justify-start gap-6 bg-primary-100 border-2 border-primary-400 p-2 rounded-lg">
+    <h2 class="text-xl font-semibold text-primary-800 w-40 flex-shrink-0">
       {{ getMonthName() }}
     </h2>
 
@@ -36,9 +36,10 @@
     @if (permanentDataSource().length > 0) {
       <ng-container [ngTemplateOutlet]="ScheduleTable"
                     [ngTemplateOutletContext]="{
-                      dataSource: permanentDataSource(),
-                      title: 'Pracownicy zatrudnieni na podstawie umowy o pracę'
-                    }">
+                  dataSource: permanentDataSource(),
+                  title: 'Pracownicy zatrudnieni na podstawie umowy o pracę',
+                  showJobColumn: true
+                }">
       </ng-container>
     }
 
@@ -46,43 +47,44 @@
     @if (contractDataSource().length > 0) {
       <ng-container [ngTemplateOutlet]="ScheduleTable"
                     [ngTemplateOutletContext]="{
-                      dataSource: contractDataSource(),
-                      title: 'Pracownicy zatrudnieni na podstawie umowy na zlecenie'
-                    }">
+                  dataSource: contractDataSource(),
+                  title: 'Pracownicy zatrudnieni na podstawie umowy na zlecenie',
+                  showJobColumn: false
+                }">
       </ng-container>
     }
 
   </div>
 </div>
 
-<ng-template #ScheduleTable let-dataSource="dataSource" let-title="title">
-  <section class="example-container mat-elevation-z8 border-2 border-warm-gray-400 rounded-lg overflow-hidden" tabindex="0">
-    <div class="bg-white h-14 p-2 sticky left-0 font-medium text-sm flex flex-row items-center">{{ title }}</div>
+<ng-template #ScheduleTable let-dataSource="dataSource" let-title="title" let-showJobColumn="showJobColumn">
+  <section class="example-container mat-elevation-z8 border-2 border-primary-400 rounded-lg overflow-hidden" tabindex="0">
+    <div class="bg-primary-100 h-14 p-2 sticky left-0 font-medium text-sm flex flex-row items-center">{{ title }}</div>
 
     <mat-table [dataSource]="dataSource">
       <!-- Kolumna z pracownikami -->
       <ng-container matColumnDef="employees" sticky="true">
-        <mat-header-cell *matHeaderCellDef class="!bg-warm-gray-100"> Pracownicy </mat-header-cell>
-        <mat-cell *matCellDef="let element" class="!bg-warm-gray-100"> {{ element.name }} </mat-cell>
+        <mat-header-cell *matHeaderCellDef class="!bg-primary-100"> Pracownicy </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="!bg-primary-100"> {{ element.name }} </mat-cell>
       </ng-container>
 
       <!-- Dynamiczne kolumny dla dni miesiąca -->
       @for (day of monthDays(); track day.dayNumber) {
         <ng-container [matColumnDef]="'day-' + day.dayNumber">
           <mat-header-cell *matHeaderCellDef
-                           class="!bg-warm-gray-100"
+                           class="!bg-primary-100"
                            [class.weekend-header]="day.isWeekend"
                            [class.today-header]="day.isToday"
                            [class.saturday-cell]="day.isSaturday"
                            [class.sunday-cell]="day.isSunday">
-            <div class="day-header w-full text-xs text-center">
+            <div class="day-header w-full text-center">
               <div class="day-number text-center">{{ day.dayNumber }}</div>
               <div class="day-name text-center">{{ day.date | date:'EEE':'pl' }}</div>
             </div>
           </mat-header-cell>
 
           <mat-cell *matCellDef="let element"
-                    class="cursor-pointer w-2 !bg-warm-gray-100"
+                    class="cursor-pointer w-2 !bg-primary-100"
                     [class.weekend-cell]="day.isWeekend"
                     [class.today-cell]="day.isToday"
                     [class.saturday-cell]="day.isSaturday"
@@ -93,7 +95,7 @@
                     [class.exceeding-12h-cell]="isCellExceeding12h(element, day.dayNumber)"
                     (click)="onCellClick(element, day.dayNumber, $event)"
                     (dblclick)="onDbCellClick(element, day.dayNumber, $event)">
-            <div class="work-hours-cell text-xs text-center">
+            <div class="work-hours-cell text-center">
               {{ getWorkHoursForDay(element, day.dayNumber) }}
             </div>
           </mat-cell>
@@ -104,17 +106,35 @@
         </ng-container>
       }
 
-      <!-- Kolumna z sumą godzin -->
-      <ng-container matColumnDef="hoursSum" stickyEnd="true">
-        <mat-header-cell *matHeaderCellDef class="!bg-warm-gray-100"> Suma godzin </mat-header-cell>
-        <mat-cell *matCellDef="let element" class="!bg-warm-gray-100"> {{ getTotalHoursForEmployee(element) }}h </mat-cell>
+      <!-- Kolumna z podsumowaniem -->
+      <ng-container matColumnDef="summary" stickyEnd="true">
+        <mat-header-cell *matHeaderCellDef class="!bg-primary-100">
+          <div class=" w-full flex flex-row justify-between">
+            <div class="w-fit">
+              Suma godzin
+            </div>
+            @if (showJobColumn) {
+              <div class="w-fit text-end">
+                Godziny do wyp.
+              </div>
+            }
+          </div>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="!bg-primary-100">
+          <div class="w-full h-full flex flex-row justify-between">
+            <div class="w-10 h-full flex items-center justify-center">{{ getTotalHoursForEmployee(element) | hoursFormat}} </div>
+            @if (showJobColumn) {
+              <div class="h-full flex items-center border-l border-primary-800 px-1 justify-center">{{ element.hoursToWork | hoursFormat}}</div>
+            }
+          </div>
+        </mat-cell>
       </ng-container>
 
       <!-- Wiersze nagłówka -->
-      <mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></mat-header-row>
+      <mat-header-row *matHeaderRowDef="getColumnsForTable(showJobColumn); sticky: true"></mat-header-row>
 
       <!-- Wiersze danych -->
-      <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
+      <mat-row *matRowDef="let row; columns: getColumnsForTable(showJobColumn);"></mat-row>
 
     </mat-table>
   </section>

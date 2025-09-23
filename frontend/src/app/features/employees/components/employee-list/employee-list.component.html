@@ -11,7 +11,7 @@
   <!-- Kontener na pracowników z overflow -->
   <div class="flex-1 overflow-y-auto min-h-0">
     @for(employee of employees(); track employee){
-      <div class="w-full flex flex-row justify-between items-center bg-warm-gray-200 my-2 rounded-lg cursor-pointer py-2"
+      <div class="w-full flex flex-row justify-between items-center bg-primary-100 my-2 rounded-lg cursor-pointer py-2"
            (click)="onEmployeeSelect(employee)"
       >
         <span class="font-rubik font-normal mx-4">{{employee.first_name}} {{employee.last_name}}</span>

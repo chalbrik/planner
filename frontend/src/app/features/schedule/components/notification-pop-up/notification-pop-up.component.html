@@ -1,27 +1,76 @@
-<div class="notification-dialog" [attr.data-type]="data.type">
-  <div class="notification-content">
-    <div class="notification-icon">
-      @switch (data.type) {
-        @case ('exceed12h') {
-          <mat-icon>schedule</mat-icon>
-        }
-        @case ('conflict11h') {
-          <mat-icon>warning</mat-icon>
-        }
-        @case ('badWeek35h') {
-          <mat-icon>event_busy</mat-icon>
-        }
+<!--<div class="notification-dialog" [attr.data-type]="data.type">-->
+<!--  <div class="notification-content">-->
+<!--    <div class="notification-icon">-->
+<!--      @switch (data.type) {-->
+<!--        @case ('exceed12h') {-->
+<!--          <mat-icon>schedule</mat-icon>-->
+<!--        }-->
+<!--        @case ('conflict11h') {-->
+<!--          <mat-icon>warning</mat-icon>-->
+<!--        }-->
+<!--        @case ('badWeek35h') {-->
+<!--          <mat-icon>event_busy</mat-icon>-->
+<!--        }-->
+<!--      }-->
+<!--    </div>-->
+
+<!--    <div class="notification-message">-->
+<!--      {{ data.message }}-->
+<!--    </div>-->
+
+<!--    <button mat-icon-button class="close-button" (click)="close()">-->
+<!--      <div class="flex items-center justify-center">-->
+<!--        <mat-icon>close</mat-icon>-->
+<!--      </div>-->
+<!--    </button>-->
+<!--  </div>-->
+<!--</div>-->
+
+
+<div class="h-20 rounded-2xl flex flex-row items-center w-96 p-2"
+     [ngClass]="{
+     '!bg-yellow-100' : data.type === 'exceed12h',
+     '!bg-red-100' : data.type === 'conflict11h',
+     '!bg-purple-100' : data.type === 'badWeek35h',
+     }"
+>
+  <div class="w-full h-full rounded-2xl flex flex-row justify-between items-center border-2 px-3"
+       [ngClass]="{
+        '!border-yellow-600 !bg-yellow-200' : data.type === 'exceed12h',
+        '!border-red-600 !bg-red-200' : data.type === 'conflict11h',
+        '!border-purple-600 !bg-purple-200' : data.type === 'badWeek35h',
+       }"
+  >
+    @switch(data.type){
+      @case('exceed12h'){
+        <div class="text-yellow-600 flex flex-col gap-2">
+          <div class="text-base font-bold">
+            Praca powyżej 12h
+          </div>
+          <div class="text-sm font-normal">
+            Uwzględnij odbiór nadgodzin dla pracownika
+          </div>
+        </div>
       }
-    </div>
+      @case('conflict11h'){
+        <div class="text-red-600 font-bold">
+          Brak przerwy u pracownika 11h
+        </div>
+      }
+      @case('badWeek35h'){
+        <div class="text-purple-600 font-bold">
+          Brak przerwy 35h w tygodniu
+        </div>
+      }
+    }
+    <app-button
+      [variant]="'outline'"
+      [accentColor]="data.type === 'exceed12h' ? 'yellow-600' :
+                     data.type === 'conflict11h' ? 'red-600' :
+                     data.type === 'badWeek35h' ? 'purple-600' : 'gray-600'"
+      [iconName]="'x-mark'"
+      [iconSize]="'solid'"
+      (click)="close()"/>
 
-    <div class="notification-message">
-      {{ data.message }}
-    </div>
-
-    <button mat-icon-button class="close-button" (click)="close()">
-      <div class="flex items-center justify-center">
-        <mat-icon>close</mat-icon>
-      </div>
-    </button>
   </div>
 </div>

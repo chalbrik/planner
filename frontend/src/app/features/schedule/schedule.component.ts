@@ -19,15 +19,14 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {CellEditPopupComponent} from './components/cell-edit-popup/cell-edit-popup.component';
 import {Subject, takeUntil, timer} from 'rxjs';
-import {MatFormField, MatLabel} from '@angular/material/input';
-import {MatSelect} from '@angular/material/select';
-import {MatOption} from '@angular/material/core';
 import {LocationService} from '../../core/services/locations/location.service';
 import {Location} from '../../core/services/locations/location.types';
 import {Employee} from '../../core/services/employees/employee.types';
 import {WorkHours} from '../../core/services/schedule/schedule.types';
 import {ConflictService} from '../../core/services/conflicts/conflict.service';
 import {SelectInputComponent} from '../../shared/components/select-input/select-input.component';
+import {HolidayService} from '../../core/services/holiday/holiday.service';
+import {HoursFormatPipe} from '../../shared/pipes/hours-format.pipe';
 
 
 interface Day {
@@ -45,6 +44,8 @@ interface EmployeeRow {
   name: string;
   workHours: { [key: string]: string }; // klucz to data w formacie YYYY-MM-DD, wartość to godziny pracy
   agreement_type?: 'permanent' | 'contract';
+  job: number;
+  hoursToWork?: number;
   isSeparator?: boolean;
 }
 
@@ -68,11 +69,8 @@ interface EmployeeRow {
     MatHeaderRowDef,
     IconComponent,
     MatIconButton,
-    MatFormField,
-    MatLabel,
-    MatSelect,
-    MatOption,
     SelectInputComponent,
+    HoursFormatPipe,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -87,13 +85,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private readonly overlay = inject(Overlay);
   private readonly locationService = inject(LocationService);
   private readonly conflictService = inject(ConflictService);
+  private holidayService = inject(HolidayService);
 
   employees: Employee[] = [];
   workHours: WorkHours[] = [];
   isLoading = false;
   errorMessage: string | null = null;
-
-
 
   // Sygnały dla zarządzania datami
   currentMonthDate = signal<Date>(new Date());
@@ -132,10 +129,16 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   });
 
   // Obliczony sygnał dla kolumn tabeli
-  displayedColumns = computed(() => {
+  permanentDisplayedColumns = computed(() => {
     const days = this.monthDays();
     const dayColumns = days.map(day => `day-${day.dayNumber}`);
-    return ['employees', ...dayColumns, 'hoursSum'];
+    return ['employees', ...dayColumns, 'hoursSum', 'job']; // Z kolumną "job"
+  });
+
+  contractDisplayedColumns = computed(() => {
+    const days = this.monthDays();
+    const dayColumns = days.map(day => `day-${day.dayNumber}`);
+    return ['employees', ...dayColumns, 'hoursSum']; // BEZ kolumny "job"
   });
 
   // Przygotowane dane dla tabeli
@@ -169,6 +172,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   );
   selectedLocationId = signal<string>('');
 
+  workingDaysInMonth = signal<number>(0);
+
+
   private subscriptions = new Subject<void>();
 
   constructor() {}
@@ -177,6 +183,20 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.loadLocations();
     this.setupResponsiveColumns();
     this.setupSubscriptions();
+
+    this.loadWorkingDaysAndCalculateHours();
+
+
+
+    // setTimeout(() => {
+    //   this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
+    //
+    //   this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
+    // }, 1000);
+
+
+
+
   }
 
   ngOnDestroy() {
@@ -273,6 +293,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const permanentEmployees = filteredEmployees.filter(emp => emp.agreement_type === 'permanent');
     const contractEmployees = filteredEmployees.filter(emp => emp.agreement_type === 'contract');
 
+    // Pobierz aktualną liczbę dni roboczych
+    const workingDays = this.workingDaysInMonth();
+
     // Przygotuj dane dla UoP (Umowa o Pracę)
     const permanentRows = permanentEmployees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
@@ -288,11 +311,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
       });
 
+      const jobRate = parseFloat(employee.job) || 0;
+
       return {
         id: employee.id,
         name: `${employee.full_name}`,
         workHours: workHoursMap,
-        agreement_type: employee.agreement_type
+        agreement_type: employee.agreement_type,
+        job: jobRate,
+        hoursToWork: this.calculateHoursToWorkForEmployee(jobRate, workingDays)
       };
     });
 
@@ -311,11 +338,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
       });
 
+      const jobRate = parseFloat(employee.job) || 0;
+
       return {
         id: employee.id,
         name: `${employee.full_name}`,
         workHours: workHoursMap,
-        agreement_type: employee.agreement_type
+        agreement_type: employee.agreement_type,
+        job: jobRate,
+        hoursToWork: this.calculateHoursToWorkForEmployee(jobRate, workingDays)
       };
     });
 
@@ -323,7 +354,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.permanentDataSource.set(permanentRows);
     this.contractDataSource.set(contractRows);
 
-    // Zachowaj stary dataSource dla kompatybilności (opcjonalnie możesz go usunąć później)
+    // Zachowaj stary dataSource dla kompatybilności
     this.dataSource = [...permanentRows, ...contractRows];
 
     this.checkRestTimeConflicts();
@@ -339,28 +370,36 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   getTotalHoursForEmployee(employee: EmployeeRow): number {
     let totalHours = 0;
+    const currentDate = this.currentMonthDate();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1;
 
-    // Iteruj przez wszystkie godziny pracy tego pracownika
-    Object.values(employee.workHours).forEach(hoursString => {
+    // Iteruj tylko przez godziny z bieżącego miesiąca
+    Object.entries(employee.workHours).forEach(([dateString, hoursString]) => {
       if (hoursString) {
-        // Parsuj format "8:00-16:00"
-        const match = hoursString.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
+        // Sprawdź czy data należy do bieżącego miesiąca
+        const workDate = new Date(dateString);
+        if (workDate.getFullYear() === currentYear && workDate.getMonth() + 1 === currentMonth) {
 
-        if (match) {
-          const [, startHour, startMin, endHour, endMin] = match;
+          // Parsuj format "8:00-16:00"
+          const match = hoursString.match(/(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})/);
 
-          // Konwertuj na minuty
-          const startMinutes = parseInt(startHour) * 60 + parseInt(startMin);
-          const endMinutes = parseInt(endHour) * 60 + parseInt(endMin);
+          if (match) {
+            const [, startHour, startMin, endHour, endMin] = match;
 
-          // Oblicz różnicę w godzinach
-          const hoursWorked = (endMinutes - startMinutes) / 60;
-          totalHours += hoursWorked;
+            // Konwertuj na minuty
+            const startMinutes = parseInt(startHour) * 60 + parseInt(startMin);
+            const endMinutes = parseInt(endHour) * 60 + parseInt(endMin);
+
+            // Oblicz różnicę w godzinach
+            const hoursWorked = (endMinutes - startMinutes) / 60;
+            totalHours += hoursWorked;
+          }
         }
       }
     });
 
-    return Math.round(totalHours * 100) / 100; // zaokrągl do 2 miejsc po przecinku
+    return Math.round(totalHours * 100) / 100;
   }
 
   // Metoda do zmiany miesiąca
@@ -375,6 +414,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
+
+    // Pobierz dni robocze dla nowego miesiąca i przelicz godziny do dyspozycji
+    this.loadWorkingDaysAndCalculateHours();
   }
 
   getMonthName(): string {
@@ -687,8 +729,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       width: '400px',
       disableClose: false,
       position: {
-        top: `${50 + (openDialogs * 80)}px`,  // Każdy kolejny o 120px niżej
-        right: '20px'                           // Wszystkie po prawej stronie
+        top: `${90 + (openDialogs * 90)}px`,  // Każdy kolejny o 120px niżej
+        right: '0'                           // Wszystkie po prawej stronie
       }
     })
 
@@ -773,6 +815,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.employeesService.getEmployees(params).subscribe({
         next: (data) => {
           if (Array.isArray(data)) {
+            console.log(data);
             this.employees = data;
             resolve(data);
           } else {
@@ -842,5 +885,79 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadWorkingDaysAndCalculateHours(): void {
+    const currentDate = this.currentMonthDate();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+
+    this.holidayService.calculateWorkingDaysInMonth(year, month).subscribe({
+      next: (workingDays) => {
+        this.workingDaysInMonth.set(workingDays);
+        console.log(`Dni robocze w ${month}/${year}: ${workingDays}`);
+
+        // Po pobraniu dni roboczych, przelicz godziny dla każdego pracownika
+        this.recalculateHoursToWork(workingDays);
+      },
+      error: (error) => {
+        console.error('Błąd podczas pobierania dni roboczych:', error);
+        // W przypadku błędu, oblicz bez świąt
+        const fallbackWorkingDays = this.calculateWorkingDaysWithoutHolidays();
+        this.workingDaysInMonth.set(fallbackWorkingDays);
+        this.recalculateHoursToWork(fallbackWorkingDays);
+      }
+    });
+  }
+
+  private calculateWorkingDaysWithoutHolidays(): number {
+    const currentDate = this.currentMonthDate();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    let workingDays = 0;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dayOfWeek = date.getDay();
+
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        workingDays++;
+      }
+    }
+
+    return workingDays;
+  }
+
+  private recalculateHoursToWork(workingDays: number): void {
+    // Przelicz dla stałych pracowników
+    const updatedPermanent = this.permanentDataSource().map(employee => ({
+      ...employee,
+      hoursToWork: this.calculateHoursToWorkForEmployee(employee.job, workingDays)
+    }));
+    this.permanentDataSource.set(updatedPermanent);
+
+    // Przelicz dla pracowników na zlecenie
+    const updatedContract = this.contractDataSource().map(employee => ({
+      ...employee,
+      hoursToWork: this.calculateHoursToWorkForEmployee(employee.job, workingDays)
+    }));
+    this.contractDataSource.set(updatedContract);
+
+    // Aktualizuj główny dataSource dla kompatybilności
+    this.dataSource = [...updatedPermanent, ...updatedContract];
+  }
+
+  private calculateHoursToWorkForEmployee(jobRate: number, workingDays: number): number {
+    // job * dni robocze * 8h
+    // np. 1.0 * 22 * 8 = 176h dla pełnego etatu
+    // np. 0.5 * 22 * 8 = 88h dla pół etatu
+    return Math.round(jobRate * workingDays * 8);
+  }
+
+  getColumnsForTable(showJobColumn: boolean): string[] {
+    const days = this.monthDays();
+    const dayColumns = days.map(day => `day-${day.dayNumber}`);
+    return ['employees', ...dayColumns, 'summary']; // Zawsze 'summary' zamiast 'hoursSum' i 'job'
+  }
 
 }

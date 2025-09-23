@@ -1,13 +1,16 @@
-.mdc-text-field--filled{
-  background-color: transparent !important;
-  border: 1px solid #57534e !important;
-  border-radius: 10px !important;
-  width: 125px !important;
-  height: 44px !important;
+.time-field{
+  .mdc-text-field--filled{
+    background-color: transparent !important;
+    border: 1px solid #57534e !important;
+    border-radius: 10px !important;
+    width: 125px !important;
+    height: 44px !important;
+  }
 }
 
 
-.mat-mdc-form-field-infix{
+
+.time-field.mat-mdc-form-field-infix{
   //wysokosc musi byc taka sama co wyzej
   //pamietaj ze w srodku masz pole ktore ma 24px - jezeli chce obliczyc ponizej paddingi do wysokosci nowej zalozonej odejmuje 24 i dziele na 2
   height: 44px !important;
@@ -16,20 +19,23 @@
   padding-bottom: 10px !important;
 }
 
-.mdc-text-field .mat-mdc-form-field-focus-overlay {
+.time-field.mdc-text-field .mat-mdc-form-field-focus-overlay {
   display: none !important;
 }
 
-.mat-mdc-form-field {
+.time-field.mat-mdc-form-field {
   .mdc-line-ripple {
     display: none !important;
   }
 }
 
-.mat-mdc-form-field-has-icon-suffix .mat-mdc-text-field-wrapper{
+.time-field.mat-mdc-form-field-has-icon-suffix .mat-mdc-text-field-wrapper{
   //border: 2px black !important;
 }
 
-.mat-mdc-form-field-bottom-align {
-  display: none !important;
+.time-field{
+  .mat-mdc-form-field-bottom-align {
+    display: none !important;
+  }
 }
+

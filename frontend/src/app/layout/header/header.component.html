@@ -1,23 +1,23 @@
-<header class="font-geist bg-warm-gray-200 fixed top-0 left-0 right-0 h-12 flex item-center">
+<header class="font-geist bg-primary-300 fixed top-0 left-0 right-0 h-16 flex item-center m-2 rounded-lg">
   <div class="w-full mx-8 flex flex-row justify-between items-center">
     <div #logo class="w-52">
-      <h1 class="text-xl font-bold text-true-gray-600 text-center">Planner</h1>
+      <h1 class="text-xl font-bold text-primary-600 text-center">Planner</h1>
     </div>
     <nav #navigation class="w-2/5 flex flex-row justify-between items-center">
-<!--      <a routerLink="/dashboard" routerLinkActive="font-bold" class="text-true-gray-600 px-2">User dashboard</a>-->
-      <a routerLink="/schedule" routerLinkActive="font-bold" class="text-warm-gray-400 text-base px-2">Grafik</a>
-      <a routerLink="/employees" routerLinkActive="font-bold" class="text-warm-gray-400 text-base px-2">Pracownicy</a>
-<!--      <a routerLink="/employees-files" routerLinkActive="font-bold" class="text-warm-gray-400 text-base px-2">Akta pracownicze</a>-->
-      <a routerLink="/locations" routerLinkActive="font-bold" class="text-warm-gray-400 text-base px-2">Lista obiektów</a>
-<!--      <a routerLink="/add-employee" routerLinkActive="font-bold" class="text-warm-gray-400 text-base px-2">Dodaj pracownika (tymczasowo)</a>-->
+<!--      <a routerLink="/dashboard" routerLinkActive="font-bold" class="text-primary-600 px-2">User dashboard</a>-->
+      <a routerLink="/schedule" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Grafik</a>
+      <a routerLink="/employees" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Pracownicy</a>
+<!--      <a routerLink="/employees-files" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Akta pracownicze</a>-->
+      <a routerLink="/locations" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Lista obiektów</a>
+<!--      <a routerLink="/add-employee" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Dodaj pracownika (tymczasowo)</a>-->
     </nav>
     @if (currentUser) {
       <div #userOptions class="flex justify-around items-center gap-4">
         <div class="flex flex-row items-center justify-start">
-          <app-icon iconName="user-solid" iconSize="mini" class="text-warm-gray-400"></app-icon>
-          <span class="text-warm-gray-400 px-2 text-base">{{ currentUser.username }}</span>
+          <app-icon iconName="user-solid" iconSize="mini" class="text-primary-400"></app-icon>
+          <span class="text-primary-400 px-2 text-base">{{ currentUser.username }}</span>
         </div>
-        <button matButton="outlined" class="px-2 !rounded-md !border-warm-gray-400" (click)="logout()"><span class="font-geist text-base text-warm-gray-400">Wyloguj</span></button>
+        <button matButton="outlined" class="px-2 !rounded-md !border-primary-400" (click)="logout()"><span class="font-geist text-base text-primary-400">Wyloguj</span></button>
       </div>
     }
   </div>

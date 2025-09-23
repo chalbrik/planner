@@ -21,12 +21,17 @@
 // === UKRYWANIE LINII TABELI ===
 .mat-mdc-cell {
   border-bottom-style: none !important;
+  font-size: 10px !important;
 }
 
 // === STYLE NAGŁÓWKA ===
 .mat-mdc-header-row {
   top: 0 !important;
   z-index: 1000 !important;
+}
+
+.mat-mdc-header-cell {
+  font-size: 10px !important;
 }
 
 // === STICKY TABELA ===
@@ -65,21 +70,20 @@ mat-table .mat-column-employees {
     max-width: 150px !important;
     padding: 0 8px 0 8px !important;
   }
-
 }
 
-// Kolumny suma godzin - stała szerokość
-mat-table .mat-column-hoursSum {
-  width: 50px !important;
-  min-width: 50px !important;
-  max-width: 50px !important;
-  padding:  0 4px 0 4px !important;
+// Kolumna podsumowania - jedyna sticky z prawej
+mat-table .mat-column-summary {
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+  padding: 0 4px !important;
 
   @media(min-width: 640px) {
-    width: 80px !important;
-    min-width: 80px !important;
-    max-width: 80px !important;
-    padding:  0 8px 0 8px !important;
+    width: 90px !important;
+    min-width: 90px !important;
+    max-width: 90px !important;
+    padding: 0 6px !important;
   }
 }
 
@@ -142,7 +146,6 @@ mat-table .mat-column-hoursSum {
 // 2. KONFLIKT 11H - CZERWONY (nadpisuje fioletowy)
 .conflict-cell {
   background-color: rgba(248, 113, 113, 0.5) !important;
-  //border: 2px solid #10B981 !important;
 
   &:hover {
     background-color: rgba(248, 113, 113, 0.7) !important;
@@ -152,12 +155,10 @@ mat-table .mat-column-hoursSum {
 
 // 3. PRZEKROCZENIE 12H PRACY - ŻÓŁTY
 .exceeding-12h-cell {
-  //background-color: rgba(245, 158, 11, 0.5) !important;
   color: #D223FA !important;
   font-weight: 600 !important;
 
   &:hover {
-    //background-color: rgba(245, 158, 11, 0.7) !important;
     border-radius: 0 !important;
     font-weight: 600 !important;
   }
@@ -254,11 +255,8 @@ mat-table .mat-column-hoursSum {
 
 .sticky-separator {
   position: sticky !important;
-  top: 55px !important; // wysokość header row
+  top: 55px !important;
   z-index: 100 !important;
-  //background-color: #f59e0b !important; // żółty/pomarańczowy
-  //border-top: 2px solid #d97706 !important;
-  //border-bottom: 2px solid #d97706 !important;
   font-weight: bold !important;
 
   &::before {
@@ -268,7 +266,6 @@ mat-table .mat-column-hoursSum {
     left: 0;
     right: 0;
     bottom: 0;
-    //background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
     z-index: -1;
   }
 }
