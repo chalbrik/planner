@@ -1,71 +1,113 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-50">
-  <div class="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
-    <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-6">Logowanie</h2>
+<!--<div class="min-h-screen flex items-center justify-center bg-gray-50">-->
+<!--  <div class="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">-->
+<!--    <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-6">Logowanie</h2>-->
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
-      <!-- Alert o błędach -->
-      @if (error) {
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {{ error }}
-        </div>
-      }
+<!--    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">-->
+<!--      &lt;!&ndash; Alert o błędach &ndash;&gt;-->
+<!--      @if (error) {-->
+<!--        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">-->
+<!--          {{ error }}-->
+<!--        </div>-->
+<!--      }-->
 
-      <!-- Pole nazwy użytkownika -->
-      <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">Nazwa użytkownika</label>
-        <input
-          formControlName="username"
+<!--      &lt;!&ndash; Pole nazwy użytkownika &ndash;&gt;-->
+<!--      <div>-->
+<!--        <label for="username" class="block text-sm font-medium text-gray-700">Nazwa użytkownika</label>-->
+<!--        <input-->
+<!--          formControlName="username"-->
+<!--          id="username"-->
+<!--          type="text"-->
+<!--          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"-->
+<!--          required>-->
+<!--        @if (loginForm.get('username')?.invalid && (loginForm.get('username')?.dirty || loginForm.get('username')?.touched)) {-->
+<!--          <div class="text-red-500 text-sm mt-1">-->
+<!--            Nazwa użytkownika jest wymagana-->
+<!--          </div>-->
+<!--        }-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Pole hasła &ndash;&gt;-->
+<!--      <div>-->
+<!--        <label for="password" class="block text-sm font-medium text-gray-700">Hasło</label>-->
+<!--        <input-->
+<!--          formControlName="password"-->
+<!--          id="password"-->
+<!--          type="password"-->
+<!--          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"-->
+<!--          required>-->
+<!--        @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {-->
+<!--          <div class="text-red-500 text-sm mt-1">-->
+<!--            Hasło jest wymagane-->
+<!--          </div>-->
+<!--        }-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Przycisk logowania &ndash;&gt;-->
+<!--      <div>-->
+<!--        <button-->
+<!--          type="submit"-->
+<!--          [disabled]="loginForm.invalid || isLoading"-->
+<!--          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300">-->
+<!--          @if (isLoading) {-->
+<!--            <span>Logowanie...</span>-->
+<!--          }-->
+<!--          @if (!isLoading) {-->
+<!--            <span>Zaloguj się</span>-->
+<!--          }-->
+<!--        </button>-->
+<!--      </div>-->
+
+<!--      &lt;!&ndash; Link do rejestracji &ndash;&gt;-->
+<!--      <div class="text-center mt-4">-->
+<!--        <p class="text-sm text-gray-600">-->
+<!--          Nie masz konta?-->
+<!--          <a routerLink="/auth/register" class="font-medium text-indigo-600 hover:text-indigo-500">-->
+<!--            Zarejestruj się-->
+<!--          </a>-->
+<!--        </p>-->
+<!--      </div>-->
+<!--    </form>-->
+<!--  </div>-->
+<!--</div>-->
+
+<div class="px-2 pb-2 grid grid-cols-2 gap-2 h-full">
+
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-row justify-center items-center">
+    <div class="col-span-1 flex flex-col items-start justify-center gap-5 px-16 w-2/3">
+      <h1 class="text-3xl font-bold text-primary-800">Zaloguj się</h1>
+      <div class="flex flex-col w-full">
+        <app-input
+          class="w-full"
           id="username"
-          type="text"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          required>
-        @if (loginForm.get('username')?.invalid && (loginForm.get('username')?.dirty || loginForm.get('username')?.touched)) {
-          <div class="text-red-500 text-sm mt-1">
-            Nazwa użytkownika jest wymagana
-          </div>
-        }
-      </div>
+          [label]="'Nazwa użytkownika'"
+          [placeholder]="''"
+          formControlName="username">
+        </app-input>
 
-      <!-- Pole hasła -->
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Hasło</label>
-        <input
-          formControlName="password"
+        <app-input
+          class="w-full"
           id="password"
-          type="password"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-          required>
-        @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
-          <div class="text-red-500 text-sm mt-1">
-            Hasło jest wymagane
-          </div>
-        }
+          [label]="'Hasło'"
+          [placeholder]="''"
+          formControlName="password">
+        </app-input>
       </div>
+      <app-button
+        type="submit"
+        [disabled]="loginForm.invalid || isLoading"
+        class="w-full"
+        variant="fill"
+        text="Zaloguj"
+        [fullWidth]="true">
+      </app-button>
+    </div>
+  </form>
 
-      <!-- Przycisk logowania -->
-      <div>
-        <button
-          type="submit"
-          [disabled]="loginForm.invalid || isLoading"
-          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300">
-          @if (isLoading) {
-            <span>Logowanie...</span>
-          }
-          @if (!isLoading) {
-            <span>Zaloguj się</span>
-          }
-        </button>
-      </div>
+  <div class="col-span-1 bg-primary-300 rounded-lg ">
 
-      <!-- Link do rejestracji -->
-      <div class="text-center mt-4">
-        <p class="text-sm text-gray-600">
-          Nie masz konta?
-          <a routerLink="/auth/register" class="font-medium text-indigo-600 hover:text-indigo-500">
-            Zarejestruj się
-          </a>
-        </p>
-      </div>
-    </form>
   </div>
+
 </div>
+
+
+

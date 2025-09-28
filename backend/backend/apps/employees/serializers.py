@@ -41,7 +41,7 @@ class EmployeeDetailSerializer(serializers.ModelSerializer):
 
 
 class EmployeeCreateSerializer(serializers.ModelSerializer):
-    # Zagniezdzone dane - tylko definicje pól
+    # Zagnieżdżone dane - tylko definicje pól
     school_type = serializers.CharField(required=False, write_only=True)
     school_name = serializers.CharField(required=False, write_only=True)
     graduation_year = serializers.DateField(required=False, write_only=True)
@@ -59,7 +59,26 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        return EmployeeService.create_employee_with_relations(validated_data)
+        """
+        Tworzy pracownika z powiązanymi danymi przy użyciu EmployeeService.
+        Pobiera user z kontekstu serializatora.
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+
+        logger.info(f"🚀 SERIALIZER CREATE CALLED with: {validated_data.keys()}")
+
+        # Pobierz user z kontekstu (przekazany przez ViewSet)
+        user = self.context.get('user')
+        logger.info(f"🚀 USER from context: {user}")
+
+        if user:
+            validated_data['user'] = user
+
+        # Użyj serwisu do tworzenia z relacjami
+        result = EmployeeService.create_employee_with_relations(validated_data)
+        logger.info(f"🚀 SERIALIZER FINISHED, returning: {result.id}")
+        return result
 
 class VacationLeaveSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.__str__', read_only=True)

@@ -47,7 +47,7 @@ export class RegisterComponent implements OnInit {
         this.isLoading = false;
         this.success = 'Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.';
         setTimeout(() => {
-          this.router.navigate(['/auth/login']);
+          this.router.navigate(['/login']);
         }, 2000);
       },
       error: (err) => {

@@ -6,12 +6,16 @@ from .serializers import EmployeeSerializer, VacationLeaveSerializer, EmployeeCr
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
-    queryset = Employee.objects.all()
+    queryset = Employee.objects.all()  # Bazowy queryset dla DRF Router
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """Zwraca tylko pracowników należących do zalogowanego użytkownika"""
+        # Filtruj po właścicielu
+        queryset = Employee.objects.filter(user=self.request.user)
+
         # Filtruj tylko pracowników z przypisanymi lokacjami
-        queryset = Employee.objects.filter(locations__isnull=False).distinct()
+        queryset = queryset.filter(locations__isnull=False).distinct()
 
         # Dodatkowe filtrowanie po konkretnej lokacji (opcjonalne)
         location_id = self.request.query_params.get('location')
@@ -20,12 +24,19 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def get_serializer_context(self):
+        """Dodaj user do kontekstu serializatora"""
+        context = super().get_serializer_context()
+        context['user'] = self.request.user
+        return context
+
     def get_serializer_class(self):
         if self.action == 'create':
             return EmployeeCreateSerializer
-        elif self.action == 'retrieve':  # ← Popraw literówkę: 'retrive' na 'retrieve'
+        elif self.action == 'retrieve':
             return EmployeeDetailSerializer
         return EmployeeSerializer
+
 
 class VacationLeaveViewSet(viewsets.ModelViewSet):
     queryset = VacationLeave.objects.all()
@@ -33,7 +44,8 @@ class VacationLeaveViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        """Zwraca tylko urlopy pracowników należących do zalogowanego użytkownika"""
+        queryset = VacationLeave.objects.filter(employee__user=self.request.user)
 
         # Filtrowanie po pracowniku
         employee_id = self.request.query_params.get('employee_id')

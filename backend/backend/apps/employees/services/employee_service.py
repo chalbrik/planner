@@ -3,12 +3,23 @@ from django.db import transaction
 from .identification_service import IdentificationService
 from .vacation_service import VacationService
 from ..models import Employee, School, PreviousEmployers
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class EmployeeService:
     @staticmethod
     @transaction.atomic
     def create_employee_with_relations(validated_data: Dict[str, Any]) -> Employee:
         """Tworzy pracownika wraz z powiązanymi danymi."""
+        logger.info(f"🔥 EMPLOYEE SERVICE CALLED with data: {validated_data.keys()}")
+
+        # Sprawdź czy user został przekazany
+        user = validated_data.get('user')
+        if not user:
+            raise ValueError("Pole 'user' jest wymagane do utworzenia pracownika")
+
         birth_date = validated_data.pop('birth_date', None)
         school_type = validated_data.pop('school_type', '')
 
@@ -20,18 +31,21 @@ class EmployeeService:
         }
 
         locations_data = validated_data.pop('locations', [])
-
         previous_employers_data = validated_data.pop('previous_employers', [])
 
         # Generuj numer ewidencyjny
         if not validated_data.get('identification_number'):
             validated_data['identification_number'] = IdentificationService.generate_employee_id()
 
-        # Utwórz pracownika
+        logger.info(f"🔥 CREATING EMPLOYEE with: {validated_data}")
+
+        # Utwórz pracownika (user jest już w validated_data)
         employee = Employee.objects.create(**validated_data)
 
+        logger.info(f"🔥 EMPLOYEE CREATED: {employee.id} - {employee.full_name}")
+
         # Utwórz szkołę
-        if school_data.get('school_type'):
+        if school_data.get('school_type') and school_data['school_type'] != '':
             School.objects.create(employee=employee, **school_data)
 
         # Przypisz lokacje

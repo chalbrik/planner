@@ -33,6 +33,9 @@ export class ButtonComponent {
   readonly disabled = input<boolean>(false);
   readonly fillColor = input<string>('primary-400');
   readonly accentColor = input<string>('primary-400');
+  readonly fullWidth = input<boolean>(false);
+
+  private isProcessing = false;
 
   // Output dla kliknięcia
   readonly click = output<void>();
@@ -43,7 +46,10 @@ export class ButtonComponent {
   readonly showIconAfter = computed(() => this.hasIcon() && this.iconPosition() === 'after');
 
   readonly buttonClasses = computed(() => {
-    return 'px-2 !rounded-md gap-2 whitespace-nowrap !h-10 !w-fit';
+    const baseClasses = 'px-2 !rounded-md gap-2 whitespace-nowrap !h-10';
+    const widthClass = this.fullWidth() ? '!w-full' : '!w-fit';
+
+    return `${baseClasses} ${widthClass}`;
   });
 
   readonly buttonStyle = computed(() => {
@@ -76,25 +82,39 @@ export class ButtonComponent {
   });
 
   // Event handler
+  // handleClick(event?: Event): void {
+  //   // ✅ Sprawdź czy to MouseEvent (kliknięcie myszą)
+  //   if (event instanceof MouseEvent) {
+  //     event.preventDefault();
+  //     event.stopPropagation();
+  //   }
+  //
+  //   if (!this.disabled()) {
+  //     this.click.emit();
+  //   }
+  // }
+
   handleClick(): void {
+    console.log('click');
     if (!this.disabled()) {
       this.click.emit();
     }
   }
 
+
   private getColorHex(colorName: string): string {
     const colors: { [key: string]: string } = {
       // Primary
-      'primary-50': '#FAFAFA',
-      'primary-100': '#F4F4F5',
-      'primary-200': '#E4E4E7',
-      'primary-300': '#D4D4D8',
-      'primary-400': '#A1A1AA',
-      'primary-500': '#71717A',
-      'primary-600': '#52525B',
-      'primary-700': '#3F3F46',
-      'primary-800': '#27272A',
-      'primary-900': '#18181B',
+      'primary-50': '#FEF2F2',
+      'primary-100': '#FEE2E2',
+      'primary-200': '#FECACA',
+      'primary-300': '#FCA5A5',
+      'primary-400': '#F87171',
+      'primary-500': '#EF4444',
+      'primary-600': '#DC2626',
+      'primary-700': '#B91C1C',
+      'primary-800': '#991B1B',
+      'primary-900': '#7F1D1D',
 
       // Secondary
       'secondary-50': '#FFFBEB',

@@ -192,7 +192,7 @@
       <mat-vertical-stepper [linear]="false" #employerStepper>
         @for (employer of previousEmployers.controls; track $index) {
           <mat-step [stepControl]="$any(employer)">
-            <form [formGroup]="$any(employer)">
+            <div [formGroup]="$any(employer)">
               <ng-template matStepLabel>Pracodawca {{ $index + 1 }}</ng-template>
 
               <div class="flex flex-row justify-start items-center mb-4">
@@ -251,7 +251,7 @@
                 <button mat-button matStepperPrevious type="button">Poprzedni</button>
                 <button mat-button (click)="handleNextStep($index)" type="button">Następny</button>
               </div>
-            </form>
+            </div>
           </mat-step>
         }
       </mat-vertical-stepper>
@@ -263,11 +263,13 @@
       <app-button
         variant="fill"
         text="Wyślij"
+        type="button"
         (click)="onAddEmployee()">
       </app-button>
       <app-button
         variant="outline"
         text="Anuluj"
+        type="button"
         (click)="onCancel()">
       </app-button>
     </div>

@@ -21,6 +21,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {IconComponent} from '../../shared/components/icon';
 import {MatButton, MatFabButton, MatIconButton} from '@angular/material/button';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
+import {ButtonComponent} from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-employees',
@@ -51,6 +52,7 @@ import {MatBottomSheet} from '@angular/material/bottom-sheet';
     MatIcon,
     MatIconButton,
     MatButton,
+    ButtonComponent,
   ],
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss',

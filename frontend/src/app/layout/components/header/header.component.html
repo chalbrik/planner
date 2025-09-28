@@ -4,12 +4,11 @@
       <h1 class="text-xl font-bold text-primary-600 text-center">Planner</h1>
     </div>
     <nav #navigation class="w-2/5 flex flex-row justify-between items-center">
-<!--      <a routerLink="/dashboard" routerLinkActive="font-bold" class="text-primary-600 px-2">User dashboard</a>-->
-      <a routerLink="/schedule" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Grafik</a>
-      <a routerLink="/employees" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Pracownicy</a>
-<!--      <a routerLink="/employees-files" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Akta pracownicze</a>-->
-      <a routerLink="/locations" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Lista obiektów</a>
-<!--      <a routerLink="/add-employee" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Dodaj pracownika (tymczasowo)</a>-->
+<!--      <a routerLink="/app/dashboard" routerLinkActive="font-bold" class="text-primary-600 px-2">User dashboard</a>-->
+      <a routerLink="/app/schedule" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Grafik</a>
+      <a routerLink="/app/employees" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Pracownicy</a>
+<!--      <a routerLink="/app/employees-files" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Akta pracownicze</a>-->
+      <a routerLink="/app/locations" routerLinkActive="font-bold" class="text-primary-400 text-base px-2">Lista obiektów</a>
     </nav>
     @if (currentUser) {
       <div #userOptions class="flex justify-around items-center gap-4">

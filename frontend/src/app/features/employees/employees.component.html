@@ -29,14 +29,17 @@
       mode="side"
       position="end"
       [opened]="isSidenavOpen()"
-      class="!w-1/3 overflow-y-auto">
+      class="!w-1/3 overflow-y-auto !bg-primary-100">
 
       @if (selectedEmployee()) {
-        <div class="p-4">
+        <div class="p-4 flex flex-col gap-2">
 
-          <button mat-icon-button (click)="closeSidenav()">
-            <mat-icon>close</mat-icon>
-          </button>
+          <app-button
+            (click)="closeSidenav()"
+            variant="outline"
+            iconName="x-mark"
+            iconSize="outline">
+          </app-button>
 
 
           <!-- Tutaj użyjemy istniejący komponent employee-info -->
@@ -100,8 +103,8 @@
 
           <!-- Kolumna Actions -->
           <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Akcje </th>
-            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
+            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800 !text-right"> Akcje </th>
+            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800 !text-right">
               <button mat-icon-button class="delete-button" (click)="onDeleteEmployee(employee, $event)">
                 <app-icon iconName="trash" iconSize="outline" class="text-primary-800"></app-icon>
               </button>

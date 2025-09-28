@@ -5,9 +5,9 @@ from .models import Employee, VacationLeave, School, PreviousEmployers
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = (
-    'id', 'full_name', 'email', 'phone', 'agreement_type', 'identification_number', 'job', 'contract_date_start',
+    'id', 'user', 'full_name', 'email', 'phone', 'agreement_type', 'identification_number', 'job', 'contract_date_start',
     'contract_date_end', 'job_rate', 'hour_rate', 'get_locations')
-    search_fields = ('full_name', 'email', 'phone', 'agreement_type', 'identification_number', 'job')
+    search_fields = ('user', 'full_name', 'email', 'phone', 'agreement_type', 'identification_number', 'job')
 
     def get_locations(self, obj):
         return ", ".join([location.name for location in obj.locations.all()])

@@ -7,10 +7,6 @@ table {
   width: 100%;
 }
 
-td, th {
-  width: 25%;
-}
-
 .mdc-text-field{
   background-color: transparent !important;
   border: 1px solid #57534e !important;
@@ -33,8 +29,8 @@ td, th {
 }
 
 mat-sidenav {
-  border-left: 1px solid #A8A29E !important; // warm-gray-400 jak w reszcie aplikacji
-  border-radius: 0 !important;
+  border-left: 2px solid #991B1B !important; // warm-gray-400 jak w reszcie aplikacji
+  border-radius: 16px !important;
 }
 
 

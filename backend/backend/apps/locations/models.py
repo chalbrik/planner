@@ -1,13 +1,19 @@
 import uuid
 
 from django.db import models
+from django.contrib.auth import get_user_model
 
-
-# Create your models here.
+User = get_user_model()
 
 class Location(models.Model):
     objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='locations',
+        verbose_name="Właściciel"
+    )
     identification_number = models.CharField(
         max_length=50,
         verbose_name="Numer lokacji",

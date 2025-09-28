@@ -1,10 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   forwardRef,
   input,
-  signal,
   ViewEncapsulation
 } from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule} from '@angular/forms';
@@ -31,24 +29,22 @@ import {MatInputModule} from '@angular/material/input';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InputComponent implements ControlValueAccessor {
-  // Inputs używając funkcji input()
   readonly label = input<string>('');
   readonly placeholder = input<string>('');
   readonly errorMessage = input<string>('Pole obowiązkowe');
   readonly disabled = input<boolean>(false);
   readonly showError = input<boolean>(false);
 
-  // Stan komponentu jako sygnał
-  private readonly _value = signal<string>('');
-  readonly value = computed(() => this._value());
+  value: string = '';
 
-  // Callbacks dla ControlValueAccessor
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
 
-  // Implementacja ControlValueAccessor
+  // ✅ USUŃ KONSTRUKTOR I NgControl
+  // ✅ USUŃ get hasError()
+
   writeValue(value: string | null): void {
-    this._value.set(value ?? '');
+    this.value = value ?? '';
   }
 
   registerOnChange(fn: (value: string) => void): void {
@@ -63,12 +59,11 @@ export class InputComponent implements ControlValueAccessor {
     // Możesz dodać dodatkową logikę dla disabled state jeśli potrzebna
   }
 
-  // Event handlers
   handleInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     const inputValue = inputElement.value;
 
-    this._value.set(inputValue);
+    this.value = inputValue;
     this.onChange(inputValue);
   }
 

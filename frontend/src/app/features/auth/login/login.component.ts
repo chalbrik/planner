@@ -4,13 +4,15 @@ import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
 import {environment} from '../../../../environments/environment';
+import {ButtonComponent} from '../../../shared/components/button/button.component';
+import {InputComponent} from '../../../shared/components/input/input.component';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   standalone: true,
-  imports: [ReactiveFormsModule]
+  imports: [ReactiveFormsModule, ButtonComponent, InputComponent]
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
@@ -31,19 +33,19 @@ export class LoginComponent implements OnInit {
       password: ['', [Validators.required]]
     });
 
-    // Sprawdź, czy jesteśmy w trybie deweloperskim
-    if (typeof window !== 'undefined' && !environment.production && this.autoLogin) {
-      // Ustaw dane dla trybu deweloperskiego
-      this.loginForm.setValue({
-        username: 'pawel',  // Zmień na własne dane testowe
-        password: 'alpachino'  // Zmień na własne dane testowe
-      });
-
-      // Automatyczne logowanie po krótkim opóźnieniu
-      setTimeout(() => {
-        this.onSubmit();
-      }, 500);
-    }
+    // // Sprawdź, czy jesteśmy w trybie deweloperskim
+    // if (typeof window !== 'undefined' && !environment.production && this.autoLogin) {
+    //   // Ustaw dane dla trybu deweloperskiego
+    //   this.loginForm.setValue({
+    //     username: 'pawel',  // Zmień na własne dane testowe
+    //     password: 'alpachino'  // Zmień na własne dane testowe
+    //   });
+    //
+    //   // Automatyczne logowanie po krótkim opóźnieniu
+    //   setTimeout(() => {
+    //     this.onSubmit();
+    //   }, 500);
+    // }
 
   }
 
@@ -60,7 +62,7 @@ export class LoginComponent implements OnInit {
     this.authService.login(username, password).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/schedule']);
+        this.router.navigate(['/app/schedule']);
       },
       error: (err) => {
         this.isLoading = false;

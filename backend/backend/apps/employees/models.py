@@ -12,6 +12,12 @@ User = get_user_model()
 class Employee(models.Model):
     objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='employees',
+        verbose_name="Właściciel"
+    )
     full_name = models.CharField(max_length=100)
     birth_date = models.DateField(
         verbose_name="Data urodzenia",

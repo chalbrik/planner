@@ -8,12 +8,15 @@ from .serializers import LocationSerializer
 from ..schedule.models import WorkHours
 
 
-# Create your views here.
-
 class LocationViewSet(viewsets.ModelViewSet):
-    queryset = Location.objects.all()
+    queryset = Location.objects.all()  # Bazowy queryset dla DRF Router
     serializer_class = LocationSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Location.objects.all()
+        """Zwraca tylko lokacje należące do zalogowanego użytkownika"""
+        return Location.objects.filter(user=self.request.user)
 
+    def perform_create(self, serializer):
+        """Automatycznie przypisuje zalogowanego użytkownika przy tworzeniu lokacji"""
+        serializer.save(user=self.request.user)

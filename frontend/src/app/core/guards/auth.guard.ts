@@ -12,7 +12,7 @@ export const AuthGuard: CanActivateFn = (route, state) => {
   // Brak tokena - przekieruj na login
   if (!token) {
     // console.log('AuthGuard: No token found, redirecting to login');
-    router.navigate(['/auth/login']);
+    router.navigate(['/login']);
     return false;
   }
 
@@ -20,7 +20,7 @@ export const AuthGuard: CanActivateFn = (route, state) => {
   if (authService.isTokenExpired(token)) {
     // console.log('AuthGuard: Token expired, clearing auth data');
     authService.clearAuthData();
-    router.navigate(['/auth/login']);
+    router.navigate(['/login']);
     return false;
   }
 

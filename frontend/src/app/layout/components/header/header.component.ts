@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {User} from '../../core/services/auth.model';
-import {AuthService} from '../../core/services/auth.service';
+import {User} from '../../../core/services/auth.model';
+import {AuthService} from '../../../core/services/auth.service';
 import {Router, RouterModule} from '@angular/router';
 
 import {MatButton} from "@angular/material/button";
-import {IconComponent} from '../../shared/components/icon';
+import {IconComponent} from '../../../shared/components/icon';
 
 
 
@@ -28,7 +28,7 @@ export class HeaderComponent implements OnInit {
 
   logout(): void {
     this.authService.logout().subscribe(() => {
-      this.router.navigate(['/auth/login']);
+      this.router.navigate(['/login']);
     });
   }
 
