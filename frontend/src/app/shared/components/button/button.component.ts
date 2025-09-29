@@ -34,8 +34,7 @@ export class ButtonComponent {
   readonly fillColor = input<string>('primary-400');
   readonly accentColor = input<string>('primary-400');
   readonly fullWidth = input<boolean>(false);
-
-  private isProcessing = false;
+  readonly type = input<'button' | 'submit' | 'reset'>('button');
 
   // Output dla kliknięcia
   readonly click = output<void>();
@@ -46,7 +45,7 @@ export class ButtonComponent {
   readonly showIconAfter = computed(() => this.hasIcon() && this.iconPosition() === 'after');
 
   readonly buttonClasses = computed(() => {
-    const baseClasses = 'px-2 !rounded-md gap-2 whitespace-nowrap !h-10';
+    const baseClasses = 'p-2 !rounded-xl gap-2 whitespace-nowrap !h-10';
     const widthClass = this.fullWidth() ? '!w-full' : '!w-fit';
 
     return `${baseClasses} ${widthClass}`;
@@ -61,6 +60,7 @@ export class ButtonComponent {
     } else {
       return {
         'border-color': this.getColorHex(this.accentColor()),
+        'color': this.getColorHex(this.accentColor()),
         'background-color': 'transparent'
       };
     }
@@ -82,25 +82,16 @@ export class ButtonComponent {
   });
 
   // Event handler
-  // handleClick(event?: Event): void {
-  //   // ✅ Sprawdź czy to MouseEvent (kliknięcie myszą)
-  //   if (event instanceof MouseEvent) {
-  //     event.preventDefault();
-  //     event.stopPropagation();
-  //   }
-  //
-  //   if (!this.disabled()) {
-  //     this.click.emit();
-  //   }
-  // }
+  handleClick(event?: Event): void {
+    console.log("handleClick - timestamp:", Date.now());
+    console.log("handleClick - event:", event);
 
-  handleClick(): void {
-    console.log('click');
     if (!this.disabled()) {
+      console.log("About to emit...");
       this.click.emit();
+      console.log("Emitted!");
     }
   }
-
 
   private getColorHex(colorName: string): string {
     const colors: { [key: string]: string } = {

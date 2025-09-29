@@ -1,13 +1,14 @@
 <!-- Używamy direktywy mat-stroked-button bezpośrednio jak w oryginale -->
 @if (variant() === 'fill') {
   <button
-    mat-button
+    matButton
     [class]="buttonClasses()"
     [style]="buttonStyle()"
     [disabled]="disabled()"
-    (click)="handleClick()">
+    [type]="type()"
+    (click)="handleClick($event)">
 
-    <div class="flex flex-row justify-start items-center h-full w-full gap-2">
+    <div class="flex flex-row justify-center items-center h-full w-full gap-2">
       @if (showIconBefore()) {
         <app-icon
           [iconName]="iconName()!"
@@ -35,9 +36,10 @@
     [class]="buttonClasses()"
     [style]="buttonStyle()"
     [disabled]="disabled()"
-    (click)="handleClick()">
+    [type]="type()"
+    (click)="handleClick($event)">
 
-    <div class="flex flex-row justify-start items-center h-full w-full gap-2">
+    <div class="flex flex-row justify-center items-center h-full w-full gap-2">
       @if (showIconBefore()) {
         <app-icon
           [iconName]="iconName()!"

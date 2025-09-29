@@ -40,9 +40,6 @@ export class InputComponent implements ControlValueAccessor {
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
 
-  // ✅ USUŃ KONSTRUKTOR I NgControl
-  // ✅ USUŃ get hasError()
-
   writeValue(value: string | null): void {
     this.value = value ?? '';
   }

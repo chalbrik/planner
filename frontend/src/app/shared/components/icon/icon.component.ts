@@ -71,6 +71,7 @@ export class IconComponent implements OnInit {
         case 'mini': return 20;
         case 'outline': return 24;
         case 'solid': return 24;
+        case 'xl': return 44;
         default: return 24;
       }
     }

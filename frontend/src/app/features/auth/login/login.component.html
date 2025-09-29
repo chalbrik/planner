@@ -1,113 +1,139 @@
-<!--<div class="min-h-screen flex items-center justify-center bg-gray-50">-->
-<!--  <div class="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">-->
-<!--    <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-6">Logowanie</h2>-->
+<div class="relative grid grid-cols-2 h-full overflow-hidden font-geist">
 
-<!--    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">-->
-<!--      &lt;!&ndash; Alert o błędach &ndash;&gt;-->
-<!--      @if (error) {-->
-<!--        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">-->
-<!--          {{ error }}-->
-<!--        </div>-->
-<!--      }-->
+  <!-- Panel Logowania -->
+  <div class="col-span-1 flex flex-col justify-center items-center p-10 z-10">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()" class="w-2/3">
+      <div class="flex flex-col items-start justify-center gap-5">
+        <h1 class="text-3xl font-bold text-primary-800">Zaloguj się</h1>
 
-<!--      &lt;!&ndash; Pole nazwy użytkownika &ndash;&gt;-->
-<!--      <div>-->
-<!--        <label for="username" class="block text-sm font-medium text-gray-700">Nazwa użytkownika</label>-->
-<!--        <input-->
-<!--          formControlName="username"-->
-<!--          id="username"-->
-<!--          type="text"-->
-<!--          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"-->
-<!--          required>-->
-<!--        @if (loginForm.get('username')?.invalid && (loginForm.get('username')?.dirty || loginForm.get('username')?.touched)) {-->
-<!--          <div class="text-red-500 text-sm mt-1">-->
-<!--            Nazwa użytkownika jest wymagana-->
-<!--          </div>-->
-<!--        }-->
-<!--      </div>-->
+        <!-- Komunikaty błędów i sukcesów -->
+        @if (error && !isSlid()) {
+          <div class="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {{ error }}
+          </div>
+        }
 
-<!--      &lt;!&ndash; Pole hasła &ndash;&gt;-->
-<!--      <div>-->
-<!--        <label for="password" class="block text-sm font-medium text-gray-700">Hasło</label>-->
-<!--        <input-->
-<!--          formControlName="password"-->
-<!--          id="password"-->
-<!--          type="password"-->
-<!--          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"-->
-<!--          required>-->
-<!--        @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {-->
-<!--          <div class="text-red-500 text-sm mt-1">-->
-<!--            Hasło jest wymagane-->
-<!--          </div>-->
-<!--        }-->
-<!--      </div>-->
+        <div class="flex flex-col w-full gap-4">
+          <app-input
+            class="w-full"
+            id="login-username"
+            [label]="'Nazwa użytkownika'"
+            [placeholder]="''"
+            formControlName="username">
+          </app-input>
 
-<!--      &lt;!&ndash; Przycisk logowania &ndash;&gt;-->
-<!--      <div>-->
-<!--        <button-->
-<!--          type="submit"-->
-<!--          [disabled]="loginForm.invalid || isLoading"-->
-<!--          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300">-->
-<!--          @if (isLoading) {-->
-<!--            <span>Logowanie...</span>-->
-<!--          }-->
-<!--          @if (!isLoading) {-->
-<!--            <span>Zaloguj się</span>-->
-<!--          }-->
-<!--        </button>-->
-<!--      </div>-->
+          <app-input
+            class="w-full"
+            id="login-password"
+            [label]="'Hasło'"
+            [placeholder]="''"
+            type="password"
+            formControlName="password">
+          </app-input>
+        </div>
 
-<!--      &lt;!&ndash; Link do rejestracji &ndash;&gt;-->
-<!--      <div class="text-center mt-4">-->
-<!--        <p class="text-sm text-gray-600">-->
-<!--          Nie masz konta?-->
-<!--          <a routerLink="/auth/register" class="font-medium text-indigo-600 hover:text-indigo-500">-->
-<!--            Zarejestruj się-->
-<!--          </a>-->
-<!--        </p>-->
-<!--      </div>-->
-<!--    </form>-->
-<!--  </div>-->
-<!--</div>-->
-
-<div class="px-2 pb-2 grid grid-cols-2 gap-2 h-full">
-
-  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-row justify-center items-center">
-    <div class="col-span-1 flex flex-col items-start justify-center gap-5 px-16 w-2/3">
-      <h1 class="text-3xl font-bold text-primary-800">Zaloguj się</h1>
-      <div class="flex flex-col w-full">
-        <app-input
+        <app-button
+          type="submit"
+          [disabled]="loginForm.invalid || isLoading"
           class="w-full"
-          id="username"
-          [label]="'Nazwa użytkownika'"
-          [placeholder]="''"
-          formControlName="username">
-        </app-input>
-
-        <app-input
-          class="w-full"
-          id="password"
-          [label]="'Hasło'"
-          [placeholder]="''"
-          formControlName="password">
-        </app-input>
+          variant="fill"
+          [text]="isLoading ? 'Logowanie...' : 'Zaloguj'"
+          [fullWidth]="true">
+        </app-button>
       </div>
-      <app-button
-        type="submit"
-        [disabled]="loginForm.invalid || isLoading"
-        class="w-full"
-        variant="fill"
-        text="Zaloguj"
-        [fullWidth]="true">
-      </app-button>
+    </form>
+  </div>
+
+  <!-- Panel Rejestracji -->
+  <div class="col-span-1 flex flex-col justify-center items-center p-10 z-10">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmitRegister()" class="w-2/3">
+      <div class="flex flex-col items-start justify-center gap-5">
+        <h1 class="text-3xl font-bold text-primary-800">Zarejestruj się</h1>
+
+        <!-- Komunikaty błędów i sukcesów -->
+        @if (error && isSlid()) {
+          <div class="w-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {{ error }}
+          </div>
+        }
+
+        @if (success && isSlid()) {
+          <div class="w-full bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            {{ success }}
+          </div>
+        }
+
+        <div class="flex flex-col w-full gap-4">
+          <app-input
+            class="w-full"
+            id="register-username"
+            [label]="'Nazwa użytkownika'"
+            [placeholder]="''"
+            formControlName="username">
+          </app-input>
+
+          <app-input
+            class="w-full"
+            id="register-password"
+            [label]="'Hasło'"
+            [placeholder]="''"
+            type="password"
+            formControlName="password">
+          </app-input>
+
+          <app-input
+            class="w-full"
+            id="register-confirm-password"
+            [label]="'Potwierdź hasło'"
+            [placeholder]="''"
+            type="password"
+            formControlName="confirmPassword">
+          </app-input>
+        </div>
+
+        <app-button
+          type="submit"
+          [disabled]="registerForm.invalid || isLoading"
+          class="w-full"
+          variant="fill"
+          [text]="isLoading ? 'Rejestracja...' : 'Zarejestruj'"
+          [fullWidth]="true">
+        </app-button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Sliding Overlay -->
+  <div class="absolute top-0 w-1/2 h-full z-20 cursor-pointer transition-all duration-700 ease-in-out right-0 p-4"
+       [ngClass]="{ 'translate-x-[-100%]': isSlid() }"
+       (click)="togglePanel()">
+
+    <div class="h-full bg-gradient-to-br from-amber-500 to-pink-600 flex flex-row-reverse items-end justify-between text-white p-10 rounded-lg shadow-xl">
+
+      <!-- Content dla logowania (gdy overlay jest po prawej) -->
+      <div class="transition-opacity duration-500 flex flex-row items-end gap-5"
+           [ngClass]="{ 'opacity-0': isSlid(), 'opacity-100': !isSlid() }">
+        <div>
+          <p class="text-base font-normal">Jeśli jeszcze nie posiadasz</p>
+          <p class="text-3xl font-bold">Utwórz konto</p>
+        </div>
+        <app-icon
+          [iconName]="'arrow-right-circle'"
+          [iconSize]="'xl'">
+        </app-icon>
+      </div>
+
+      <!-- Content dla rejestracji (gdy overlay jest po lewej) -->
+      <div class="text-center transition-opacity duration-500 flex flex-row items-center gap-5"
+           [ngClass]="{ 'opacity-0': !isSlid(), 'opacity-100': isSlid() }">
+        <app-icon
+          [iconName]="'arrow-left-circle'"
+          [iconSize]="'xl'">
+        </app-icon>
+        <p class="text-3xl font-bold">Zaloguj się</p>
+      </div>
+
     </div>
-  </form>
-
-  <div class="col-span-1 bg-primary-300 rounded-lg ">
-
   </div>
 
 </div>
-
-
-

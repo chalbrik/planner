@@ -133,6 +133,8 @@ export class EmployeesComponent implements OnInit {
 
   openAddEmployeeDialog(): void {
     // Zmiana z dialog.open na bottomSheet.open
+    console.log("openAddEmployeeDialog - called from:", new Error().stack);
+    console.log("openAddEmployeeDialog - timestamp:", Date.now());
     const bottomSheetRef = this.bottomSheet.open(EmployeeFormComponent, {
       ariaLabel: 'Dodaj nowego pracownika',
     });

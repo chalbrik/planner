@@ -1,4 +1,4 @@
-export type IconSize = 16 | 20 | 24 | 'micro' | 'mini' | 'outline' | 'solid';
+export type IconSize = 16 | 20 | 24 | 'micro' | 'mini' | 'outline' | 'solid' | 'xl';
 
 export type IconVariant = 'outline' | 'solid' | 'mini' | 'micro';
 

@@ -51,6 +51,10 @@ export class EmployeeFormComponent implements OnInit {
 
   @ViewChild('employerStepper') employerStepper!: MatStepper;
 
+  // Flagi dla zapobiegania podwójnym wywołaniom (workaround dla MatBottomSheet)
+  private isSubmitting = false;
+  private isCancelling = false;
+
   addEmployeeForm!: FormGroup;
 
   locations = signal<Location[]>([]);
@@ -116,8 +120,12 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   onAddEmployee() {
-    // console.log('Form valid:', this.addEmployeeForm.valid);
-    // console.log('Form data:', this.addEmployeeForm.getRawValue());
+    // Sprawdź czy już się wykonuje (workaround dla MatBottomSheet double event)
+    if (this.isSubmitting) {
+      return;
+    }
+
+    this.isSubmitting = true;
     if (this.addEmployeeForm.valid) {
       const formData = this.addEmployeeForm.getRawValue();
 
@@ -151,14 +159,18 @@ export class EmployeeFormComponent implements OnInit {
 
       this.employeesService.addEmployee(formData).subscribe({
         next: (newEmployee) => {
+          this.isSubmitting = false; // Reset flagi
           this.snackBar.open('Dodano pracownika!', 'OK', { duration: 3000 });
           this.bottomSheet.dismiss(newEmployee);
         },
         error: (error) => {
+          this.isSubmitting = false; // Reset flagi
           console.error('Błąd:', error);
           this.snackBar.open('Błąd!', 'OK', { duration: 3000 });
         }
       });
+    } else {
+      this.isSubmitting = false; // Reset flagi jeśli formularz niepoprawny
     }
   }
 
@@ -215,36 +227,36 @@ export class EmployeeFormComponent implements OnInit {
     this.removeEmployer(currentIndex);
   }
 
-private formatDate(date: Date): string {
-  if (!date) return '';
-  return date.toISOString().split('T')[0];  // YYYY-MM-DD
-}
+  private formatDate(date: Date): string {
+    if (!date) return '';
+    return date.toISOString().split('T')[0];  // YYYY-MM-DD
+  }
 
-private loadLocations(): void {
+  private loadLocations(): void {
     this.locationService.getLocations().subscribe({
       next: (data) => {
-      this.locations.set(data)
+        this.locations.set(data)
         // console.log("Lokacje: ", data);
       },
       error: (error) => {
         // console.error("Błąd ładowania lokacji: ", error);
       }
     })
-}
-
-onLocationChange(locationId: string, event: any): void {
-    const assignedLocations = this.addEmployeeForm.get('locations') as FormArray;
-
-  if (event.checked) {
-    assignedLocations.push(this.formBuilder.control(locationId));
-  } else {
-    const index = assignedLocations.controls.findIndex(x => x.value === locationId);
-    if (index !== -1) {
-      assignedLocations.removeAt(index);
-    }
   }
 
-}
+  onLocationChange(locationId: string, event: any): void {
+    const assignedLocations = this.addEmployeeForm.get('locations') as FormArray;
+
+    if (event.checked) {
+      assignedLocations.push(this.formBuilder.control(locationId));
+    } else {
+      const index = assignedLocations.controls.findIndex(x => x.value === locationId);
+      if (index !== -1) {
+        assignedLocations.removeAt(index);
+      }
+    }
+
+  }
 
   getErrorMessage(controlName: string): string {
     const control = this.addEmployeeForm.get(controlName);
@@ -262,8 +274,13 @@ onLocationChange(locationId: string, event: any): void {
   }
 
   onCancel(): void {
+    // Sprawdź czy już się wykonuje (workaround dla MatBottomSheet double event)
+    if (this.isCancelling) {
+      return;
+    }
+
+    this.isCancelling = true;
     this.bottomSheet.dismiss();
   }
-
 
 }

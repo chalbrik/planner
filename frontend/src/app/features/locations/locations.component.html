@@ -102,14 +102,14 @@
           </ng-container>
 
           <!-- Wiersze z obsługą kliknięcia -->
-          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="!bg-primary-100"></tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="!bg-primary-100 !h-11"></tr>
           <tr mat-row
               *matRowDef="let employee; columns: displayedColumns;"
-              class="cursor-pointer bg-primary-100">
+              class="cursor-pointer bg-primary-100 !h-11">
           </tr>
 
           <!-- Wiersz gdy brak danych -->
-          <tr class="mat-row" *matNoDataRow class="!bg-primary-100">
+          <tr class="mat-row !bg-primary-100 !h-11" *matNoDataRow>
             <td class="mat-cell !bg-primary-100" [attr.colspan]="displayedColumns.length">
               Brak danych "{{input.value}}"
             </td>
