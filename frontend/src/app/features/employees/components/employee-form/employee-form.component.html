@@ -7,38 +7,39 @@
 
         <div class="grid grid-cols-2 gap-2">
 
-          <app-input
-            [label]="'Pełne imię i nazwisko'"
-            [placeholder]="''"
-            [showError]="shouldShowError('full_name')"
-            [errorMessage]="getErrorMessage('full_name')"
-            formControlName="full_name">
-          </app-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Pełne imię i nazwisko</mat-label>
+            <input type="text" matInput formControlName="full_name">
+            @if (addEmployeeForm.get('full_name')?.hasError('required')) {
+              <mat-error>Imię i nazwisko jest <strong>wymagane</strong></mat-error>
+            }
+          </mat-form-field>
 
-          <app-date-input
-            class="col-span-1"
-            [label]="'Data urodzenia'"
-            [placeholder]="''"
-            [showError]="shouldShowError('birth_date')"
-            [errorMessage]="getErrorMessage('birth_date')"
-            formControlName="birth_date">
-          </app-date-input>
+          <mat-form-field>
+            <mat-label>Data urodzenia</mat-label>
+            <input matInput [matDatepicker]="birth_date_picker" formControlName="birth_date">
+            <mat-datepicker-toggle matIconSuffix [for]="birth_date_picker"></mat-datepicker-toggle>
+            <mat-datepicker #birth_date_picker></mat-datepicker>
+            @if (addEmployeeForm.get('birth_date')?.hasError('required')) {
+              <mat-error>Data urodzenia jest wymagana</mat-error>
+            }
+          </mat-form-field>
 
-          <app-input
-            [label]="'Telefon'"
-            [placeholder]="''"
-            [showError]="shouldShowError('phone')"
-            [errorMessage]="getErrorMessage('phone')"
-            formControlName="phone">
-          </app-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Telefon</mat-label>
+            <input type="number" matInput formControlName="phone">
+            @if (addEmployeeForm.get('phone')?.hasError('required')) {
+              <mat-error>Telefon jest <strong>wymagany</strong></mat-error>
+            }
+          </mat-form-field>
 
-          <app-input
-            [label]="'Email'"
-            [placeholder]="''"
-            [showError]="shouldShowError('email')"
-            [errorMessage]="getErrorMessage('email')"
-            formControlName="email">
-          </app-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Email</mat-label>
+            <input type="number" matInput formControlName="email">
+            @if (addEmployeeForm.get('email')?.hasError('required')) {
+              <mat-error>Email jest <strong>wymagany</strong></mat-error>
+            }
+          </mat-form-field>
 
         </div>
 
@@ -49,65 +50,50 @@
         <app-title-display [name]="'Dane dotyczące zatrudnienia'" [iconName]="'document-text'" [iconSize]="'outline'"></app-title-display>
 
         <div class="grid grid-cols-2 gap-2">
+          <mat-form-field>
+            <mat-label>Rodzaj umowy</mat-label>
+            <mat-select>
+              @for (option of contractTypeOptions; track option) {
+                <mat-option [value]="option.value">{{option.label}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
-          <app-select-input
-            [label]="'Rodzaj umowy'"
-            [placeholder]="'Wybierz rodzaj umowy'"
-            [options]="contractTypeOptions"
-            [showError]="shouldShowError('agreement_type')"
-            [errorMessage]="getErrorMessage('agreement_type')"
-            formControlName="agreement_type">
-          </app-select-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Stawka godzinowa</mat-label>
+            <input type="number" matInput formControlName="hour_rate">
+          </mat-form-field>
 
-          <app-input
-            class="col-span-1"
-            [label]="'Stawka godzinowa'"
-            [placeholder]="''"
-            [showError]="shouldShowError('hour_rate')"
-            [errorMessage]="getErrorMessage('hour_rate')"
-            formControlName="hour_rate">
-          </app-input>
+          <mat-form-field>
+            <mat-label>Początek okresu umowy</mat-label>
+            <input matInput [matDatepicker]="contract_date_start_picker" formControlName="contract_date_start">
+            <mat-datepicker-toggle matIconSuffix [for]="contract_date_start_picker"></mat-datepicker-toggle>
+            <mat-datepicker #contract_date_start_picker></mat-datepicker>
+          </mat-form-field>
 
-          <app-date-input
-            class="col-span-1"
-            [label]="'Początek okresu umowy'"
-            [placeholder]="''"
-            [showError]="shouldShowError('contract_date_start')"
-            [errorMessage]="getErrorMessage('contract_date_start')"
-            formControlName="contract_date_start">
-          </app-date-input>
+          <mat-form-field>
+            <mat-label>Koniec okresu umowy</mat-label>
+            <input matInput [matDatepicker]="contract_date_end_picker" formControlName="contract_date_end">
+            <mat-datepicker-toggle matIconSuffix [for]="contract_date_end_picker"></mat-datepicker-toggle>
+            <mat-datepicker #contract_date_end_picker></mat-datepicker>
+          </mat-form-field>
 
-          <app-date-input
-            class="col-span-1"
-            [label]="'Koniec okresu umowy'"
-            [placeholder]="''"
-            [showError]="shouldShowError('contract_date_end')"
-            [errorMessage]="getErrorMessage('contract_date_end')"
-            formControlName="contract_date_end">
-          </app-date-input>
         </div>
       </div>
 
       <div class="col-span-2 flex flex-col">
         <app-title-display [name]="'Informacje dodatkowe'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>
         <div class="grid grid-cols-2 gap-2">
-          <app-input
-            class="col-span-2"
-            [label]="'Niepełnosprawności'"
-            [placeholder]="''"
-            [showError]="shouldShowError('')"
-            [errorMessage]="getErrorMessage('')"
-          >
-          </app-input>
+          <mat-form-field  appearance="fill" class="col-span-2">
+            <mat-label>Niepełnosprawności</mat-label>
+            <input type="text" matInput>
+          </mat-form-field>
 
-          <app-input
-            class="col-span-2"
-            [label]="'KP-188'"
-            [placeholder]="''"
-            [showError]="shouldShowError('')"
-            [errorMessage]="getErrorMessage('')"
-          >
-          </app-input>
+          <mat-form-field  appearance="fill" class="col-span-2">
+            <mat-label>KP-188</mat-label>
+            <input type="text" matInput>
+          </mat-form-field>
+
         </div>
       </div>
 

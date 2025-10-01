@@ -14,6 +14,16 @@ import {SelectInputComponent} from '../../../../shared/components/select-input/s
 import {TitleDisplayComponent} from '../../../../shared/components/title-display/title-display.component';
 import {MatStep, MatStepLabel, MatStepper, MatStepperPrevious} from '@angular/material/stepper';
 import {ButtonComponent} from '../../../../shared/components/button/button.component';
+import {MatError, MatFormField, MatInput, MatInputModule, MatLabel} from '@angular/material/input';
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerModule,
+  MatDatepickerToggle
+} from '@angular/material/datepicker';
+import {MatIconModule} from '@angular/material/icon';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatSelect} from '@angular/material/select';
 
 
 @Component({
@@ -34,6 +44,18 @@ import {ButtonComponent} from '../../../../shared/components/button/button.compo
     MatStepLabel,
     MatStepperPrevious,
     ButtonComponent,
+    MatFormField,
+    MatInput,
+    MatLabel,
+    MatError,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatDatepicker,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatSelect,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
