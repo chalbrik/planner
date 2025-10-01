@@ -6,20 +6,19 @@ import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import {
   MatCell, MatCellDef,
   MatColumnDef,
-  MatHeaderCell,
-  MatHeaderCellDef,
+  MatHeaderCell, MatHeaderCellDef,
   MatHeaderRow, MatHeaderRowDef, MatNoDataRow,
   MatRow, MatRowDef,
   MatTable, MatTableDataSource
 } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatSidenav, MatSidenavContainer, MatSidenavContent, MatSidenavModule} from '@angular/material/sidenav';
-import {MatIcon, MatIconModule} from '@angular/material/icon';
+import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
+import {MatIconModule} from '@angular/material/icon';
 import {EmployeeFormComponent} from './components/employee-form/employee-form.component';
 import {MatDialog} from '@angular/material/dialog';
 import {IconComponent} from '../../shared/components/icon';
-import {MatButton, MatFabButton, MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
 import {ButtonComponent} from '../../shared/components/button/button.component';
 
@@ -35,24 +34,22 @@ import {ButtonComponent} from '../../shared/components/button/button.component';
     MatHeaderRow,
     MatRow,
     MatPaginator,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatHeaderRowDef,
-    MatRowDef,
     MatNoDataRow,
     MatFormField,
     MatLabel,
     MatSidenav,
-    MatIcon,
     MatSidenavContainer,
     MatSidenavContent,
     EmployeeInfoComponent,
     IconComponent,
     MatIconModule,
-    MatIcon,
     MatIconButton,
     MatButton,
     ButtonComponent,
+    MatRowDef,
+    MatHeaderRowDef,
+    MatCellDef,
+    MatHeaderCellDef,
   ],
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss',

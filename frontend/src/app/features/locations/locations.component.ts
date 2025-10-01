@@ -1,21 +1,17 @@
 import {Component, inject, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
-import {EmployeeInfoComponent} from "../employees/components/employee-info/employee-info.component";
 import {IconComponent} from "../../shared/components/icon";
 import {MatButton, MatIconButton} from "@angular/material/button";
 import {
-  MatCell,
-  MatCellDef,
+  MatCell, MatCellDef,
   MatColumnDef,
   MatHeaderCell, MatHeaderCellDef,
-  MatHeaderRow,
-  MatHeaderRowDef, MatNoDataRow,
+  MatHeaderRow, MatHeaderRowDef, MatNoDataRow,
   MatRow, MatRowDef, MatTable, MatTableDataSource
 } from "@angular/material/table";
-import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
-import {MatSidenav, MatSidenavContainer, MatSidenavContent} from "@angular/material/sidenav";
+import {MatFormField, MatInput} from "@angular/material/input";
+import { MatSidenavContainer, MatSidenavContent} from "@angular/material/sidenav";
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatIcon} from '@angular/material/icon';
 import {LocationService} from '../../core/services/locations/location.service';
 import { Location } from '../../core/services/locations/location.types';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
@@ -27,24 +23,23 @@ import {LocationFormComponent} from './components/location-form/location-form.co
     IconComponent,
     MatButton,
     MatCell,
-    MatCellDef,
     MatColumnDef,
     MatFormField,
     MatHeaderCell,
     MatHeaderRow,
-    MatHeaderRowDef,
     MatIconButton,
     MatInput,
-    MatLabel,
     MatPaginator,
     MatRow,
-    MatRowDef,
     MatSidenavContainer,
     MatSidenavContent,
     MatSort,
     MatTable,
+    MatNoDataRow,
     MatHeaderCellDef,
-    MatNoDataRow
+    MatCellDef,
+    MatHeaderRowDef,
+    MatRowDef
   ],
   templateUrl: './locations.component.html',
   styleUrl: './locations.component.scss',
