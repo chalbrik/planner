@@ -120,6 +120,10 @@
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800 !text-right"> Akcje </th>
             <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800 !text-right">
+              <button mat-icon-button class="delete-button" (click)="onEditEmployee(employee, $event)">
+                <app-icon iconName="pencil-square" iconSize="outline" class="text-primary-800"></app-icon>
+              </button>
+
               <button mat-icon-button class="delete-button" (click)="onDeleteEmployee(employee, $event)">
                 <app-icon iconName="trash" iconSize="outline" class="text-primary-800"></app-icon>
               </button>

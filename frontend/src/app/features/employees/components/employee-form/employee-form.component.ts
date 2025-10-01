@@ -14,6 +14,8 @@ import {SelectInputComponent} from '../../../../shared/components/select-input/s
 import {TitleDisplayComponent} from '../../../../shared/components/title-display/title-display.component';
 import {MatStep, MatStepLabel, MatStepper, MatStepperPrevious} from '@angular/material/stepper';
 import {ButtonComponent} from '../../../../shared/components/button/button.component';
+import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
+import { Employee } from '../../../../core/services/employees/employee.types';
 import {MatError, MatFormField, MatInput, MatInputModule, MatLabel} from '@angular/material/input';
 import {
   MatDatepicker,
@@ -36,7 +38,6 @@ import {MatSelect} from '@angular/material/select';
     MatCheckbox,
     InputComponent,
     DateInputComponent,
-    SelectInputComponent,
     MatOptionModule,
     TitleDisplayComponent,
     MatStepper,
@@ -70,6 +71,10 @@ export class EmployeeFormComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly locationService = inject(LocationService);
   private readonly bottomSheet = inject(MatBottomSheet);
+
+  hasSelectedLocations = signal<boolean>(false);
+
+  private readonly data = inject<Employee | null>(MAT_BOTTOM_SHEET_DATA, { optional: true });
 
   @ViewChild('employerStepper') employerStepper!: MatStepper;
 
@@ -121,7 +126,7 @@ export class EmployeeFormComponent implements OnInit {
 
       //Pola wypełniane przez kierownika
 
-      agreement_type: [''],
+      agreement_type: ['', Validators.required],
       job: [''],
       hour_rate: [''],
       job_rate: [''],
@@ -131,13 +136,30 @@ export class EmployeeFormComponent implements OnInit {
       locations: this.formBuilder.array([]),
     })
 
-    this.addEmployer();
-
     this.loadLocations();
 
     this.addEmployeeForm.get('agreement_type')?.valueChanges.subscribe(value => {
       this.agreementType.set(value);
     });
+
+    console.log("Dane z backendu:", this.data);
+    if (this.data) {
+      this.addEmployeeForm.patchValue({
+        full_name: this.data.full_name,
+        birth_date: this.data.birth_date ? new Date(this.data.birth_date) : null,
+        phone: this.data.phone,
+        email: this.data.email,
+        // school_type: this.data.school_ type,
+        // school_name: this.data.school_name,
+        // graduation_year: this.data.graduation_year ? new Date(this.data.graduation_year) : null,
+        agreement_type: this.data.agreement_type,
+        job: this.data.job,
+        hour_rate: this.data.hour_rate,
+        job_rate: this.data.job_rate,
+        contract_date_start: this.data.contract_date_start ? new Date(this.data.contract_date_start) : null,
+        contract_date_end: this.data.contract_date_end ? new Date(this.data.contract_date_end) : null,
+      });
+    }
 
   }
 
@@ -148,52 +170,92 @@ export class EmployeeFormComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    if (this.addEmployeeForm.valid) {
-      const formData = this.addEmployeeForm.getRawValue();
 
-      // ✅ Prosto: popraw daty
-      if (formData.birth_date) {
-        formData.birth_date = formData.birth_date.toISOString().split('T')[0];
-      }
+    const formData = this.addEmployeeForm.getRawValue();
 
-      if (formData.graduation_year) {
-        formData.graduation_year = formData.graduation_year.toISOString().split('T')[0];
-      }
-
-      if (formData.contract_date_start) {
-        formData.contract_date_start = formData.contract_date_start.toISOString().split('T')[0];
-      }
-
-      if (formData.contract_date_end) {
-        formData.contract_date_end = formData.contract_date_end.toISOString().split('T')[0];
-      }
-
-      if (formData.previous_employers) {
-        formData.previous_employers.forEach((employer: any) => {
-          if (employer.work_date_start) {
-            employer.work_date_start = employer.work_date_start.toISOString().split('T')[0];
-          }
-          if (employer.work_date_end) {
-            employer.work_date_end = employer.work_date_end.toISOString().split('T')[0];
-          }
-        });
-      }
-
-      this.employeesService.addEmployee(formData).subscribe({
-        next: (newEmployee) => {
-          this.isSubmitting = false; // Reset flagi
-          this.snackBar.open('Dodano pracownika!', 'OK', { duration: 3000 });
-          this.bottomSheet.dismiss(newEmployee);
-        },
-        error: (error) => {
-          this.isSubmitting = false; // Reset flagi
-          console.error('Błąd:', error);
-          this.snackBar.open('Błąd!', 'OK', { duration: 3000 });
-        }
-      });
+    // ✅ Formatuj daty lub usuń pole jeśli puste
+    if (formData.birth_date) {
+      formData.birth_date = formData.birth_date.toISOString().split('T')[0];
     } else {
-      this.isSubmitting = false; // Reset flagi jeśli formularz niepoprawny
+      delete formData.birth_date;
     }
+
+    if (formData.graduation_year) {
+      formData.graduation_year = formData.graduation_year.toISOString().split('T')[0];
+    } else {
+      delete formData.graduation_year;
+    }
+
+    if (formData.contract_date_start) {
+      formData.contract_date_start = formData.contract_date_start.toISOString().split('T')[0];
+    } else {
+      delete formData.contract_date_start;
+    }
+
+    if (formData.contract_date_end) {
+      formData.contract_date_end = formData.contract_date_end.toISOString().split('T')[0];
+    } else {
+      delete formData.contract_date_end;
+    }
+
+    // ✅ Filtruj i formatuj pracodawców
+    if (formData.previous_employers && formData.previous_employers.length > 0) {
+      formData.previous_employers = formData.previous_employers
+        .filter((employer: any) => {
+          // Zostaw tylko wypełnionych pracodawców
+          return employer.employer_name ||
+            employer.employee_position ||
+            employer.work_date_start ||
+            employer.work_date_end;
+        })
+        .map((employer: any) => {
+          const cleanEmployer: any = {};
+
+          // Dodaj tylko niepuste pola
+          if (employer.employer_name) cleanEmployer.employer_name = employer.employer_name;
+          if (employer.employee_position) cleanEmployer.employee_position = employer.employee_position;
+
+          if (employer.work_date_start) {
+            cleanEmployer.work_date_start = employer.work_date_start.toISOString().split('T')[0];
+          }
+
+          if (employer.work_date_end) {
+            cleanEmployer.work_date_end = employer.work_date_end.toISOString().split('T')[0];
+          }
+
+          return cleanEmployer;
+        });
+
+      // Jeśli po filtracji nie ma pracodawców, usuń pole
+      if (formData.previous_employers.length === 0) {
+        delete formData.previous_employers;
+      }
+    } else {
+      delete formData.previous_employers;
+    }
+
+    // ✅ Usuń puste pola tekstowe (ale zostaw liczby i booleany)
+    // Object.keys(formData).forEach(key => {
+    //   const value = formData[key];
+    //   if (value === '' || value === null || value === undefined) {
+    //     delete formData[key];
+    //   }
+    // });
+
+    console.log("Wysłane dane:", formData);
+
+    this.employeesService.addEmployee(formData).subscribe({
+      next: (newEmployee) => {
+        this.isSubmitting = false;
+        this.snackBar.open('Dodano pracownika!', 'OK', { duration: 3000 });
+        this.bottomSheet.dismiss(newEmployee);
+      },
+      error: (error) => {
+        this.isSubmitting = false;
+        console.error('Błąd:', error);
+        this.snackBar.open('Błąd!', 'OK', { duration: 3000 });
+      }
+    });
   }
 
   // Getter do łatwego dostępu do FormArray
@@ -235,13 +297,12 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   removeEmployer(index: number): void {
-    // Nie pozwalaj usunąć ostatniego pracodawcy - zawsze musi zostać przynajmniej jeden
-    if (this.previousEmployers.length <= 1) {
-      this.snackBar.open('Musi zostać przynajmniej jeden pracodawca', 'OK', { duration: 3000 });
-      return;
-    }
-
     this.previousEmployers.removeAt(index);
+
+    // Opcjonalnie: wróć do poprzedniego kroku jeśli usunęliśmy aktualny
+    if (this.employerStepper.selectedIndex >= this.previousEmployers.length) {
+      this.employerStepper.previous();
+    }
   }
 
   removeCurrentEmployer(): void {
@@ -265,6 +326,20 @@ export class EmployeeFormComponent implements OnInit {
       }
     })
   }
+  //
+  // onLocationChange(locationId: string, event: any): void {
+  //   const assignedLocations = this.addEmployeeForm.get('locations') as FormArray;
+  //
+  //   if (event.checked) {
+  //     assignedLocations.push(this.formBuilder.control(locationId));
+  //   } else {
+  //     const index = assignedLocations.controls.findIndex(x => x.value === locationId);
+  //     if (index !== -1) {
+  //       assignedLocations.removeAt(index);
+  //     }
+  //   }
+  //
+  // }
 
   onLocationChange(locationId: string, event: any): void {
     const assignedLocations = this.addEmployeeForm.get('locations') as FormArray;
@@ -278,6 +353,9 @@ export class EmployeeFormComponent implements OnInit {
       }
     }
 
+    // ✅ Aktualizuj signal
+    this.hasSelectedLocations.set(assignedLocations.length > 0);
+    console.log("siganl: ", this.hasSelectedLocations());
   }
 
   getErrorMessage(controlName: string): string {

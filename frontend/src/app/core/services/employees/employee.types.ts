@@ -1,6 +1,7 @@
 export interface Employee {
   id: string;
   full_name: string;
+  birth_date: string;
   email: string;
   phone: string;
   agreement_type: 'permanent' | 'contract';

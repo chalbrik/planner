@@ -10,7 +10,7 @@
           <mat-form-field  appearance="fill">
             <mat-label>Pełne imię i nazwisko</mat-label>
             <input type="text" matInput formControlName="full_name">
-            @if (addEmployeeForm.get('full_name')?.hasError('required')) {
+            @if (shouldShowError('full_name')) {
               <mat-error>Imię i nazwisko jest <strong>wymagane</strong></mat-error>
             }
           </mat-form-field>
@@ -20,7 +20,7 @@
             <input matInput [matDatepicker]="birth_date_picker" formControlName="birth_date">
             <mat-datepicker-toggle matIconSuffix [for]="birth_date_picker"></mat-datepicker-toggle>
             <mat-datepicker #birth_date_picker></mat-datepicker>
-            @if (addEmployeeForm.get('birth_date')?.hasError('required')) {
+            @if (shouldShowError('birth_date')) {
               <mat-error>Data urodzenia jest wymagana</mat-error>
             }
           </mat-form-field>
@@ -28,7 +28,7 @@
           <mat-form-field  appearance="fill">
             <mat-label>Telefon</mat-label>
             <input type="number" matInput formControlName="phone">
-            @if (addEmployeeForm.get('phone')?.hasError('required')) {
+            @if (shouldShowError('phone')) {
               <mat-error>Telefon jest <strong>wymagany</strong></mat-error>
             }
           </mat-form-field>
@@ -36,7 +36,7 @@
           <mat-form-field  appearance="fill">
             <mat-label>Email</mat-label>
             <input type="number" matInput formControlName="email">
-            @if (addEmployeeForm.get('email')?.hasError('required')) {
+            @if (shouldShowError('email')) {
               <mat-error>Email jest <strong>wymagany</strong></mat-error>
             }
           </mat-form-field>
@@ -52,7 +52,7 @@
         <div class="grid grid-cols-2 gap-2">
           <mat-form-field>
             <mat-label>Rodzaj umowy</mat-label>
-            <mat-select>
+            <mat-select formControlName="agreement_type">
               @for (option of contractTypeOptions; track option) {
                 <mat-option [value]="option.value">{{option.label}}</mat-option>
               }
@@ -101,15 +101,14 @@
         <app-title-display [name]="'Wykształcenie'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>
 
         <div class="grid grid-cols-2 gap-2">
-          <app-select-input
-            class="col-span-2"
-            [label]="'Typ szkoły'"
-            [placeholder]="'Wybierz typ szkoły'"
-            [options]="schoolTypeOptions"
-            [showError]="shouldShowError('school_type')"
-            [errorMessage]="getErrorMessage('school_type')"
-            formControlName="school_type">
-          </app-select-input>
+          <mat-form-field>
+            <mat-label>Typ szkoły</mat-label>
+            <mat-select formControlName="school_type">
+              @for (option of schoolTypeOptions; track option) {
+                <mat-option [value]="option.value">{{option.label}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
 
           <app-input
             class="col-span-1"
@@ -174,74 +173,78 @@
 
 
     <app-title-display [name]="'Przebieg dotychczasowego zatrudnienia'" [iconName]="'briefcase'" [iconSize]="'outline'"></app-title-display>
-    <div formArrayName="previous_employers">
-      <mat-vertical-stepper [linear]="false" #employerStepper>
-        @for (employer of previousEmployers.controls; track $index) {
-          <mat-step [stepControl]="$any(employer)">
-            <div [formGroup]="$any(employer)">
-              <ng-template matStepLabel>Pracodawca {{ $index + 1 }}</ng-template>
 
-              <div class="flex flex-row justify-start items-center mb-4">
-<!--                <button mat-icon-button (click)="removeEmployer($index)" type="button">-->
-<!--                  <app-icon iconName="trash" iconSize="outline" class="text-primary-400"></app-icon>-->
-<!--                </button>-->
-                <p class="font-bold text-base">Dane pracodawcy {{ $index + 1 }}</p>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4">
-                <app-input
-                  class="col-span-1"
-                  [label]="'Nazwa firmy'"
-                  [placeholder]="''"
-                  [showError]="shouldShowError('employer_name')"
-                  [errorMessage]="getErrorMessage('employer_name')"
-                  formControlName="employer_name">
-                </app-input>
-
-                <app-input
-                  class="col-span-1"
-                  [label]="'Stanowisko'"
-                  [placeholder]="''"
-                  [showError]="shouldShowError('employee_position')"
-                  [errorMessage]="getErrorMessage('employee_position')"
-                  formControlName="employee_position">
-                </app-input>
-
-                <app-date-input
-                  [label]="'Data rozpoczęcia pracy'"
-                  [placeholder]="''"
-                  [showError]="shouldShowError('work_date_start')"
-                  [errorMessage]="getErrorMessage('work_date_start')"
-                  formControlName="work_date_start">
-                </app-date-input>
-
-                <app-date-input
-                  [label]="'Data zakończenia pracy'"
-                  [placeholder]="''"
-                  [showError]="shouldShowError('work_date_end')"
-                  [errorMessage]="getErrorMessage('work_date_end')"
-                  formControlName="work_date_end">
-                </app-date-input>
-              </div>
-
-              <div class="flex justify-end items-center mt-4">
-                <app-button
-                  variant="outline"
-                  text="Usuń pracodawcę"
-                  iconName="trash"
-                  iconSize="mini"
-                  iconPosition="before"
-                  (click)="removeEmployer($index)">
-                </app-button>
-
-                <button mat-button matStepperPrevious type="button">Poprzedni</button>
-                <button mat-button (click)="handleNextStep($index)" type="button">Następny</button>
-              </div>
-            </div>
-          </mat-step>
-        }
-      </mat-vertical-stepper>
+    <div class="py-4">
+      <button matButton="outlined" (click)="addEmployer()">Dodaj pracodawcę</button>
     </div>
+
+    @if (previousEmployers.length > 0) {
+      <div formArrayName="previous_employers">
+        <mat-vertical-stepper [linear]="false" #employerStepper>
+          @for (employer of previousEmployers.controls; track $index) {
+            <mat-step [stepControl]="$any(employer)">
+              <div [formGroup]="$any(employer)">
+                <ng-template matStepLabel>Pracodawca {{ $index + 1 }}</ng-template>
+
+                <div class="flex flex-row justify-start items-center mb-4">
+                  <p class="font-bold text-base">Dane pracodawcy {{ $index + 1 }}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <app-input
+                    class="col-span-1"
+                    [label]="'Nazwa firmy'"
+                    [placeholder]="''"
+                    [showError]="shouldShowError('employer_name')"
+                    [errorMessage]="getErrorMessage('employer_name')"
+                    formControlName="employer_name">
+                  </app-input>
+
+                  <app-input
+                    class="col-span-1"
+                    [label]="'Stanowisko'"
+                    [placeholder]="''"
+                    [showError]="shouldShowError('employee_position')"
+                    [errorMessage]="getErrorMessage('employee_position')"
+                    formControlName="employee_position">
+                  </app-input>
+
+                  <app-date-input
+                    [label]="'Data rozpoczęcia pracy'"
+                    [placeholder]="''"
+                    [showError]="shouldShowError('work_date_start')"
+                    [errorMessage]="getErrorMessage('work_date_start')"
+                    formControlName="work_date_start">
+                  </app-date-input>
+
+                  <app-date-input
+                    [label]="'Data zakończenia pracy'"
+                    [placeholder]="''"
+                    [showError]="shouldShowError('work_date_end')"
+                    [errorMessage]="getErrorMessage('work_date_end')"
+                    formControlName="work_date_end">
+                  </app-date-input>
+                </div>
+
+                <div class="flex justify-end items-center mt-4">
+                  <app-button
+                    variant="outline"
+                    text="Usuń pracodawcę"
+                    iconName="trash"
+                    iconSize="mini"
+                    iconPosition="before"
+                    (click)="removeEmployer($index)">
+                  </app-button>
+
+                  <button mat-button matStepperPrevious type="button">Poprzedni</button>
+                  <button mat-button (click)="handleNextStep($index)" type="button">Następny</button>
+                </div>
+              </div>
+            </mat-step>
+          }
+        </mat-vertical-stepper>
+      </div>
+    }
 
 
 
@@ -249,7 +252,7 @@
       <app-button
         variant="fill"
         text="Wyślij"
-        type="button"
+        [disabled]="!hasSelectedLocations()"
         (click)="onAddEmployee()">
       </app-button>
       <app-button

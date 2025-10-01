@@ -81,6 +81,7 @@ export class EmployeesComponent implements OnInit {
 
   ngOnInit() {
     this.loadEmployees();
+    console.log("Dane pracownika: ", this.dataSource);
   }
 
   ngAfterViewInit() {
@@ -162,6 +163,22 @@ export class EmployeesComponent implements OnInit {
         console.error("Błąd podczas usuwania pracownika: ", error);
       }
     });
+  }
+
+  onEditEmployee(employee: Employee, event: Event) {
+    event.stopPropagation();
+
+    const bottomSheetRef = this.bottomSheet.open(EmployeeFormComponent, {
+      ariaLabel: 'Edytuj pracownika',
+      data: employee  // Przekazujemy dane pracownika
+    });
+
+    bottomSheetRef.afterDismissed().subscribe(result => {
+      if (result) {
+        this.loadEmployees();
+      }
+    });
+
   }
 
 }
