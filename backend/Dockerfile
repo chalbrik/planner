@@ -1,12 +1,21 @@
 # Używamy oficjalnego obrazu Python 3.11
 FROM python:3.11
 
-# Instalujemy system dependencies potrzebne dla PostgreSQL
+# Instalujemy system dependencies potrzebne dla PostgreSQL i WeasyPrint
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         postgresql-client \
         build-essential \
         libpq-dev \
+        # Zależności dla WeasyPrint
+        libpango-1.0-0 \
+        libpangoft2-1.0-0 \
+        libpangocairo-1.0-0 \
+        libgdk-pixbuf2.0-0 \
+        libffi-dev \
+        shared-mime-info \
+        libcairo2 \
+        libcairo2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Ustawiamy katalog roboczy w kontenerze

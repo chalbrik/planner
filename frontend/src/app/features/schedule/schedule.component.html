@@ -1,5 +1,7 @@
 <div class="h-full flex flex-col px-2 space-y-2 pt-2">
 
+  <button matButton="outlined" (click)="testPdf()">Test generate pdf</button>
+
   <!-- Kontener do wyboru miesiąca -->
   <div class="flex items-center justify-start gap-6 bg-primary-100 border-2 border-primary-400 p-2 rounded-lg">
     <h2 class="text-xl font-semibold text-primary-800 w-40 flex-shrink-0">
@@ -20,12 +22,14 @@
       </button>
     </div>
 
-    <app-select-input
-      [label]="'Lokacja'"
-      [options]="locationOptions()"
-      [(ngModel)]="selectedLocationId"
-      (selectionChange)="onLocationChange($event)">
-    </app-select-input>
+    <mat-form-field>
+      <mat-label>Lokacja</mat-label>
+      <mat-select [formControl]="locationControl">
+        @for (option of locationOptions(); track option.value) {
+          <mat-option [value]="option.value">{{option.label}}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
   </div>
 

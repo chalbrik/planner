@@ -1,6 +1,6 @@
 import {Component, OnInit, signal, computed, ViewEncapsulation, inject, OnDestroy} from '@angular/core';
 import {ScheduleService} from '../../core/services/schedule/schedule.service';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
   MatCell, MatCellDef, MatColumnDef,
@@ -10,7 +10,7 @@ import {
   MatRow, MatRowDef,
   MatTable
 } from '@angular/material/table';
-import {MatIconButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {IconComponent} from '../../shared/components/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,9 +24,11 @@ import {Location} from '../../core/services/locations/location.types';
 import {Employee} from '../../core/services/employees/employee.types';
 import {WorkHours} from '../../core/services/schedule/schedule.types';
 import {ConflictService} from '../../core/services/conflicts/conflict.service';
-import {SelectInputComponent} from '../../shared/components/select-input/select-input.component';
 import {HolidayService} from '../../core/services/holiday/holiday.service';
 import {HoursFormatPipe} from '../../shared/pipes/hours-format.pipe';
+import {MatFormField, MatLabel} from '@angular/material/input';
+import {MatOption} from '@angular/material/core';
+import {MatSelect} from '@angular/material/select';
 
 
 interface Day {
@@ -62,15 +64,19 @@ interface EmployeeRow {
     MatHeaderRow,
     MatRow,
     MatColumnDef,
-    MatHeaderCellDef,
-    MatCellDef,
-    MatFooterCellDef,
-    MatRowDef,
-    MatHeaderRowDef,
     IconComponent,
     MatIconButton,
-    SelectInputComponent,
     HoursFormatPipe,
+    MatFormField,
+    MatLabel,
+    MatOption,
+    MatSelect,
+    MatRowDef,
+    MatHeaderRowDef,
+    MatCellDef,
+    MatHeaderCellDef,
+    MatFooterCellDef,
+    MatButton,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -171,6 +177,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }))
   );
   selectedLocationId = signal<string>('');
+  locationControl = new FormControl<string>('');
 
   workingDaysInMonth = signal<number>(0);
 
@@ -958,6 +965,22 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const days = this.monthDays();
     const dayColumns = days.map(day => `day-${day.dayNumber}`);
     return ['employees', ...dayColumns, 'summary']; // Zawsze 'summary' zamiast 'hoursSum' i 'job'
+  }
+
+  testPdf() {
+    const locationId = this.selectedLocationId(); // Twoja wybrana lokacja
+    const currentDate = this.currentMonthDate();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+
+    this.scheduleService.generateSchedulePdf(locationId, month, year).subscribe({
+      next: () => {
+        console.log('PDF pobrany!');
+      },
+      error: (error) => {
+        console.error('Błąd pobierania PDF:', error);
+      }
+    });
   }
 
 }

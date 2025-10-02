@@ -14,32 +14,26 @@
         }
 
         <div class="flex flex-col w-full gap-4">
-          <app-input
-            class="w-full"
-            id="login-username"
-            [label]="'Nazwa użytkownika'"
-            [placeholder]="''"
-            formControlName="username">
-          </app-input>
 
-          <app-input
-            class="w-full"
-            id="login-password"
-            [label]="'Hasło'"
-            [placeholder]="''"
-            type="password"
-            formControlName="password">
-          </app-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Nazwa użytkownika</mat-label>
+            <input type="text" matInput formControlName="username">
+            @if (loginForm.get('username')?.invalid && (loginForm.get('username')?.dirty || loginForm.get('username')?.touched)) {
+              <mat-error>Nazwa użytkownika jest <strong>wymagana</strong></mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field  appearance="fill">
+            <mat-label>Hasło</mat-label>
+            <input type="text" matInput formControlName="password">
+            @if (loginForm.get('password')?.invalid && (loginForm.get('password')?.dirty || loginForm.get('password')?.touched)) {
+              <mat-error>Hasło jest <strong>wymagana</strong></mat-error>
+            }
+          </mat-form-field>
+
+          <button matButton="outlined" type="submit" [disabled]="loginForm.invalid">Zaloguj</button>
+
         </div>
-
-        <app-button
-          type="submit"
-          [disabled]="loginForm.invalid || isLoading"
-          class="w-full"
-          variant="fill"
-          [text]="isLoading ? 'Logowanie...' : 'Zaloguj'"
-          [fullWidth]="true">
-        </app-button>
       </div>
     </form>
   </div>
@@ -64,31 +58,31 @@
         }
 
         <div class="flex flex-col w-full gap-4">
-          <app-input
-            class="w-full"
-            id="register-username"
-            [label]="'Nazwa użytkownika'"
-            [placeholder]="''"
-            formControlName="username">
-          </app-input>
 
-          <app-input
-            class="w-full"
-            id="register-password"
-            [label]="'Hasło'"
-            [placeholder]="''"
-            type="password"
-            formControlName="password">
-          </app-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Nazwa użytkownika</mat-label>
+            <input type="text" matInput formControlName="username">
+            @if (registerForm.get('username')?.invalid && (registerForm.get('username')?.dirty || registerForm.get('username')?.touched)) {
+              <mat-error>Nazwa użytkownika jest <strong>wymagana</strong></mat-error>
+            }
+          </mat-form-field>
 
-          <app-input
-            class="w-full"
-            id="register-confirm-password"
-            [label]="'Potwierdź hasło'"
-            [placeholder]="''"
-            type="password"
-            formControlName="confirmPassword">
-          </app-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Hasło</mat-label>
+            <input type="text" matInput formControlName="password">
+            @if (registerForm.get('password')?.invalid && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)) {
+              <mat-error>Hasło jest <strong>wymagane</strong></mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field  appearance="fill">
+            <mat-label>Potwierdź hasło</mat-label>
+            <input type="text" matInput formControlName="confirmPassword">
+            @if (registerForm.get('confirmPassword')?.invalid && (registerForm.get('confirmPassword')?.dirty || registerForm.get('confirmPassword')?.touched)) {
+              <mat-error>Pole jest <strong>wymagane</strong></mat-error>
+            }
+          </mat-form-field>
+
         </div>
 
         <app-button

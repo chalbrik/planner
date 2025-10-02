@@ -7,6 +7,8 @@ import { jwtInterceptor } from './interceptors/jwt.interceptor';
 import {MAT_DIALOG_DEFAULT_OPTIONS} from '@angular/material/dialog';
 import {AuthService} from './core/services/auth.service';
 import {provideNativeDateAdapter} from '@angular/material/core';
+import { NgxGoogleAnalyticsModule, NgxGoogleAnalyticsRouterModule } from 'ngx-google-analytics';
+import {environment} from '../environments/environment';
 
 function initializeAuth(authService: AuthService) {
   return () => authService.init();
@@ -26,6 +28,8 @@ export const appConfig: ApplicationConfig = {
       useFactory: initializeAuth,
       deps: [AuthService],
       multi: true
-    }
+    },
+    ...NgxGoogleAnalyticsModule.forRoot(environment.googleAnalyticsId).providers || [],
+    ...NgxGoogleAnalyticsRouterModule.forRoot().providers || []
   ]
 };

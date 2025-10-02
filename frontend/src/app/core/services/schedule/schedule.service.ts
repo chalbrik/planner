@@ -36,7 +36,6 @@ export class ScheduleService {
 
   private dayNumberCache = new Map<string, number>();
 
-
   constructor() { }
 
   getWorkHours(filters?: any): Observable<WorkHours[]> {
@@ -62,6 +61,27 @@ export class ScheduleService {
   // Metoda do emitowania aktualizacji
   emitScheduleUpdate(data: any) {
     this.scheduleUpdatedSubject.next(data);
+  }
+
+  generateSchedulePdf(locationId: string, month: number, year: number) {
+    // Zbuduj URL z parametrami
+    const params = `?location=${locationId}&month=${month}&year=${year}`;
+
+    return this.http.get(`${this.apiUrl}work-hours/generate-schedule-pdf/${params}`, {
+      responseType: 'blob'
+    }).pipe(
+      tap(blob => {
+        // Utwórz URL do pobrania pliku
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `grafik_${month}_${year}_lokacja_${locationId}.pdf`;
+        link.click();
+
+        // Zwolnij pamięć
+        window.URL.revokeObjectURL(url);
+      })
+    );
   }
 
 }

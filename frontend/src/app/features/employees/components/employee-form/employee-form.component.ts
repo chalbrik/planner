@@ -8,9 +8,6 @@ import {MatCheckbox} from '@angular/material/checkbox';
 import {LocationService} from '../../../../core/services/locations/location.service';
 import {Location} from '../../../../core/services/locations/location.types';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
-import {InputComponent} from '../../../../shared/components/input/input.component';
-import {DateInputComponent} from '../../../../shared/components/date-input/date-input.component';
-import {SelectInputComponent} from '../../../../shared/components/select-input/select-input.component';
 import {TitleDisplayComponent} from '../../../../shared/components/title-display/title-display.component';
 import {MatStep, MatStepLabel, MatStepper, MatStepperPrevious} from '@angular/material/stepper';
 import {ButtonComponent} from '../../../../shared/components/button/button.component';
@@ -27,7 +24,6 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelect} from '@angular/material/select';
 
-
 @Component({
   selector: 'app-employee-form',
   imports: [
@@ -36,8 +32,6 @@ import {MatSelect} from '@angular/material/select';
     FormsModule,
     MatNativeDateModule,
     MatCheckbox,
-    InputComponent,
-    DateInputComponent,
     MatOptionModule,
     TitleDisplayComponent,
     MatStepper,
@@ -107,9 +101,7 @@ export class EmployeeFormComponent implements OnInit {
 
   ngOnInit() {
     this.addEmployeeForm = this.formBuilder.group({
-
       //Pola wypełniane przez pracownika
-
       full_name: ['', Validators.required],
       birth_date: ['', Validators.required],
       phone: ['', Validators.required],
@@ -123,9 +115,7 @@ export class EmployeeFormComponent implements OnInit {
 
       //JESZCZE TRZEBA DODAC NIEPELNOSPRAWNOSIC I KP-188 ALE TO POZNIEJ, NA RAZIE ZOSTAW
 
-
       //Pola wypełniane przez kierownika
-
       agreement_type: ['', Validators.required],
       job: [''],
       hour_rate: [''],

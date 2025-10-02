@@ -1,21 +1,38 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
-import { InputComponent } from '../../../shared/components/input/input.component';
 import {IconComponent} from '../../../shared/components/icon';
+import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   standalone: true,
-  imports: [ReactiveFormsModule, ButtonComponent, InputComponent, NgClass, IconComponent]
+  imports: [
+    ReactiveFormsModule,
+    ButtonComponent,
+    NgClass,
+    IconComponent,
+    MatError,
+    MatFormField,
+    MatInput,
+    MatLabel,
+    MatFormField,
+    MatButton,
+  ]
 })
 export class LoginComponent implements OnInit {
+
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
   loginForm!: FormGroup;
   registerForm!: FormGroup;
   isLoading = false;
@@ -25,13 +42,7 @@ export class LoginComponent implements OnInit {
   // Signal do kontroli sliding overlay
   readonly isSlid = signal<boolean>(false);
 
-  autoLogin = true;
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor() {}
 
   ngOnInit(): void {
     // Formularz logowania
@@ -140,4 +151,15 @@ export class LoginComponent implements OnInit {
       }
     });
   }
+
+  shouldShowLoginError(controlName: string): boolean {
+    const control = this.loginForm.get(controlName);
+    return !!(control?.invalid && control?.touched);
+  }
+
+  shouldShowRegisterError(controlName: string): boolean {
+    const control = this.registerForm.get(controlName);
+    return !!(control?.invalid && control?.touched);
+  }
+
 }

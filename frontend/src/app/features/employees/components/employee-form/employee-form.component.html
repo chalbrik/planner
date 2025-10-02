@@ -110,23 +110,17 @@
             </mat-select>
           </mat-form-field>
 
-          <app-input
-            class="col-span-1"
-            [label]="'Nazwa szkoły'"
-            [placeholder]="''"
-            [showError]="shouldShowError('school_name')"
-            [errorMessage]="getErrorMessage('school_name')"
-            formControlName="school_name">
-          </app-input>
+          <mat-form-field  appearance="fill">
+            <mat-label>Nazwa szkoły</mat-label>
+            <input type="text" matInput formControlName="school_name">
+          </mat-form-field>
 
-          <app-date-input
-            class="col-span-1"
-            [label]="'Rok ukończenia'"
-            [placeholder]="''"
-            [showError]="shouldShowError('graduation_year')"
-            [errorMessage]="getErrorMessage('graduation_year')"
-            formControlName="graduation_year">
-          </app-date-input>
+          <mat-form-field>
+            <mat-label>Rok ukończenia</mat-label>
+            <input matInput [matDatepicker]="graduation_year_picker" formControlName="graduation_year">
+            <mat-datepicker-toggle matIconSuffix [for]="graduation_year_picker"></mat-datepicker-toggle>
+            <mat-datepicker #graduation_year_picker></mat-datepicker>
+          </mat-form-field>
 
         </div>
       </div>
@@ -134,23 +128,16 @@
       <div class="col-span-2 flex flex-col">
         <div class="grid grid-cols-2 gap-2">
           @if(agreementType() == 'permanent'){
-            <app-input
-              class="col-span-1"
-              [label]="'Etat'"
-              [placeholder]="''"
-              [showError]="shouldShowError('job')"
-              [errorMessage]="getErrorMessage('job')"
-              formControlName="job">
-            </app-input>
+            <mat-form-field  appearance="fill">
+              <mat-label>Etat</mat-label>
+              <input type="text" matInput formControlName="job">
+            </mat-form-field>
 
-            <app-input
-              class="col-span-1"
-              [label]="'Stawka etatowa'"
-              [placeholder]="''"
-              [showError]="shouldShowError('job_rate')"
-              [errorMessage]="getErrorMessage('job_rate')"
-              formControlName="job_rate">
-            </app-input>
+            <mat-form-field  appearance="fill">
+              <mat-label>Stawka etatowa</mat-label>
+              <input type="text" matInput formControlName="job_rate">
+            </mat-form-field>
+
           }
           <div class="col-span-2 flex flex-col">
             <label>Przypisz pracownika do obiektu</label>
@@ -163,7 +150,6 @@
                     {{ location.name }}
                   </mat-checkbox>
                 </div>
-
               }
             </div>
           </div>
@@ -191,39 +177,26 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                  <app-input
-                    class="col-span-1"
-                    [label]="'Nazwa firmy'"
-                    [placeholder]="''"
-                    [showError]="shouldShowError('employer_name')"
-                    [errorMessage]="getErrorMessage('employer_name')"
-                    formControlName="employer_name">
-                  </app-input>
+                  <mat-form-field  appearance="fill">
+                    <mat-label>Nazwa firmy</mat-label>
+                    <input type="text" matInput formControlName="employer_name">
+                  </mat-form-field>
 
-                  <app-input
-                    class="col-span-1"
-                    [label]="'Stanowisko'"
-                    [placeholder]="''"
-                    [showError]="shouldShowError('employee_position')"
-                    [errorMessage]="getErrorMessage('employee_position')"
-                    formControlName="employee_position">
-                  </app-input>
+                  <mat-form-field  appearance="fill">
+                    <mat-label>Stanowisko</mat-label>
+                    <input type="text" matInput formControlName="employee_position">
+                  </mat-form-field>
 
-                  <app-date-input
-                    [label]="'Data rozpoczęcia pracy'"
-                    [placeholder]="''"
-                    [showError]="shouldShowError('work_date_start')"
-                    [errorMessage]="getErrorMessage('work_date_start')"
-                    formControlName="work_date_start">
-                  </app-date-input>
+                  <mat-form-field  appearance="fill">
+                    <mat-label>Data rozpoczęcia pracy</mat-label>
+                    <input type="text" matInput formControlName="work_date_start">
+                  </mat-form-field>
 
-                  <app-date-input
-                    [label]="'Data zakończenia pracy'"
-                    [placeholder]="''"
-                    [showError]="shouldShowError('work_date_end')"
-                    [errorMessage]="getErrorMessage('work_date_end')"
-                    formControlName="work_date_end">
-                  </app-date-input>
+                  <mat-form-field  appearance="fill">
+                    <mat-label>Data zakończenia pracy</mat-label>
+                    <input type="text" matInput formControlName="work_date_end">
+                  </mat-form-field>
+
                 </div>
 
                 <div class="flex justify-end items-center mt-4">

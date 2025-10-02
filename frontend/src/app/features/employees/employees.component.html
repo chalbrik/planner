@@ -41,7 +41,6 @@
             iconSize="outline">
           </app-button>
 
-
           <!-- Tutaj użyjemy istniejący komponent employee-info -->
           <app-employee-info [employee]="selectedEmployee()!"></app-employee-info>
         </div>
@@ -63,21 +62,6 @@
           </div>
         </button>
 
-      </div>
-
-      <div>
-        <mat-form-field class="example-full-width">
-          <mat-label>Email</mat-label>
-          <input type="email" matInput
-                 placeholder="Ex. pat@example.com">
-<!--          <mat-hint>Errors appear instantly!</mat-hint>-->
-          @if (1) {
-<!--            <mat-error>Please enter a valid email address</mat-error>-->
-          }
-          @if (0) {
-<!--            <mat-error>Email is <strong>required</strong></mat-error>-->
-          }
-        </mat-form-field>
       </div>
 
       <!-- Tabela -->

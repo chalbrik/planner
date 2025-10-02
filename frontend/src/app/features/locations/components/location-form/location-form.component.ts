@@ -28,10 +28,8 @@ export class LocationFormComponent implements OnInit {
   ngOnInit() {
 
     this.addLocationForm = this.formBuilder.group({
-
       name: [''],
       address: [''],
-
     })
 
   }

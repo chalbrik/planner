@@ -2,7 +2,7 @@ import {Component, computed, inject, OnInit, signal, ViewChild, ViewEncapsulatio
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {Employee} from '../../core/services/employees/employee.types';
 import {EmployeeInfoComponent} from './components/employee-info/employee-info.component';
-import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
+import {MatFormField, MatInput} from '@angular/material/input';
 import {
   MatCell, MatCellDef,
   MatColumnDef,
@@ -36,7 +36,6 @@ import {ButtonComponent} from '../../shared/components/button/button.component';
     MatPaginator,
     MatNoDataRow,
     MatFormField,
-    MatLabel,
     MatSidenav,
     MatSidenavContainer,
     MatSidenavContent,
@@ -46,10 +45,10 @@ import {ButtonComponent} from '../../shared/components/button/button.component';
     MatIconButton,
     MatButton,
     ButtonComponent,
+    MatHeaderCellDef,
+    MatCellDef,
     MatRowDef,
     MatHeaderRowDef,
-    MatCellDef,
-    MatHeaderCellDef,
   ],
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss',
@@ -58,7 +57,6 @@ import {ButtonComponent} from '../../shared/components/button/button.component';
 export class EmployeesComponent implements OnInit {
 
   private readonly employeesService = inject(EmployeesService);
-  private readonly dialog = inject(MatDialog);
   private readonly bottomSheet = inject(MatBottomSheet);
 
   displayedColumns: string[] = ['identification_number', 'name', 'job', 'agreement_type', 'actions'];
@@ -73,7 +71,6 @@ export class EmployeesComponent implements OnInit {
   selectedEmployee = signal<Employee | null>(null);
 
   isSidenavOpen = computed(() => !!this.selectedEmployee());
-
 
   constructor() {
     this.dataSource = new MatTableDataSource<Employee>([]);
@@ -130,9 +127,6 @@ export class EmployeesComponent implements OnInit {
   }
 
   openAddEmployeeDialog(): void {
-    // Zmiana z dialog.open na bottomSheet.open
-    console.log("openAddEmployeeDialog - called from:", new Error().stack);
-    console.log("openAddEmployeeDialog - timestamp:", Date.now());
     const bottomSheetRef = this.bottomSheet.open(EmployeeFormComponent, {
       ariaLabel: 'Dodaj nowego pracownika',
     });
