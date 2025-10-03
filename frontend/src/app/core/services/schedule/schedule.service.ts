@@ -84,4 +84,25 @@ export class ScheduleService {
     );
   }
 
+  generateAttendanceSheets(locationId: string, month: number, year: number) {
+    // Zbuduj URL z parametrami
+    const params = `?location=${locationId}&month=${month}&year=${year}`;
+
+    return this.http.get(`${this.apiUrl}work-hours/generate-attendance-sheets/${params}`, {
+      responseType: 'blob'
+    }).pipe(
+      tap(blob => {
+        // Utwórz URL do pobrania pliku
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `grafik_${month}_${year}_lokacja_${locationId}.pdf`;
+        link.click();
+
+        // Zwolnij pamięć
+        window.URL.revokeObjectURL(url);
+      })
+    );
+  }
+
 }

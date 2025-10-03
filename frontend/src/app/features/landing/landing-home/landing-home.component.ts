@@ -7,7 +7,6 @@ import {ScheduleService} from '../../../core/services/schedule/schedule.service'
   selector: 'app-landing-home',
   imports: [
     ButtonComponent,
-    MatButton,
   ],
   templateUrl: './landing-home.component.html',
   styleUrl: './landing-home.component.scss'

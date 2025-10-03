@@ -1,0 +1,152 @@
+{% load schedule_filters %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista obecności - {{ location_name }} - {{ month_name }} {{ year }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 1.5cm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+
+        .day-section {
+            margin-bottom: 20px;
+            border: 2px solid #333;
+            padding: 10px;
+        }
+
+        .day-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #666;
+            padding-bottom: 8px;
+        }
+
+        .header .location {
+            font-size: 11px;
+            font-weight: bold;
+            margin: 3px 0;
+        }
+
+        .header .date-info {
+            font-size: 13px;
+            margin: 5px 0;
+            font-weight: bold;
+        }
+
+        .no-employees {
+            text-align: center;
+            padding: 20px;
+            font-size: 11px;
+            color: #666;
+            font-style: italic;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            font-size: 9px;
+        }
+
+        .col-lp {
+            width: 30px;
+            text-align: center;
+        }
+
+        .col-name {
+            width: 35%;
+        }
+
+        .col-hours {
+            width: 20%;
+            text-align: center;
+        }
+
+        .col-signature {
+            width: 40%;
+        }
+
+        tbody td {
+            height: 10px;
+            vertical-align: middle;
+            font-size: 9px;
+        }
+
+        .signature-cell {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+{% for day_num, day_data in days_data.items %}
+{% if forloop.counter0|divisibleby:4 and forloop.counter0 > 0 %}
+</div><div class="page-break"></div><div>
+    {% endif %}
+
+    <div class="day-section">
+        <!-- Nagłówek sekcji dnia -->
+        <div class="header">
+            <div class="location">{{ location_name }}</div>
+            <div class="date-info">
+                {{ day_data.weekday }}, {{ day_data.day_number }} {{ month_name }} {{ year }}
+            </div>
+        </div>
+
+        {% if day_data.employees %}
+        <!-- Tabela z pracownikami -->
+        <table>
+            <thead>
+            <tr>
+                <th class="col-lp">LP</th>
+                <th class="col-name">Imię i Nazwisko</th>
+                <th class="col-hours">Godziny pracy</th>
+                <th class="col-signature">Podpis</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for employee in day_data.employees %}
+            <tr>
+                <td class="col-lp">{{ forloop.counter }}</td>
+                <td class="col-name">{{ employee.name }}</td>
+                <td class="col-hours">{{ employee.hours }}</td>
+                <td class="col-signature signature-cell"></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <!-- Brak pracowników -->
+        <div class="no-employees">
+            Brak pracowników w tym dniu
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+</html>

@@ -1,0 +1,131 @@
+{% load schedule_filters %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Grafik pracy - {{ location_name }} - {{ month_name }} {{ year }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .header p {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 4px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            font-size: 9px;
+            width: 20px;
+            max-width: 20px;
+        }
+
+        .employee-name {
+            text-align: left;
+            font-weight: bold;
+            background-color: #f5f5f5;
+            width: 100px !important;
+            max-width: 100px !important;
+        }
+
+        .weekend {
+            background-color: #ffe6e6;
+        }
+
+        .hours-cell {
+            font-size: 6px;
+            white-space: normal !important;
+            word-break: break-all;
+            overflow-wrap: break-word;
+            line-height: 1.2;
+            hyphens: auto;
+            width: 20px;
+            max-width: 20px;
+        }
+
+        .total-column {
+            background-color: #d0d0d0;
+            font-weight: bold;
+            width: 20px !important;
+            max-width: 20px !important;
+        }
+
+        .total-cell {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            font-size: 6px;
+            text-align: center;
+            width: 55px;
+            max-width: 55px;
+        }
+    </style>
+</head>
+<body>
+<!-- Nagłówek -->
+<div class="header">
+    <h1>Grafik pracy</h1>
+    <p><strong>{{ location_name }}</strong></p>
+    <p>{{ month_name }} {{ year }}</p>
+</div>
+
+<!-- Tabela z grafikiem -->
+<table>
+    <thead>
+    <tr>
+        <th class="employee-name">Pracownik</th>
+        {% for day in days %}
+        <th class="{% if day.is_weekend %}weekend{% endif %}">
+            {{ day.day }}<br>{{ day.weekday }}
+        </th>
+        {% endfor %}
+        <th class="total-column">Suma</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for employee_data in employees_schedule %}
+    <tr>
+        <td class="employee-name">{{ employee_data.name }}</td>
+        {% for day in days %}
+        <td class="hours-cell {% if day.is_weekend %}weekend{% endif %}">
+            {{ employee_data.hours|get_item:day.day|default:"-" }}
+        </td>
+        {% endfor %}
+        <td class="total-cell">{{ employee_data.total_hours }}h</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

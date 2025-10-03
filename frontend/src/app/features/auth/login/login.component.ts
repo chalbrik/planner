@@ -36,8 +36,11 @@ export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   registerForm!: FormGroup;
   isLoading = false;
-  error: string | null = null;
-  success: string | null = null;
+
+  // Rozdzielone zmienne dla każdego formularza
+  loginError: string | null = null;
+  registerError: string | null = null;
+  registerSuccess: string | null = null;
 
   // Signal do kontroli sliding overlay
   readonly isSlid = signal<boolean>(false);
@@ -67,8 +70,9 @@ export class LoginComponent implements OnInit {
 
   // Czyszczenie komunikatów
   clearMessages(): void {
-    this.error = null;
-    this.success = null;
+    this.loginError = null;
+    this.registerError = null;
+    this.registerSuccess = null;
   }
 
   // Logowanie
@@ -78,7 +82,7 @@ export class LoginComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.error = null;
+    this.loginError = null;
 
     const { username, password } = this.loginForm.value;
 
@@ -90,9 +94,9 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
         if (err.error && err.error.detail) {
-          this.error = err.error.detail;
+          this.loginError = err.error.detail;
         } else {
-          this.error = 'Wystąpił błąd podczas logowania. Spróbuj ponownie.';
+          this.loginError = 'Wystąpił błąd podczas logowania. Spróbuj ponownie.';
         }
         console.error('Błąd logowania:', err);
       }
@@ -107,13 +111,13 @@ export class LoginComponent implements OnInit {
 
     // Sprawdzenie czy hasła się zgadzają
     if (this.registerForm.value.password !== this.registerForm.value.confirmPassword) {
-      this.error = 'Hasła nie są identyczne';
+      this.registerError = 'Hasła nie są identyczne';
       return;
     }
 
     this.isLoading = true;
-    this.error = null;
-    this.success = null;
+    this.registerError = null;
+    this.registerSuccess = null;
 
     const registerData = {
       username: this.registerForm.value.username,
@@ -126,7 +130,7 @@ export class LoginComponent implements OnInit {
     this.authService.register(registerData).subscribe({
       next: () => {
         this.isLoading = false;
-        this.success = 'Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.';
+        this.registerSuccess = 'Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.';
         setTimeout(() => {
           this.togglePanel(); // Przełącz na panel logowania
           this.registerForm.reset();
@@ -136,16 +140,16 @@ export class LoginComponent implements OnInit {
         this.isLoading = false;
         if (err.error) {
           if (typeof err.error === 'string') {
-            this.error = err.error;
+            this.registerError = err.error;
           } else if (err.error.username) {
-            this.error = `Nazwa użytkownika: ${err.error.username.join(', ')}`;
+            this.registerError = `Nazwa użytkownika: ${err.error.username.join(', ')}`;
           } else if (err.error.password) {
-            this.error = `Hasło: ${err.error.password.join(', ')}`;
+            this.registerError = `Hasło: ${err.error.password.join(', ')}`;
           } else {
-            this.error = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
+            this.registerError = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
           }
         } else {
-          this.error = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
+          this.registerError = 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
         }
         console.error('Błąd rejestracji:', err);
       }

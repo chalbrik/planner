@@ -983,4 +983,20 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
+  testAttendance() {
+    const locationId = this.selectedLocationId(); // Twoja wybrana lokacja
+    const currentDate = this.currentMonthDate();
+    const month = currentDate.getMonth() + 1;
+    const year = currentDate.getFullYear();
+
+    this.scheduleService.generateAttendanceSheets(locationId, month, year).subscribe({
+      next: () => {
+        console.log('PDF pobrany!');
+      },
+      error: (error) => {
+        console.error('Błąd pobierania PDF:', error);
+      }
+    });
+  }
+
 }
