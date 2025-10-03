@@ -5,7 +5,7 @@
     <button
       mat-icon-button
       class="sm:hidden text-primary-800"
-      (click)="drawer().toggle()">
+      (click)="drawer()?.toggle()">
       <mat-icon>menu</mat-icon>
     </button>
 
@@ -24,10 +24,26 @@
     <!-- User options (desktop only) -->
     @if (currentUser()) {
       <div class="hidden sm:flex justify-around items-center gap-4">
+        <!-- Theme Toggle Button -->
+        <button
+          mat-icon-button
+          (click)="toggleTheme()"
+          [attr.aria-label]="themeAriaLabel()"
+          class="text-primary-800">
+          <app-icon
+            [iconName]="themeIcon()"
+            iconSize="mini"
+            class="text-primary-800">
+          </app-icon>
+        </button>
+
+        <!-- User Info -->
         <div class="flex flex-row items-center justify-start">
           <app-icon iconName="user-solid" iconSize="mini" class="text-primary-800"></app-icon>
           <span class="text-primary-800 px-2 text-base">{{ currentUser()?.username }}</span>
         </div>
+
+        <!-- Logout Button -->
         <button mat-raised-button color="primary" class="px-2" (click)="onLogout()">
           <span class="font-geist text-base">Wyloguj</span>
         </button>

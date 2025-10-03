@@ -1,0 +1,63 @@
+@use '@angular/material' as mat;
+
+/* Include the core Angular Material styles */
+@include mat.core();
+
+/* ============================= */
+/* Light Theme Colors */
+/* ============================= */
+$light-primary: mat.define-palette(mat.$orange-palette, 500);
+$light-accent: mat.define-palette(mat.$blue-gray-palette, 200);
+$light-warn: mat.define-palette(mat.$red-palette, 500);
+
+$light-theme: mat.define-light-theme((
+  color: (
+    primary: $light-primary,
+    accent: $light-accent,
+    warn: $light-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+/* ============================= */
+/* Dark Theme Colors */
+/* ============================= */
+$dark-primary: mat.define-palette(mat.$orange-palette, 300);
+$dark-accent: mat.define-palette(mat.$blue-gray-palette, 700);
+$dark-warn: mat.define-palette(mat.$red-palette, 400);
+
+$dark-theme: mat.define-dark-theme((
+  color: (
+    primary: $dark-primary,
+    accent: $dark-accent,
+    warn: $dark-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
+));
+
+/* ============================= */
+/* Apply Themes */
+/* ============================= */
+
+/* Default light theme */
+@include mat.all-component-themes($light-theme);
+
+/* Dark theme - applied when body has .dark class */
+.dark {
+  @include mat.all-component-colors($dark-theme);
+
+  /* Dark mode background and text colors */
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+/* Light theme - explicitly applied when body has .light class */
+.light {
+  @include mat.all-component-colors($light-theme);
+
+  /* Light mode background and text colors */
+  background-color: #ffffff;
+  color: #000000;
+}

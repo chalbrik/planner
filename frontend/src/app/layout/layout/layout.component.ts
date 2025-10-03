@@ -1,33 +1,50 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {HeaderComponent} from '../components/header/header.component';
-import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
-import {MatButton} from '@angular/material/button';
-import {IconComponent} from '../../shared/components/icon';
-import {AuthService} from '../../core/services/auth.service';
-import {Router, RouterModule} from '@angular/router';
-import {User} from '../../core/services/auth.model';
+import { Component, OnInit, inject, computed } from '@angular/core';
+import { HeaderComponent } from '../components/header/header.component';
+import { FooterComponent } from '../components/footer/footer.component';
+import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { IconComponent } from '../../shared/components/icon';
+import { AuthService } from '../../core/services/auth.service';
+import { User } from '../../core/services/auth.model';
+import { Router } from '@angular/router';
+import { ThemeService } from '../../core/services/theme/theme.service';
 
 @Component({
   selector: 'app-layout',
   imports: [
     HeaderComponent,
-    MatSidenavModule,
+    MatDrawerContainer,
+    MatDrawer,
+    MatDrawerContent,
+    RouterLink,
+    RouterLinkActive,
     MatButton,
-    IconComponent,
-    RouterModule
+    MatIconButton,
+    IconComponent
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
   standalone: true
 })
 export class LayoutComponent implements OnInit {
-  @ViewChild('drawer') drawer!: MatDrawer;
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly themeService = inject(ThemeService);
+
   currentUser: User | null = null;
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  // Computed signal dla ikony motywu
+  readonly themeIcon = computed(() => {
+    return this.themeService.currentTheme() === 'light' ? 'moon' : 'sun';
+  });
+
+  // Computed signal dla aria-label
+  readonly themeAriaLabel = computed(() => {
+    return this.themeService.currentTheme() === 'light'
+      ? 'Przełącz na tryb ciemny'
+      : 'Przełącz na tryb jasny';
+  });
 
   ngOnInit() {
     this.authService.currentUser.subscribe(user => {
@@ -35,9 +52,15 @@ export class LayoutComponent implements OnInit {
     });
   }
 
-  logout() {
+  logout(): void {
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/login']);
     });
+  }
+
+  toggleTheme(): void {
+    console.log('Toggle clicked! Current theme:', this.themeService.currentTheme());
+    this.themeService.toggleTheme();
+    console.log('After toggle:', this.themeService.currentTheme());
   }
 }

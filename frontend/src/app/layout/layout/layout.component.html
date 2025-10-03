@@ -35,10 +35,29 @@
       <!-- User info w drawerze (mobile) -->
       @if (currentUser) {
         <div class="mt-auto p-4 border-t border-primary-400">
+          <!-- Theme Toggle w mobile drawer -->
+          <div class="flex flex-row items-center justify-between mb-4 px-4 py-2">
+            <span class="text-primary-800 text-base">Motyw</span>
+            <button
+              mat-icon-button
+              (click)="toggleTheme()"
+              [attr.aria-label]="themeAriaLabel()"
+              class="text-primary-800">
+              <app-icon
+                [iconName]="themeIcon()"
+                iconSize="mini"
+                class="text-primary-800">
+              </app-icon>
+            </button>
+          </div>
+
+          <!-- User Info -->
           <div class="flex flex-row items-center justify-start mb-4">
             <app-icon iconName="user-solid" iconSize="mini" class="text-primary-800"></app-icon>
             <span class="text-primary-800 px-2 text-base">{{ currentUser.username }}</span>
           </div>
+
+          <!-- Logout Button -->
           <button
             mat-raised-button
             color="primary"

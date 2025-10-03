@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
-import {AuthService} from './core/services/auth.service';
+import { ThemeService } from './core/services/theme/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +11,11 @@ import {AuthService} from './core/services/auth.service';
 export class AppComponent {
   title = 'Planner';
 
-  constructor() {
+  // Inject ThemeService aby zainicjalizować motyw przy starcie aplikacji
+  private readonly themeService = inject(ThemeService);
 
+  constructor() {
+    // ThemeService automatycznie inicjalizuje motyw w konstruktorze
+    // i aplikuje go do <body> przez effect()
   }
 }
