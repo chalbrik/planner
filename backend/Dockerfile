@@ -1,37 +1,36 @@
 # Używamy oficjalnego obrazu Python 3.11
-FROM python:3.11
+FROM python:3.11-slim
 
-# Instalujemy system dependencies potrzebne dla PostgreSQL i WeasyPrint
+# Instalujemy system dependencies
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         postgresql-client \
         build-essential \
         libpq-dev \
-        # Zależności dla WeasyPrint
         libpango-1.0-0 \
         libpangoft2-1.0-0 \
         libpangocairo-1.0-0 \
-        libgdk-pixbuf2.0-0 \
+        libgdk-pixbuf-2.0-0 \
         libffi-dev \
         shared-mime-info \
         libcairo2 \
         libcairo2-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Ustawiamy katalog roboczy w kontenerze
 WORKDIR /app
 
-# Kopiujemy plik z zależnościami
+# Kopiujemy requirements i instalujemy zależności
 COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
-# Instalujemy zależności Python
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Kopiujemy cały kod aplikacji
+# Kopiujemy kod
 COPY . /app/
 
-# Otwieramy port 8000 (na którym Django będzie działać)
-EXPOSE 8000
+# Zbieramy pliki statyczne
+RUN python manage.py collectstatic --noinput || true
 
-# Komenda która uruchomi Django
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Port 8080 wymagany przez Cloud Run
+EXPOSE 8080
+
+# Gunicorn dla produkcji
+CMD exec gunicorn --bind :8080 --workers 1 --threads 8 --timeout 0 backend.wsgi:application

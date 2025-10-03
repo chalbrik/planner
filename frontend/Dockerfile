@@ -12,9 +12,6 @@ RUN npm ci
 # Kopiuj kod źródłowy
 COPY . .
 
-# Usuń lokalne node_modules jeśli zostały skopiowane
-RUN rm -rf node_modules && npm ci
-
 # Buduj aplikację dla produkcji
 RUN npm run build
 
@@ -26,7 +23,7 @@ COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 
 # konfiguracja nginx dla Angular SPA
 RUN echo 'server { \
-    listen 80; \
+    listen 8080; \
     server_name _; \
     root /usr/share/nginx/html; \
     index index.html; \
@@ -35,6 +32,6 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

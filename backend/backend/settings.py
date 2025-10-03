@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'silk.middleware.SilkyMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -82,21 +83,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database Configuration - Enhanced dla produkcji
-if os.getenv('DJANGO_IN_DOCKER'):
+if os.getenv('DJANGO_IN_DOCKER') or os.getenv('DATABASE_HOST'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'planner_db'),
-            'USER': os.getenv('DB_USER', 'planner_user'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'planner_password'),
-            'HOST': os.getenv('DB_HOST', 'postgres'),
+            'NAME': os.getenv('DATABASE_NAME') or os.getenv('DB_NAME', 'planner_db'),
+            'USER': os.getenv('DATABASE_USER') or os.getenv('DB_USER', 'planner_user'),
+            'PASSWORD': os.getenv('DATABASE_PASSWORD') or os.getenv('DB_PASSWORD', 'planner_password'),
+            'HOST': os.getenv('DATABASE_HOST') or os.getenv('DB_HOST', 'postgres'),
             'PORT': os.getenv('DB_PORT', '5432'),
             'OPTIONS': {
                 'connect_timeout': 60,
                 'application_name': 'planner_backend',
             },
-            # Connection pooling dla produkcji
-            'CONN_MAX_AGE': 600,  # 10 minut
+            'CONN_MAX_AGE': 600,
         }
     }
 else:
@@ -220,6 +220,9 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
+
+# WhiteNoise configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Utworzenie folderu logs jeśli nie istnieje
 LOGS_DIR = BASE_DIR / 'logs'
