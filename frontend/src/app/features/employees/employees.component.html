@@ -55,11 +55,9 @@
         <mat-form-field class="w-full h-full !border-primary-800">
           <input matInput class="h-11 !text-primary-800 !border-primary-800" (keyup)="applyFilter($event)" placeholder="Wyszukaj pracownika" #input>
         </mat-form-field>
-        <button mat-stroked-button class="w-full sm:w-fit px-2 !rounded-xl !border-primary-800 gap-2 whitespace-nowrap w-60 !h-11" (click)="openAddEmployeeDialog()">
-          <div class="flex flex-row justify-start items-center h-full w-full gap-2">
-            <app-icon iconName="plus" iconSize="outline" class="text-primary-800"></app-icon>
-            <span class="font-geist text-base text-primary-800">Dodaj pracownika</span>
-          </div>
+        <button matButton="filled" (click)="openAddEmployeeDialog()" class="whitespace-nowrap">
+          <app-icon iconName="plus" iconSize="mini"></app-icon>
+          <span>Dodaj pracownika</span>
         </button>
 
       </div>

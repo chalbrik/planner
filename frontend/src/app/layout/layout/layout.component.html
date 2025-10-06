@@ -72,16 +72,13 @@
 
   <!-- Main Content -->
   <mat-drawer-content>
-    <div class="h-full flex flex-col gap-2">
-      <!-- Nagłówek -->
+    <div class="h-full flex flex-col gap-2 overflow-y-auto">
       <app-header [drawer]="drawer" [currentUser]="currentUser" (logoutEvent)="logout()"></app-header>
 
-      <!-- Główna zawartość -->
-      <main class="flex-grow overflow-hidden pt-16">
-        <div class="h-full">
+      <main class="flex-grow pt-20">
+        <div class="h-full overflow-y-auto">
           <ng-content></ng-content>
         </div>
       </main>
     </div>
   </mat-drawer-content>
-</mat-drawer-container>

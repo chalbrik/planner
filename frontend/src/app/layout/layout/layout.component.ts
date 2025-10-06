@@ -1,6 +1,5 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed, ViewChild, AfterViewInit } from '@angular/core';
 import { HeaderComponent } from '../components/header/header.component';
-import { FooterComponent } from '../components/footer/footer.component';
 import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -27,19 +26,19 @@ import { ThemeService } from '../../core/services/theme/theme.service';
   styleUrl: './layout.component.scss',
   standalone: true
 })
-export class LayoutComponent implements OnInit {
+export class LayoutComponent implements OnInit, AfterViewInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
 
+  @ViewChild(MatDrawer) drawer?: MatDrawer;
+
   currentUser: User | null = null;
 
-  // Computed signal dla ikony motywu
   readonly themeIcon = computed(() => {
     return this.themeService.currentTheme() === 'light' ? 'moon' : 'sun';
   });
 
-  // Computed signal dla aria-label
   readonly themeAriaLabel = computed(() => {
     return this.themeService.currentTheme() === 'light'
       ? 'Przełącz na tryb ciemny'
@@ -52,6 +51,14 @@ export class LayoutComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 0);
+  }
+
   logout(): void {
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/login']);
@@ -59,8 +66,6 @@ export class LayoutComponent implements OnInit {
   }
 
   toggleTheme(): void {
-    console.log('Toggle clicked! Current theme:', this.themeService.currentTheme());
     this.themeService.toggleTheme();
-    console.log('After toggle:', this.themeService.currentTheme());
   }
 }

@@ -64,4 +64,9 @@ export class LocationFormComponent implements OnInit {
     return !!(control?.invalid && control?.touched);
   }
 
+  onCancel(): void {
+    this.bottomSheet.dismiss();
+  }
+
+
 }

@@ -57,6 +57,9 @@
                 <mat-option [value]="option.value">{{option.label}}</mat-option>
               }
             </mat-select>
+            @if (shouldShowError('agreement_type')) {
+              <mat-error>Pole jest <strong>wymagane</strong></mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field  appearance="fill">
@@ -228,13 +231,8 @@
 
 
     <div class="py-6 w-full flex flex-row justify-center items-center gap-6">
-      <button matButton="filled" (click)="onAddEmployee()" [disabled]="!hasSelectedLocations()">Wyślij</button>
-      <app-button
-        variant="outline"
-        text="Anuluj"
-        type="button"
-        (click)="onCancel()">
-      </app-button>
+      <button matButton="filled" (click)="onAddEmployee()" class="whitespace-nowrap">Wyślij</button>
+      <button matButton="outlined" (click)="onCancel()" class="whitespace-nowrap">Anuluj</button>
     </div>
 
 

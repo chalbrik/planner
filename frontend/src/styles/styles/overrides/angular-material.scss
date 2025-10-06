@@ -148,7 +148,7 @@
       display: flex;
       align-items: stretch;
       border-radius: 6px;
-      padding: 0 16px;
+      padding: 0 6px 0 16px;
 
       .mat-mdc-form-field-icon-prefix,
       .mat-mdc-form-field-text-prefix {
@@ -346,7 +346,7 @@ textarea.mat-mdc-input-element {
   }
 
   &:hover {
-    @apply bg-primary-200; // lub dowolny inny kolor
+    @apply bg-primary-300; // lub dowolny inny kolor
   }
 }
 
@@ -441,6 +441,11 @@ textarea.mat-mdc-input-element {
 button[matButton="filled"] {
 
   .mdc-button__label {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
     @apply text-white;
 
   }

@@ -78,7 +78,6 @@ export class EmployeesComponent implements OnInit {
 
   ngOnInit() {
     this.loadEmployees();
-    console.log("Dane pracownika: ", this.dataSource);
   }
 
   ngAfterViewInit() {

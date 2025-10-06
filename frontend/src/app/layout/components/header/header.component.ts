@@ -50,8 +50,6 @@ export class HeaderComponent implements OnInit {
   }
 
   toggleTheme(): void {
-    console.log('Toggle clicked! Current theme:', this.themeService.currentTheme());
     this.themeService.toggleTheme();
-    console.log('After toggle:', this.themeService.currentTheme());
   }
 }

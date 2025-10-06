@@ -60,7 +60,7 @@ export class HolidayService {
     return this.getHolidaysForMonth(year, month).pipe(
       tap(response => {
         const workingDays = this.countWorkingDays(year, month, response.holidays);
-        console.log(`📊 Dni robocze w ${month}/${year}: ${workingDays}`);
+        // console.log(`📊 Dni robocze w ${month}/${year}: ${workingDays}`);
       }),
       // Zwracamy tylko liczbę dni roboczych
       tap(() => {}),
@@ -90,7 +90,6 @@ export class HolidayService {
 
       // Jeśli to święto przypadające w dzień roboczy, odejmij
       if (isHoliday) {
-        console.log(`🎭 Święto w dzień roboczy: ${dateString}`);
         continue;
       }
 

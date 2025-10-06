@@ -196,17 +196,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     this.loadWorkingDaysAndCalculateHours();
 
-
-
-    // setTimeout(() => {
-    //   this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
-    //
-    //   this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
-    // }, 1000);
-
-
-
-
+    this.locationControl.valueChanges
+      .pipe(takeUntil(this.subscriptions))
+      .subscribe((locationId) => {
+        if (locationId) {
+          this.onLocationChange(locationId);
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -270,14 +266,14 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
         if (locations && locations.length > 0) {
           const firstLocationId = locations[0].id;
-          this.onLocationChange(firstLocationId);
+          this.locationControl.setValue(firstLocationId);
         } else {
           this.errorMessage = 'Brak dostępnych lokacji';
         }
       },
       error: (error) => {
+        console.error('❌ Błąd ładowania lokacji:', error);
         this.errorMessage = 'Nie udało się załadować lokacji';
-        console.error('Błąd ładowania lokacji:', error);
       }
     });
   }
@@ -758,7 +754,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   private onPopupCancel() {
-    // console.log('Popup cancel');
     this.closePopup();
   }
 
@@ -997,9 +992,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   }
 
-
   onLocationChange(locationId: string): void {
-    // console.log('onLocationChange wywołane z locationId:', locationId);
 
     if (!locationId) {
       const firstLocation = this.locations()[0];
@@ -1010,7 +1003,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Zawsze czyść stan przy zmianie lokacji
     this.clearConflicts();
     this.clearTableState();
     this.selectedLocationId.set(locationId);
@@ -1076,7 +1068,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.employeesService.getEmployees(params).subscribe({
         next: (data) => {
           if (Array.isArray(data)) {
-            console.log(data);
             this.employees = data;
             resolve(data);
           } else {
@@ -1154,7 +1145,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.holidayService.calculateWorkingDaysInMonth(year, month).subscribe({
       next: (workingDays) => {
         this.workingDaysInMonth.set(workingDays);
-        console.log(`Dni robocze w ${month}/${year}: ${workingDays}`);
 
         // Po pobraniu dni roboczych, przelicz godziny dla każdego pracownika
         this.recalculateHoursToWork(workingDays);
@@ -1229,7 +1219,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     this.scheduleService.generateSchedulePdf(locationId, month, year).subscribe({
       next: () => {
-        console.log('PDF pobrany!');
       },
       error: (error) => {
         console.error('Błąd pobierania PDF:', error);
@@ -1245,7 +1234,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     this.scheduleService.generateAttendanceSheets(locationId, month, year).subscribe({
       next: () => {
-        console.log('PDF pobrany!');
       },
       error: (error) => {
         console.error('Błąd pobierania PDF:', error);

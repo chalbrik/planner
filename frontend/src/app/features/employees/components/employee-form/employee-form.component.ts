@@ -32,6 +32,7 @@ import {
 import {MatIconModule} from '@angular/material/icon';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatSelect} from '@angular/material/select';
+import {IconComponent} from '../../../../shared/components/icon';
 
 @Component({
   selector: 'app-employee-form',
@@ -60,6 +61,7 @@ import {MatSelect} from '@angular/material/select';
     MatInputModule,
     MatDatepickerModule,
     MatSelect,
+    IconComponent,
   ],
   templateUrl: './employee-form.component.html',
   styleUrl: './employee-form.component.scss',
@@ -124,7 +126,7 @@ export class EmployeeFormComponent implements OnInit {
       //JESZCZE TRZEBA DODAC NIEPELNOSPRAWNOSIC I KP-188 ALE TO POZNIEJ, NA RAZIE ZOSTAW
 
       //Pola wypełniane przez kierownika
-      agreement_type: [''],
+      agreement_type: ['', Validators.required],
       job: [''],
       hour_rate: [''],
       job_rate: [''],
@@ -138,7 +140,6 @@ export class EmployeeFormComponent implements OnInit {
       this.agreementType.set(value);
     });
 
-    console.log("Dane z backendu:", this.data);
     if (this.data) {
       this.addEmployeeForm.patchValue({
         full_name: this.data.full_name,
@@ -337,7 +338,6 @@ export class EmployeeFormComponent implements OnInit {
 
         // Jeśli edycja - załaduj przypisane lokalizacje
         if (this.data && this.data.locations) {
-          console.log("Zostalem wywolany");
           const locationsArray = this.addEmployeeForm.get('locations') as FormArray;
           locationsArray.clear(); // Wyczyść najpierw
 
@@ -382,7 +382,6 @@ export class EmployeeFormComponent implements OnInit {
 
     // ✅ Aktualizuj signal
     this.hasSelectedLocations.set(assignedLocations.length > 0);
-    console.log("siganl: ", this.hasSelectedLocations());
   }
 
   isLocationSelected(locationId: string): boolean {

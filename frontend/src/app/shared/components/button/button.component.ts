@@ -87,9 +87,7 @@ export class ButtonComponent {
     console.log("handleClick - event:", event);
 
     if (!this.disabled()) {
-      console.log("About to emit...");
       this.click.emit();
-      console.log("Emitted!");
     }
   }
 

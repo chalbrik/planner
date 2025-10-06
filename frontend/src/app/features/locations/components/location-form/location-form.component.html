@@ -19,8 +19,8 @@
 
 
     <div class="py-6 w-full flex flex-row justify-center items-center gap-6">
-      <button matButton="filled" class="px-2 !rounded-md !bg-primary-400"><span class="font-geist text-base text-white" (click)="onAddLocation()">Dodaj</span></button>
-      <button matButton="outlined" class="px-2 !rounded-md !border-primary-400"><span class="font-geist text-base text-primary-400">Anuluj</span></button>
+      <button matButton="filled" (click)="onAddLocation()" class="whitespace-nowrap">Wyślij</button>
+      <button matButton="outlined" (click)="onCancel()" class="whitespace-nowrap">Anuluj</button>
     </div>
 
 
