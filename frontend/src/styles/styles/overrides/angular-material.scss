@@ -344,6 +344,10 @@ textarea.mat-mdc-input-element {
       opacity: 0.38 !important;
     }
   }
+
+  &:hover {
+    @apply bg-primary-200; // lub dowolny inny kolor
+  }
 }
 
 /* Icon buttons */
@@ -398,21 +402,57 @@ textarea.mat-mdc-input-element {
 .mat-mdc-outlined-button {
   /* Not disabled */
   &:not([disabled='true']) {
-    @apply border-gray-300 #{'!important'};
+    @apply border-primary-800 #{'!important'};
+    @apply text-primary-800 #{'!important'};
+    @apply rounded-xl #{'!important'};
+    @apply font-geist #{'!important'};
   }
 
   /* Disabled */
   &[disabled='true'] {
-    @apply border-gray-300 #{'!important'};
+    @apply border-primary-300 #{'!important'};
+    @apply text-primary-300 #{'!important'};
   }
 }
 
-/* Don't wrap the button label text */
-.mdc-button {
+/* Adjust the border color of outlined buttons */
+.mat-mdc-unelevated-button {
+  /* Not disabled */
+  &:not([disabled='true']) {
+    @apply bg-primary-800 #{'!important'};
+    @apply text-primary-200 #{'!important'};
+    @apply rounded-xl #{'!important'};
+    @apply font-geist #{'!important'};
+  }
+
+  /* Disabled */
+  &[disabled='true'] {
+    @apply bg-primary-300 #{'!important'};
+  }
+
+  &:hover {
+    @apply bg-primary-600 #{'!important'};
+    @apply text-primary-200 #{'!important'};
+  }
+
+}
+
+/* Filled button */
+button[matButton="filled"] {
+
   .mdc-button__label {
-    white-space: nowrap;
+    @apply text-white;
+
   }
 }
+
+///* Don't wrap the button label text */
+//.mdc-button {
+//  .mdc-button__label {
+//    white-space: nowrap;
+//    @apply text-primary-800;
+//  }
+//}
 
 /* -------------------------------------------------------------------------- */
 /*  @ Select

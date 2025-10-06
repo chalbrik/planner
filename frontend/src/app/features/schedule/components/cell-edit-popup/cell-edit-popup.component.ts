@@ -37,6 +37,8 @@ export class CellEditPopupComponent {
     date: string;
   } | undefined>();
 
+  readonly selectedCellsCount = input<number>(1);
+
   // Sygnały dla czasów
   timeFrom = signal<Date | null>(null);
   timeTo = signal<Date | null>(null);

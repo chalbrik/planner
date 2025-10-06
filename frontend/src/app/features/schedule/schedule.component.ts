@@ -158,6 +158,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     date: string
   } | undefined>(undefined);
 
+  selectedCells = signal<Set<string>>(new Set()); // klucze: "employeeId-date"
+  lastClickedCell = signal<{ employeeId: string; date: string } | null>(null); // dla Shift+click
+
   conflictingCells = signal<Set<string>>(new Set());
   badWeeks = signal<Map<string, Set<number>>>(new Map());
   exceedingWorkHours = signal<Set<string>>(new Set());
@@ -435,27 +438,170 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   }
 
+  // onCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
+  //   if (this.overlayRef) {
+  //     this.overlayRef.dispose();
+  //   }
+  //   // Przygotuj dane selectedCell
+  //   const currentDate = this.currentMonthDate();
+  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+  //
+  //   const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
+  //     wh.employee === employee.id && wh.date === dateString
+  //   );
+  //
+  //   const selectedCellData = {
+  //     employee: employee,
+  //     workHours: workHoursObject || null,
+  //     date: dateString
+  //   };
+  //
+  //   // Tylko zaznacz komórkę - zachowaj w sygnale
+  //   this.selectedCell.set(selectedCellData);
+  // }
+
   onCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
-    // Przygotuj dane selectedCell
+
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const cellKey = `${employee.id}-${dateString}`;
 
-    const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
-      wh.employee === employee.id && wh.date === dateString
-    );
+    // Ctrl/Cmd + Click = toggle pojedynczej komórki
+    if (event.ctrlKey || event.metaKey) {
+      const current = new Set(this.selectedCells());
 
-    const selectedCellData = {
-      employee: employee,
-      workHours: workHoursObject || null,
-      date: dateString
-    };
+      if (current.has(cellKey)) {
+        current.delete(cellKey);
+      } else {
+        current.add(cellKey);
+      }
 
-    // Tylko zaznacz komórkę - zachowaj w sygnale
-    this.selectedCell.set(selectedCellData);
+      this.selectedCells.set(current);
+      this.lastClickedCell.set({ employeeId: employee.id, date: dateString });
+      return;
+    }
+
+    // Shift + Click = zaznacz zakres (tylko w ramach jednego pracownika)
+    if (event.shiftKey) {
+      const lastClicked = this.lastClickedCell();
+
+      if (lastClicked && lastClicked.employeeId === employee.id) {
+        // Oblicz zakres dat
+        const lastDate = new Date(lastClicked.date);
+        const currentClickDate = new Date(dateString);
+
+        const startDate = lastDate < currentClickDate ? lastDate : currentClickDate;
+        const endDate = lastDate < currentClickDate ? currentClickDate : lastDate;
+
+        // Zaznacz wszystkie komórki w zakresie
+        const current = new Set(this.selectedCells());
+        const tempDate = new Date(startDate);
+
+        while (tempDate <= endDate) {
+          const tempDateString = `${tempDate.getFullYear()}-${String(tempDate.getMonth() + 1).padStart(2, '0')}-${String(tempDate.getDate()).padStart(2, '0')}`;
+          const tempKey = `${employee.id}-${tempDateString}`;
+          current.add(tempKey);
+          tempDate.setDate(tempDate.getDate() + 1);
+        }
+
+        this.selectedCells.set(current);
+        return;
+      }
+    }
+
+    // Zwykłe kliknięcie = wyczyść zaznaczenie i zaznacz tylko tę komórkę
+    const newSelection = new Set([cellKey]);
+    this.selectedCells.set(newSelection);
+    this.lastClickedCell.set({ employeeId: employee.id, date: dateString });
   }
+
+  // onDbCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
+  //   // Zamknij poprzedni overlay jeśli istnieje
+  //   if (this.overlayRef) {
+  //     this.overlayRef.dispose();
+  //   }
+  //
+  //   // Przygotuj dane selectedCell (można też użyć this.selectedCell() jeśli była już zaznaczona)
+  //   const currentDate = this.currentMonthDate();
+  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+  //
+  //   const currentLocationId = this.selectedLocationId();
+  //
+  //   const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
+  //     wh.employee === employee.id &&
+  //     wh.date === dateString &&
+  //     wh.location === currentLocationId
+  //   );
+  //
+  //   const selectedCellData = {
+  //     employee: employee,
+  //     workHours: workHoursObject || null,
+  //     date: dateString,
+  //     location: currentLocationId
+  //   };
+  //
+  //   // Pobierz element komórki
+  //   const cellElement = event.target as HTMLElement;
+  //
+  //   // Stwórz strategię pozycjonowania
+  //   const positionStrategy = this.overlay.position()
+  //     .flexibleConnectedTo(cellElement)
+  //     .withPositions([
+  //       {
+  //         originX: 'center',
+  //         originY: 'top',
+  //         overlayX: 'center',
+  //         overlayY: 'bottom',
+  //         offsetY: -8
+  //       },
+  //       {
+  //         originX: 'center',
+  //         originY: 'bottom',
+  //         overlayX: 'center',
+  //         overlayY: 'top',
+  //         offsetY: 8
+  //       }
+  //     ]);
+  //
+  //   // Stwórz overlay
+  //   this.overlayRef = this.overlay.create({
+  //     positionStrategy,
+  //     hasBackdrop: false,
+  //     scrollStrategy: this.overlay.scrollStrategies.reposition()
+  //   });
+  //
+  //   this.overlayRef.backdropClick().subscribe(() => {
+  //     this.closePopup();
+  //   });
+  //
+  //   // Stwórz portal komponentu
+  //   const portal = new ComponentPortal(CellEditPopupComponent);
+  //
+  //   // Podłącz komponent do overlay
+  //   const componentRef = this.overlayRef.attach(portal);
+  //
+  //   // Przekaż selectedCell
+  //   componentRef.setInput('selectedCell', selectedCellData);
+  //
+  //   // Obsłuż eventy z komponentu
+  //   componentRef.instance.save.subscribe((data) => {
+  //     this.onPopupSave(data);
+  //   });
+  //
+  //   componentRef.instance.cancel.subscribe(() => {
+  //     this.onPopupCancel();
+  //   });
+  //
+  //   componentRef.instance.delete.subscribe((data) => {
+  //     this.onPopupDelete(data);
+  //   });
+  //
+  //   // Zaktualizuj sygnał
+  //   this.selectedCell.set(selectedCellData);
+  // }
 
   onDbCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
     // Zamknij poprzedni overlay jeśli istnieje
@@ -463,24 +609,54 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.overlayRef.dispose();
     }
 
-    // Przygotuj dane selectedCell (można też użyć this.selectedCell() jeśli była już zaznaczona)
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const cellKey = `${employee.id}-${dateString}`;
 
+    // Sprawdź czy kliknięta komórka jest w zaznaczeniu
+    const selectedCells = this.selectedCells();
+    const isClickedCellSelected = selectedCells.has(cellKey);
+
+    // ZMIANA: Jeśli NIE ma Shift/Ctrl i komórka nie jest zaznaczona, reset
+    if (!isClickedCellSelected && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
+      const newSelection = new Set([cellKey]);
+      this.selectedCells.set(newSelection);
+    }
+
+    // Teraz pracujemy z aktualnym zaznaczeniem (może być 1 lub więcej komórek)
+    const currentSelection = this.selectedCells();
     const currentLocationId = this.selectedLocationId();
 
-    const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
-      wh.employee === employee.id &&
-      wh.date === dateString &&
-      wh.location === currentLocationId
-    );
+    // Przygotuj dane dla wszystkich zaznaczonych komórek
+    const selectedCellsData = Array.from(currentSelection).map(key => {
+      // Klucz to "employeeId-YYYY-MM-DD"
+      // employeeId to UUID (36 znaków), np. "550e8400-e29b-41d4-a716-446655440000"
+      const empId = key.substring(0, 36); // Pierwsze 36 znaków to UUID
+      const date = key.substring(37); // Reszta po myślniku to data "YYYY-MM-DD"
 
-    const selectedCellData = {
-      employee: employee,
-      workHours: workHoursObject || null,
-      date: dateString,
-      location: currentLocationId
-    };
+      const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
+        wh.employee === empId &&
+        wh.date === date &&
+        wh.location === currentLocationId
+      );
+
+      const emp = this.dataSource.find(e => e.id === empId);
+
+      return {
+        employee: emp,
+        workHours: workHoursObject || null,
+        date: date,
+        location: currentLocationId
+      };
+    });
+
+    // Filtruj komórki - zostaw tylko te z prawidłowym employee
+    const validCellsData = selectedCellsData.filter(cell => cell.employee !== undefined);
+
+    if (validCellsData.length === 0) {
+      console.error('Brak prawidłowych komórek do edycji');
+      return;
+    }
 
     // Pobierz element komórki
     const cellElement = event.target as HTMLElement;
@@ -522,12 +698,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Podłącz komponent do overlay
     const componentRef = this.overlayRef.attach(portal);
 
-    // Przekaż selectedCell
-    componentRef.setInput('selectedCell', selectedCellData);
+    // Przekaż PIERWSZĄ zaznaczoną komórkę (dla kompatybilności z obecnym komponentem)
+    componentRef.setInput('selectedCell', validCellsData[0]);
+    componentRef.setInput('selectedCellsCount', validCellsData.length);
 
     // Obsłuż eventy z komponentu
     componentRef.instance.save.subscribe((data) => {
-      this.onPopupSave(data);
+      this.onPopupSaveMultiple(data, validCellsData);
     });
 
     componentRef.instance.cancel.subscribe(() => {
@@ -535,11 +712,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     });
 
     componentRef.instance.delete.subscribe((data) => {
-      this.onPopupDelete(data);
+      this.onPopupDeleteMultiple(validCellsData);
     });
 
     // Zaktualizuj sygnał
-    this.selectedCell.set(selectedCellData);
+    this.selectedCell.set(validCellsData[0]);
   }
 
   private onPopupSave(data: { hours: string; employee: string; date: string; id?: string }) {
@@ -599,12 +776,81 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     });
   }
 
+  private onPopupSaveMultiple(data: { hours: string; employee: string; date: string; id?: string }, selectedCellsData: any[]) {
+    // Zapisz te same godziny dla wszystkich zaznaczonych komórek
+    const saveOperations = selectedCellsData.map(cellData => {
+      const existingWorkHours = cellData.workHours;
+
+      if (existingWorkHours?.id) {
+        // Update istniejących godzin
+        return this.scheduleService.updateWorkHours(existingWorkHours.id, {
+          hours: data.hours,
+          employee: cellData.employee.id,
+          date: cellData.date,
+          location: this.selectedLocationId()
+        });
+      } else {
+        // Dodaj nowe godziny
+        return this.scheduleService.addWorkHours({
+          hours: data.hours,
+          employee: cellData.employee.id,
+          date: cellData.date,
+          location: this.selectedLocationId()
+        });
+      }
+    });
+
+    // Wykonaj wszystkie operacje równolegle
+    Promise.all(saveOperations.map(obs => obs.toPromise()))
+      .then(() => {
+        this.scheduleService.emitScheduleUpdate({ multiple: true });
+        this.closePopup();
+      })
+      .catch((error) => {
+        console.error('Błąd podczas zapisu wielu komórek:', error);
+      });
+  }
+
+  private onPopupDeleteMultiple(selectedCellsData: any[]) {
+    // Usuń tylko te komórki, które mają workHours
+    const deleteOperations = selectedCellsData
+      .filter(cellData => cellData.workHours?.id)
+      .map(cellData =>
+        this.scheduleService.deleteWorkHours(cellData.workHours.id)
+      );
+
+    if (deleteOperations.length === 0) {
+      this.closePopup();
+      return;
+    }
+
+    // Wykonaj wszystkie operacje równolegle
+    Promise.all(deleteOperations.map(obs => obs.toPromise()))
+      .then(() => {
+        this.scheduleService.emitScheduleUpdate({ multiple: true, deleted: true });
+        this.closePopup();
+      })
+      .catch((error) => {
+        console.error('Błąd podczas usuwania wielu komórek:', error);
+      });
+  }
+
+  // private closePopup() {
+  //   if (this.overlayRef) {
+  //     this.overlayRef.dispose();
+  //     this.overlayRef = undefined;
+  //   }
+  //   this.selectedCell.set(undefined);
+  // }
+
   private closePopup() {
     if (this.overlayRef) {
       this.overlayRef.dispose();
       this.overlayRef = undefined;
     }
     this.selectedCell.set(undefined);
+    // Wyczyść zaznaczenie po zamknięciu popupu
+    this.selectedCells.set(new Set());
   }
 
   onCancelSelection() {
@@ -647,14 +893,22 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.badWeeks.set(badWeeksMap);
   }
 
-  isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
-    const selectedCell = this.selectedCell();
-    if (!selectedCell) return false;
+  // isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
+  //   const selectedCell = this.selectedCell();
+  //   if (!selectedCell) return false;
+  //
+  //   const currentDate = this.currentMonthDate();
+  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+  //
+  //   return selectedCell.employee.id === employee.id && selectedCell.date === dateString;
+  // }
 
+  isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
     const currentDate = this.currentMonthDate();
     const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const cellKey = `${employee.id}-${dateString}`;
 
-    return selectedCell.employee.id === employee.id && selectedCell.date === dateString;
+    return this.selectedCells().has(cellKey);
   }
 
   // Sprawdź czy komórka należy do złego tygodnia

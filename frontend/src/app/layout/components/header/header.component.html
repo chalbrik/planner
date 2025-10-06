@@ -4,18 +4,18 @@
     <!-- Hamburger menu (mobile) -->
     <button
       mat-icon-button
-      class="sm:hidden text-primary-800"
+      class="sm:!hidden text-primary-800"
       (click)="drawer()?.toggle()">
       <mat-icon>menu</mat-icon>
     </button>
 
     <!-- Logo -->
-    <div class="flex-1 sm:w-52">
+    <div class="sm:w-52">
       <h1 class="text-xl font-bold text-primary-800 text-center sm:text-left">Planner</h1>
     </div>
 
     <!-- Desktop Navigation (hidden on mobile) -->
-    <nav class="hidden sm:flex flex-row justify-between items-center flex-1">
+    <nav class="hidden sm:flex flex-row justify-start items-center gap-16 flex-1">
       <a routerLink="/app/schedule" routerLinkActive="font-bold" class="text-primary-800 text-base px-2">Grafik</a>
       <a routerLink="/app/employees" routerLinkActive="font-bold" class="text-primary-800 text-base px-2">Pracownicy</a>
       <a routerLink="/app/locations" routerLinkActive="font-bold" class="text-primary-800 text-base px-2">Lista obiektów</a>
