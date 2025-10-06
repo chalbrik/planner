@@ -15,35 +15,35 @@ class SchoolSerializer(serializers.ModelSerializer):
         fields = ['school_type', 'school_name', 'graduation_year']
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    contract_date_start = serializers.DateField(format='%d.%m.%Y', required=False, allow_null=True)
-    contract_date_end = serializers.DateField(format='%d.%m.%Y', required=False, allow_null=True)
+    contract_date_start = serializers.DateField(required=False, allow_null=True)
+    contract_date_end = serializers.DateField(required=False, allow_null=True)
     locations = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Employee
-        fields = ['id', 'full_name', 'phone', 'email', 'agreement_type', 'identification_number', 'job',
+        fields = ['id', 'full_name', 'birth_date', 'phone', 'email', 'agreement_type', 'identification_number', 'job',
                   'contract_date_start', 'contract_date_end', 'job_rate', 'hour_rate', 'locations']
 
 class EmployeeDetailSerializer(serializers.ModelSerializer):
     school = SchoolSerializer(read_only=True)
     previous_employers = PreviousEmployerSerializer(many=True, read_only=True)
-    contract_date_start = serializers.DateField(format='%d.%m.%Y', required=False, allow_null=True)
-    contract_date_end = serializers.DateField(format='%d.%m.%Y', required=False, allow_null=True)
+    contract_date_start = serializers.DateField(required=False, allow_null=True)
+    contract_date_end = serializers.DateField(required=False, allow_null=True)
 
     class Meta:
         model = Employee
         fields = [
-            'id', 'full_name', 'email', 'phone', 'agreement_type',
+            'id', 'full_name', 'birth_date', 'email', 'phone', 'agreement_type',
             'identification_number', 'job', 'contract_date_start',
             'contract_date_end', 'job_rate', 'hour_rate',
-            'school', 'previous_employers'  # zagnieżdżone obiekty
+            'school', 'previous_employers', 'locations'  # zagnieżdżone obiekty
         ]
 
 
 class EmployeeCreateSerializer(serializers.ModelSerializer):
     # Zagnieżdżone dane - tylko definicje pól
-    school_type = serializers.CharField(required=False, write_only=True)
-    school_name = serializers.CharField(required=False, write_only=True)
+    school_type = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    school_name = serializers.CharField(required=False, allow_blank=True, write_only=True)
     graduation_year = serializers.DateField(required=False, write_only=True)
     previous_employers = PreviousEmployerSerializer(many=True, required=False, write_only=True)
     birth_date = serializers.DateField(required=False, write_only=True)

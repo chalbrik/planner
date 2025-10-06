@@ -29,7 +29,7 @@
       mode="side"
       position="end"
       [opened]="isSidenavOpen()"
-      class="!w-1/3 overflow-y-auto !bg-primary-100">
+      class="!w-full sm:!w-1/3 overflow-y-auto !bg-primary-100">
 
       @if (selectedEmployee()) {
         <div class="p-4 flex flex-col gap-2">
@@ -51,11 +51,11 @@
     <mat-sidenav-content class="p-4">
 
       <!-- Pole filtrowania -->
-      <div class="flex flex-row gap-4 h-16 !border-primary-800">
+      <div class="flex flex-col-reverse sm:flex-row gap-4 sm:h-16 !border-primary-800">
         <mat-form-field class="w-full h-full !border-primary-800">
           <input matInput class="h-11 !text-primary-800 !border-primary-800" (keyup)="applyFilter($event)" placeholder="Wyszukaj pracownika" #input>
         </mat-form-field>
-        <button mat-stroked-button class="px-2 !rounded-xl !border-primary-800 gap-2 whitespace-nowrap w-60 !h-11" (click)="openAddEmployeeDialog()">
+        <button mat-stroked-button class="w-full sm:w-fit px-2 !rounded-xl !border-primary-800 gap-2 whitespace-nowrap w-60 !h-11" (click)="openAddEmployeeDialog()">
           <div class="flex flex-row justify-start items-center h-full w-full gap-2">
             <app-icon iconName="plus" iconSize="outline" class="text-primary-800"></app-icon>
             <span class="font-geist text-base text-primary-800">Dodaj pracownika</span>
@@ -84,18 +84,18 @@
             </td>
           </ng-container>
 
-          <!-- Kolumna Email -->
+          <!-- Kolumna Etat -->
           <ng-container matColumnDef="job">
-            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Etat </th>
-            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
+            <th mat-header-cell *matHeaderCellDef class="hidden sm:table-cell !bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Etat </th>
+            <td mat-cell *matCellDef="let employee" class=" hidden sm:table-cell !bg-primary-100 !border-b !border-primary-800 !text-primary-800">
               {{employee.job || 'Brak'}}
             </td>
           </ng-container>
 
           <!-- Kolumna Rodzaj umowy -->
           <ng-container matColumnDef="agreement_type">
-            <th mat-header-cell *matHeaderCellDef class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Rodzaj umowy </th>
-            <td mat-cell *matCellDef="let employee" class="!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
+            <th mat-header-cell *matHeaderCellDef class="hidden sm:table-cell!bg-primary-100 !border-b !border-primary-800 !text-primary-800"> Rodzaj umowy </th>
+            <td mat-cell *matCellDef="let employee" class="hidden sm:table-cell!bg-primary-100 !border-b !border-primary-800 !text-primary-800">
               {{getAgreementTypeLabel(employee.agreement_type)}}
             </td>
           </ng-container>

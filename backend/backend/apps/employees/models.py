@@ -33,6 +33,7 @@ class Employee(models.Model):
             ("contract", "Umowa na zlecenie")
         ],
         default='permanent',
+        blank=True,
         verbose_name="Rodzaj umowy"
     )
     identification_number = models.CharField(
@@ -146,18 +147,20 @@ class School(models.Model):
     employee = models.OneToOneField(
         Employee,
         on_delete=models.CASCADE,
-        related_name="School",
+        related_name="school",
         verbose_name="Pracownik"
     )
     school_type = models.CharField(
         max_length=100,
         verbose_name="Typ szkoły",
-        default='Nieznany'
+        default='Nieznany',
+        blank=True
     )
     school_name = models.CharField(
         max_length=200,
         verbose_name="Nazwa szkoły",
-        default='Nieznany'
+        default='Nieznany',
+        blank=True
     )
     graduation_year = models.DateField(
         verbose_name="Rok ukończenia szkoły",

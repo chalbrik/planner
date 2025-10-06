@@ -15,7 +15,6 @@ table {
   //height: 44px !important;
 }
 
-
 .mdc-text-field--filled{
   background-color: transparent !important;
   border: 1px solid #991B1B !important;
@@ -23,13 +22,12 @@ table {
 }
 
 //Tabela
-
 .mdc-line-ripple {
   display: none !important;
 }
 
 mat-sidenav {
-  border-left: 2px solid #991B1B !important; // warm-gray-400 jak w reszcie aplikacji
+  //border-left: 2px solid #991B1B !important; // warm-gray-400 jak w reszcie aplikacji
   border-radius: 16px !important;
 }
 
@@ -37,7 +35,7 @@ mat-sidenav {
 .mat-bottom-sheet-container {
   //width: 100vw !important;
   //max-width: 100vw !important;
-  height: 90vw !important;
+  height: 90vh !important;
   max-height: 90vh !important;
   padding: 30px !important;
 }
@@ -57,4 +55,8 @@ mat-sidenav {
 
 .mat-bottom-sheet-container-xlarge, .mat-bottom-sheet-container-large, .mat-bottom-sheet-container-medium {
   min-width: 100vw !important;
+}
+
+.mdc-data-table__cell, .mdc-data-table__header-cell{
+  padding: 0 8px !important;
 }

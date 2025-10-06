@@ -1,11 +1,11 @@
 <div class="h-full w-full">
   <form class="rounded-xl font-geist" [formGroup]="addEmployeeForm">
 
-    <div class="grid grid-cols-6 gap-x-6 gap-y-2">
+    <div class="grid grid-cols-2 sm:grid-cols-6 gap-x-6 gap-y-2">
       <div class="col-span-2 flex flex-col">
         <app-title-display [name]="'Dane osobowe'" [iconName]="'user-circle'" [iconSize]="'outline'"></app-title-display>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 
           <mat-form-field  appearance="fill">
             <mat-label>Pełne imię i nazwisko</mat-label>
@@ -49,7 +49,7 @@
       <div class="col-span-2 flex flex-col">
         <app-title-display [name]="'Dane dotyczące zatrudnienia'" [iconName]="'document-text'" [iconSize]="'outline'"></app-title-display>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <mat-form-field>
             <mat-label>Rodzaj umowy</mat-label>
             <mat-select formControlName="agreement_type">
@@ -100,7 +100,7 @@
       <div class="col-span-2 flex flex-col">
         <app-title-display [name]="'Wykształcenie'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>
 
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <mat-form-field>
             <mat-label>Typ szkoły</mat-label>
             <mat-select formControlName="school_type">
@@ -146,9 +146,15 @@
                 <div class="flex flex-row items-center">
                   <mat-checkbox
                     [value]="location.id"
+                    [checked]="isLocationSelected(location.id)"
                     (change)="onLocationChange(location.id, $event)">
                     {{ location.name }}
                   </mat-checkbox>
+                </div>
+              }
+              @if (shouldShowLocationError()) {
+                <div class="text-red-600 text-sm mt-2">
+                  Musisz wybrać przynajmniej jedną lokalizację
                 </div>
               }
             </div>
@@ -176,7 +182,7 @@
                   <p class="font-bold text-base">Dane pracodawcy {{ $index + 1 }}</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <mat-form-field  appearance="fill">
                     <mat-label>Nazwa firmy</mat-label>
                     <input type="text" matInput formControlName="employer_name">
@@ -222,12 +228,7 @@
 
 
     <div class="py-6 w-full flex flex-row justify-center items-center gap-6">
-      <app-button
-        variant="fill"
-        text="Wyślij"
-        [disabled]="!hasSelectedLocations()"
-        (click)="onAddEmployee()">
-      </app-button>
+      <button matButton="filled" (click)="onAddEmployee()" [disabled]="!hasSelectedLocations()">Wyślij</button>
       <app-button
         variant="outline"
         text="Anuluj"

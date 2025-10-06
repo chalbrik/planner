@@ -162,17 +162,25 @@ export class EmployeesComponent implements OnInit {
   onEditEmployee(employee: Employee, event: Event) {
     event.stopPropagation();
 
-    const bottomSheetRef = this.bottomSheet.open(EmployeeFormComponent, {
-      ariaLabel: 'Edytuj pracownika',
-      data: employee  // Przekazujemy dane pracownika
-    });
+    // Pobierz pełne dane pracownika z backendu
+    this.employeesService.getEmployeeDetail(employee.id).subscribe({
+      next: (fullEmployeeData) => {
+        console.log("Dostaje: ", fullEmployeeData);
+        const bottomSheetRef = this.bottomSheet.open(EmployeeFormComponent, {
+          ariaLabel: 'Edytuj pracownika',
+          data: fullEmployeeData  // Przekaż pełne dane ze szkołą
+        });
 
-    bottomSheetRef.afterDismissed().subscribe(result => {
-      if (result) {
-        this.loadEmployees();
+        bottomSheetRef.afterDismissed().subscribe(result => {
+          if (result) {
+            this.loadEmployees();
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Błąd pobierania danych pracownika:', error);
       }
     });
-
   }
 
 }

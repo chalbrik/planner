@@ -12,6 +12,7 @@ export interface Employee {
   job_rate: string;
   hour_rate: string;
   locations: string[];
+  school: School;
 }
 
 // Nowy interfejs dla szczegółów pracownika z zagnieżdżonymi danymi

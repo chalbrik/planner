@@ -37,6 +37,9 @@ class EmployeeService:
         if not validated_data.get('identification_number'):
             validated_data['identification_number'] = IdentificationService.generate_employee_id()
 
+        if birth_date:
+            validated_data['birth_date'] = birth_date
+
         logger.info(f"🔥 CREATING EMPLOYEE with: {validated_data}")
 
         # Utwórz pracownika (user jest już w validated_data)

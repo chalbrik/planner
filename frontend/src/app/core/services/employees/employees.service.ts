@@ -26,10 +26,24 @@ export class EmployeesService {
     );
   }
 
+  getEmployeeDetail(id: string): Observable<Employee> {
+    return this.http.get<Employee>(`${this.apiUrl}/${id}/`);
+  }
+
   addEmployee(employee: CreateEmployeeRequest): Observable<Employee> {
     return this.http.post<Employee>(`${this.apiUrl}/`, employee).pipe( // ← Zmień URL
       tap(newEmployee => {
         this._employees.update(current => [...current, newEmployee]);
+      })
+    );
+  }
+
+  updateEmployee(id: string, employee: Partial<CreateEmployeeRequest>): Observable<Employee> {
+    return this.http.put<Employee>(`${this.apiUrl}/${id}/`, employee).pipe(
+      tap(updatedEmployee => {
+        this._employees.update(current =>
+          current.map(emp => emp.id === id ? updatedEmployee : emp)
+        );
       })
     );
   }
