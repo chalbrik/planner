@@ -21,7 +21,6 @@
 
         .day-section {
             margin-bottom: 20px;
-            border: 2px solid #333;
             padding: 10px;
         }
 
@@ -101,9 +100,17 @@
         .signature-cell {
             background-color: #f9f9f9;
         }
+
+        .location{
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+<div class="location">{{ location_name }}</div>
 {% for day_num, day_data in days_data.items %}
 {% if forloop.counter0|divisibleby:4 and forloop.counter0 > 0 %}
 </div><div class="page-break"></div><div>
@@ -112,7 +119,6 @@
     <div class="day-section">
         <!-- Nagłówek sekcji dnia -->
         <div class="header">
-            <div class="location">{{ location_name }}</div>
             <div class="date-info">
                 {{ day_data.weekday }}, {{ day_data.day_number }} {{ month_name }} {{ year }}
             </div>
