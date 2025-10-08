@@ -314,7 +314,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
       employeeWorkHours.forEach(wh => {
         workHoursMap[wh.date] = wh.hours;
-        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
+        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date, employee.agreement_type);
       });
 
       const jobRate = parseFloat(employee.job) || 0;
@@ -341,7 +341,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
       employeeWorkHours.forEach(wh => {
         workHoursMap[wh.date] = wh.hours;
-        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date);
+        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date, employee.agreement_type);
       });
 
       const jobRate = parseFloat(employee.job) || 0;
@@ -858,7 +858,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
 
-    const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
+    // ✅ FILTRUJ - tylko pracownicy na umowie o pracę
+    const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
+
+    const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, permanentEmployees);
     this.conflictingCells.set(conflicts);
   }
 
@@ -884,7 +887,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
 
-    const badWeeksMap = this.conflictService.validate35HourRest(locationWorkHours, this.employees, this.currentMonthDate());
+    // ✅ FILTRUJ - tylko pracownicy na umowie o pracę
+    const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
+
+    const badWeeksMap = this.conflictService.validate35HourRest(locationWorkHours, permanentEmployees, this.currentMonthDate());
     this.badWeeks.set(badWeeksMap);
   }
 
@@ -913,7 +919,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
   }
 
-  private checkWorkHoursExceed12h(hoursString: string, employeeId: string, date: string): void {
+  private checkWorkHoursExceed12h(hoursString: string, employeeId: string, date: string, agreementType?: 'permanent' | 'contract'): void {
+    // ✅ Pomiń walidację dla zleceniobiorców
+    if (agreementType === 'contract') return;
+
     // Użyj metody z serwisu zamiast lokalnej logiki
     const validationResult = this.conflictService.validateWorkHoursExceed12h(hoursString);
     const cellKey = `${employeeId}-${date}`;
@@ -1240,5 +1249,4 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       }
     });
   }
-
 }

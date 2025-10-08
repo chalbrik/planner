@@ -27,7 +27,7 @@
 
           <mat-form-field  appearance="fill">
             <mat-label>Telefon</mat-label>
-            <input type="number" matInput formControlName="phone">
+            <input type="tel" matInput formControlName="phone">
             @if (shouldShowError('phone')) {
               <mat-error>Telefon jest <strong>wymagany</strong></mat-error>
             }
@@ -209,17 +209,13 @@
                 </div>
 
                 <div class="flex justify-end items-center mt-4">
-                  <app-button
-                    variant="outline"
-                    text="Usuń pracodawcę"
-                    iconName="trash"
-                    iconSize="mini"
-                    iconPosition="before"
-                    (click)="removeEmployer($index)">
-                  </app-button>
+                  <button matButton="outlined" (click)="removeEmployer($index)">
+                    <app-icon iconName="trash" iconSize="mini"></app-icon>
+                    <span>Usuń pracodawcę</span>
+                  </button>
 
-                  <button mat-button matStepperPrevious type="button">Poprzedni</button>
-                  <button mat-button (click)="handleNextStep($index)" type="button">Następny</button>
+                  <button matButton="outlined" matStepperPrevious type="button">Poprzedni</button>
+                  <button matButton="filled" (click)="handleNextStep($index)" type="button">Następny</button>
                 </div>
               </div>
             </mat-step>
@@ -228,11 +224,9 @@
       </div>
     }
 
-
-
     <div class="py-6 w-full flex flex-row justify-center items-center gap-6">
-      <button matButton="filled" (click)="onAddEmployee()" class="whitespace-nowrap">Wyślij</button>
-      <button matButton="outlined" (click)="onCancel()" class="whitespace-nowrap">Anuluj</button>
+      <button matButton="filled" (click)="onAddEmployee()">Wyślij</button>
+      <button matButton="outlined" (click)="onCancel()">Anuluj</button>
     </div>
 
 

@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import {NgClass} from '@angular/common';
-import {ButtonComponent} from '../../../../shared/components/button/button.component';
+import {IconComponent} from "../../../../shared/components/icon";
 
 interface NotificationData {
   type: 'exceed12h' | 'conflict11h' | 'badWeek35h';
@@ -12,7 +12,7 @@ interface NotificationData {
 
 @Component({
   selector: 'app-notification-pop-up',
-  imports: [MatDialogModule, MatButtonModule, MatIconModule, NgClass, ButtonComponent],
+    imports: [MatDialogModule, MatButtonModule, MatIconModule, NgClass, IconComponent],
   templateUrl: './notification-pop-up.component.html',
   styleUrl: './notification-pop-up.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

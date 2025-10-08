@@ -131,36 +131,50 @@ mat-table .mat-column-summary {
   }
 }
 
-// === STANY KOMÓREK (od najmniej do najbardziej ważnego) ===
+// === STANY KOMÓREK - NOWE STYLE KONFLIKTÓW ===
 
-// 1. ZŁY TYDZIEŃ (brak 35h przerwy) - FIOLETOWY
+// 1. ZŁY TYDZIEŃ (brak 35h przerwy) - KROPKOWANE TŁO FIOLETOWE
 .bad-week-cell {
-  background-color: rgba(139, 92, 246, 0.5) !important;
+  background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(139, 92, 246, 0.15) 10px,
+      rgba(139, 92, 246, 0.15) 20px
+  ) !important;
 
   &:hover {
-    background-color: rgba(139, 92, 246, 0.7) !important;
-    border-radius: 0 !important;
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(139, 92, 246, 0.25) 10px,
+        rgba(139, 92, 246, 0.25) 20px
+    ) !important;
   }
 }
 
-// 2. KONFLIKT 11H - CZERWONY (nadpisuje fioletowy)
+// 2. KONFLIKT 11H - CZERWONY TEKST + PODKREŚLENIE
 .conflict-cell {
-  background-color: rgba(248, 113, 113, 0.5) !important;
-
-  &:hover {
-    background-color: rgba(248, 113, 113, 0.7) !important;
-    border-radius: 0 !important;
-  }
-}
-
-// 3. PRZEKROCZENIE 12H PRACY - ŻÓŁTY
-.exceeding-12h-cell {
-  color: #D223FA !important;
+  color: #DC2626 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #DC2626 !important;
+  text-decoration-thickness: 2px !important;
   font-weight: 600 !important;
 
   &:hover {
-    border-radius: 0 !important;
-    font-weight: 600 !important;
+    color: #991B1B !important;
+    text-decoration-thickness: 3px !important;
+  }
+}
+
+// 3. PRZEKROCZENIE 12H PRACY - ŻÓŁTE TŁO
+.exceeding-12h-cell {
+  background-color: rgba(250, 204, 21, 0.4) !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-color: rgba(250, 204, 21, 0.6) !important;
   }
 }
 
@@ -173,49 +187,138 @@ mat-table .mat-column-summary {
 
 // === KOMBINACJE STANÓW DLA ZAZNACZONYCH KOMÓREK ===
 .selected-cell.conflict-cell {
-  background-color: rgba(248, 113, 113, 0.3) !important;
+  color: #DC2626 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #DC2626 !important;
 }
 
 .selected-cell.bad-week-cell {
-  background-color: rgba(139, 92, 246, 0.3) !important;
+  background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(139, 92, 246, 0.15) 10px,
+      rgba(139, 92, 246, 0.15) 20px
+  ) !important;
 }
 
 .selected-cell.exceeding-12h-cell {
-  background-color: rgba(245, 158, 11, 0.3) !important;
+  background-color: rgba(250, 204, 21, 0.3) !important;
 }
 
-.selected-cell.conflict-cell.bad-week-cell {
-  background: linear-gradient(135deg,
-    rgba(248, 113, 113, 0.3) 0%,
-    rgba(248, 113, 113, 0.3) 50%,
-    rgba(139, 92, 246, 0.3) 50%,
-    rgba(139, 92, 246, 0.3) 100%) !important;
+// === KOMBINACJE BŁĘDÓW (bez selected) ===
+
+// 11h + 12h - czerwony tekst + żółte tło
+.conflict-cell.exceeding-12h-cell {
+  background-color: rgba(250, 204, 21, 0.4) !important;
+  color: #DC2626 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #DC2626 !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-color: rgba(250, 204, 21, 0.6) !important;
+    color: #991B1B !important;
+  }
 }
 
-// === KOMBINACJE BŁĘDÓW ===
-.exceeding-12h-cell.conflict-cell {
-  background: linear-gradient(45deg,
-    rgba(245, 158, 11, 0.5) 0%,
-    rgba(245, 158, 11, 0.5) 50%,
-    rgba(248, 113, 113, 0.5) 50%,
-    rgba(248, 113, 113, 0.5) 100%) !important;
+// 35h + 12h - kropki + żółte tło
+.bad-week-cell.exceeding-12h-cell {
+  background-color: rgba(250, 204, 21, 0.4) !important;
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(250, 204, 21, 0.4),
+      rgba(250, 204, 21, 0.4) 10px,
+      rgba(139, 92, 246, 0.3) 10px,
+      rgba(139, 92, 246, 0.3) 20px
+  ) !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-color: rgba(250, 204, 21, 0.6) !important;
+    background-image: repeating-linear-gradient(
+        45deg,
+        rgba(250, 204, 21, 0.6),
+        rgba(250, 204, 21, 0.6) 10px,
+        rgba(139, 92, 246, 0.4) 10px,
+        rgba(139, 92, 246, 0.4) 20px
+    ) !important;
+  }
 }
 
-.exceeding-12h-cell.bad-week-cell {
-  background: linear-gradient(135deg,
-    rgba(245, 158, 11, 0.5) 0%,
-    rgba(245, 158, 11, 0.5) 50%,
-    rgba(139, 92, 246, 0.5) 50%,
-    rgba(139, 92, 246, 0.5) 100%) !important;
+// 11h + 35h - czerwony tekst + kropki
+.conflict-cell.bad-week-cell {
+  background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(139, 92, 246, 0.15) 10px,
+      rgba(139, 92, 246, 0.15) 20px
+  ) !important;
+  color: #DC2626 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #DC2626 !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(139, 92, 246, 0.25) 10px,
+        rgba(139, 92, 246, 0.25) 20px
+    ) !important;
+    color: #991B1B !important;
+  }
 }
 
-// === INNE KOMBINACJE ===
-.bad-week-cell.today-cell {
-  background-color: rgba(139, 92, 246, 0.6) !important;
+// Wszystkie 3 konflikty - kombinacja wszystkiego
+.conflict-cell.bad-week-cell.exceeding-12h-cell {
+  background-color: rgba(250, 204, 21, 0.4) !important;
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(250, 204, 21, 0.4),
+      rgba(250, 204, 21, 0.4) 10px,
+      rgba(139, 92, 246, 0.3) 10px,
+      rgba(139, 92, 246, 0.3) 20px
+  ) !important;
+  color: #DC2626 !important;
+  text-decoration: underline !important;
+  text-decoration-color: #DC2626 !important;
+  font-weight: 600 !important;
+
+  &:hover {
+    background-color: rgba(250, 204, 21, 0.6) !important;
+    background-image: repeating-linear-gradient(
+        45deg,
+        rgba(250, 204, 21, 0.6),
+        rgba(250, 204, 21, 0.6) 10px,
+        rgba(139, 92, 246, 0.4) 10px,
+        rgba(139, 92, 246, 0.4) 20px
+    ) !important;
+    color: #991B1B !important;
+  }
 }
 
+// === INNE KOMBINACJE Z WEEKENDEM I DZISIEJSZYM DNIEM ===
 .bad-week-cell.weekend-cell {
-  background-color: rgba(139, 92, 246, 0.4) !important;
+  background-image: repeating-linear-gradient(
+      45deg,
+      #D1D5DB,
+      #D1D5DB 10px,
+      rgba(139, 92, 246, 0.25) 10px,
+      rgba(139, 92, 246, 0.25) 20px
+  ) !important;
+}
+
+.bad-week-cell.today-cell {
+  background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(139, 92, 246, 0.2) 10px,
+      rgba(139, 92, 246, 0.2) 20px
+  ) !important;
 }
 
 // === DODATKOWE STYLE TABELI ===

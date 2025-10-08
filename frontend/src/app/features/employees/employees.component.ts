@@ -20,7 +20,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {IconComponent} from '../../shared/components/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
-import {ButtonComponent} from '../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-employees',
@@ -44,7 +43,6 @@ import {ButtonComponent} from '../../shared/components/button/button.component';
     MatIconModule,
     MatIconButton,
     MatButton,
-    ButtonComponent,
     MatHeaderCellDef,
     MatCellDef,
     MatRowDef,

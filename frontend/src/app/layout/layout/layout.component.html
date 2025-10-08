@@ -3,9 +3,9 @@
   <mat-drawer #drawer mode="over" class="w-64">
     <div class="flex flex-col h-full bg-primary-300">
       <!-- Logo w drawerze -->
-      <div class="p-4 border-b border-primary-400">
-        <h1 class="text-xl font-bold text-primary-800 text-center">Planner</h1>
-      </div>
+<!--      <div class="p-4 border-b border-primary-400">-->
+<!--        <h1 class="text-xl font-bold text-primary-800 text-center">Planner</h1>-->
+<!--      </div>-->
 
       <!-- Nawigacja -->
       <nav class="flex flex-col p-4 gap-4">
@@ -58,13 +58,7 @@
           </div>
 
           <!-- Logout Button -->
-          <button
-            mat-raised-button
-            color="primary"
-            class="w-full"
-            (click)="logout(); drawer.close()">
-            <span class="font-geist text-base">Wyloguj</span>
-          </button>
+          <button matButton="filled" (click)="logout(); drawer.close()">Wyloguj</button>
         </div>
       }
     </div>

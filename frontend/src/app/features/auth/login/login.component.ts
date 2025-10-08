@@ -2,9 +2,7 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
-
 import { AuthService } from '../../../core/services/auth.service';
-import { ButtonComponent } from '../../../shared/components/button/button.component';
 import {IconComponent} from '../../../shared/components/icon';
 import {MatError, MatFormField, MatInput, MatLabel} from "@angular/material/input";
 import {MatButton} from '@angular/material/button';
@@ -16,7 +14,6 @@ import {MatButton} from '@angular/material/button';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    ButtonComponent,
     NgClass,
     IconComponent,
     MatError,

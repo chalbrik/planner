@@ -53,7 +53,7 @@
         <mat-form-field class="w-full h-full !border-primary-800">
           <input matInput class="h-11 !text-primary-800 !border-primary-800" (keyup)="applyFilter($event)" placeholder="Wpisz nazwę, adres..." #input>
         </mat-form-field>
-        <button matButton="filled" (click)="onAddLocation()" class="whitespace-nowrap">
+        <button matButton="filled" (click)="onAddLocation()">
           <app-icon iconName="plus" iconSize="mini"></app-icon>
           <span>Dodaj obiekt</span>
         </button>

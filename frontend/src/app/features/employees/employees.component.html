@@ -33,13 +33,9 @@
 
       @if (selectedEmployee()) {
         <div class="p-4 flex flex-col gap-2">
-
-          <app-button
-            (click)="closeSidenav()"
-            variant="outline"
-            iconName="x-mark"
-            iconSize="outline">
-          </app-button>
+          <button matIconButton aria-label="Zamknij" (click)="closeSidenav()" class="outline">
+            <app-icon iconName="x-mark" iconSize="outline"></app-icon>
+          </button>
 
           <!-- Tutaj użyjemy istniejący komponent employee-info -->
           <app-employee-info [employee]="selectedEmployee()!"></app-employee-info>
@@ -55,7 +51,7 @@
         <mat-form-field class="w-full h-full !border-primary-800">
           <input matInput class="h-11 !text-primary-800 !border-primary-800" (keyup)="applyFilter($event)" placeholder="Wyszukaj pracownika" #input>
         </mat-form-field>
-        <button matButton="filled" (click)="openAddEmployeeDialog()" class="whitespace-nowrap">
+        <button matButton="filled" (click)="openAddEmployeeDialog()">
           <app-icon iconName="plus" iconSize="mini"></app-icon>
           <span>Dodaj pracownika</span>
         </button>

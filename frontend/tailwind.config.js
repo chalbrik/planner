@@ -9,19 +9,51 @@ module.exports = {
         'rubik': ['Rubik', 'sans-serif'],
         'geist': ['Geist', 'sans-serif'],
       },
+      fontSize: {
+        'xs': '0.625rem', //10px
+        'sm': '0.75rem',
+        'md': '0.8125rem',
+        'base': '0.875rem',
+        'lg': '1rem',
+        'xl': '1.125rem',
+        '2xl': '1.25rem',
+        '3xl': '1.5rem',
+        '4xl': '2rem',
+        '5xl': '2.25rem',
+        '6xl': '2.5rem',
+        '7xl': '3rem',
+        '8xl': '4rem',
+        '9xl': '6rem',
+        '10xl': '8rem',
+      },
+      screens: {
+        xs: '430px',
+        custom500: '500px',
+        sm: '600px',
+        employee: '760px',
+        md: '960px',
+        custom800: '800px',
+        'min-h-900': {'raw': '(min-height: 900px)'},
+        'max-h-800': {'raw': '(max-height: 800px)'},
+        custom1024: '1025px',
+        custom400: '400px',
+        custom1200: '1200px',
+        lg: '1280px',
+        xl: '1440px',
+      },
       colors: {
 
         'primary': {
-          50: '#FFFBEB',
-          100: '#FEF3C7',
-          200: '#FDE68A',
-          300: '#FCD34D',
-          400: '#FBBF24',
-          500: '#F59E0B',
-          600: '#D97706',
-          700: '#B45309',
-          800: '#92400E',
-          900: '#78350F',
+          50: '#FAFAFA',
+          100: '#F4F4F5',
+          200: '#E4E4E7',
+          300: '#D4D4D8',
+          400: '#A1A1AA',
+          500: '#71717A',
+          600: '#52525B',
+          700: '#3F3F46',
+          800: '#27272A',
+          900: '#18181B',
         },
 
         'secondary': {
@@ -150,5 +182,27 @@ module.exports = {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addBase, theme }) {
+      function extractColorVars(colorObj, colorGroup = '') {
+        return Object.keys(colorObj).reduce((vars, colorKey) => {
+          const value = colorObj[colorKey];
+          const cssVariable = colorGroup
+            ? `--${colorGroup}-${colorKey}`
+            : `--${colorKey}`;
+
+          const newVars =
+            typeof value === 'string'
+              ? { [cssVariable]: value }
+              : extractColorVars(value, colorKey);
+
+          return { ...vars, ...newVars };
+        }, {});
+      }
+
+      addBase({
+        ':root': extractColorVars(theme('colors')),
+      });
+    }
+  ],
 }

@@ -127,7 +127,7 @@
   /* Default style tweaks and enhancements */
   .mat-mdc-text-field-wrapper {
     padding: 0;
-    border-radius: 6px;
+    border-radius: 12px;
     border-width: 1px;
     border-style: solid;
     @apply border-primary-400 bg-white shadow-sm #{'!important'};
@@ -147,8 +147,9 @@
       position: relative;
       display: flex;
       align-items: stretch;
-      border-radius: 6px;
+      border-radius: 12px;
       padding: 0 6px 0 16px;
+
 
       .mat-mdc-form-field-icon-prefix,
       .mat-mdc-form-field-text-prefix {
@@ -207,7 +208,7 @@
         display: flex;
         align-items: center;
         width: 88px;
-        min-height: 48px;
+        min-height: 40px;
         padding: 0;
         border: 0;
 
@@ -442,6 +443,7 @@ button[matButton="filled"] {
 
   .mdc-button__label {
     display: flex;
+    white-space: nowrap;
     flex-direction: row;
     justify-content: center;
     align-items: center;
@@ -452,12 +454,30 @@ button[matButton="filled"] {
 }
 
 ///* Don't wrap the button label text */
-//.mdc-button {
-//  .mdc-button__label {
-//    white-space: nowrap;
-//    @apply text-primary-800;
-//  }
-//}
+.mdc-button {
+  .mdc-button__label {
+    display: flex;
+    white-space: nowrap;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    @apply text-primary-800;
+  }
+}
+
+//Obramowanie dla mat-icon-button - outline
+.mat-mdc-icon-button.outline .mat-mdc-button-persistent-ripple{
+  @apply border;
+  @apply border-primary-800;
+}
+
+//Obramowanie dla mat-icon-button - filled - do uzupelnienia
+.mat-mdc-icon-button.filled .mat-mdc-button-persistent-ripple{
+  @apply bg-primary-800;
+  @apply text-primary-50;
+
+}
 
 /* -------------------------------------------------------------------------- */
 /*  @ Select

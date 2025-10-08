@@ -1,22 +1,22 @@
 <div class="h-full w-full">
   <form class="rounded-xl font-geist" [formGroup]="addLocationForm">
 
-    <app-input
-      [label]="'Nazwa'"
-      [placeholder]="''"
-      [showError]="shouldShowError('name')"
-      [errorMessage]="getErrorMessage('name')"
-      formControlName="name">
-    </app-input>
+    <mat-form-field  appearance="fill">
+      <mat-label>Nazwa</mat-label>
+      <input type="text" matInput formControlName="name">
+      @if (shouldShowError('name')) {
+        <mat-error>Email jest <strong>wymagany</strong></mat-error>
+      }
+    </mat-form-field>
 
-    <app-input
-      [label]="'Adres'"
-      [placeholder]="''"
-      [showError]="shouldShowError('address')"
-      [errorMessage]="getErrorMessage('address')"
-      formControlName="address">
-    </app-input>
 
+    <mat-form-field  appearance="fill">
+      <mat-label>Adres</mat-label>
+      <input type="text" matInput formControlName="address">
+      @if (shouldShowError('address')) {
+        <mat-error>Email jest <strong>wymagany</strong></mat-error>
+      }
+    </mat-form-field>
 
     <div class="py-6 w-full flex flex-row justify-center items-center gap-6">
       <button matButton="filled" (click)="onAddLocation()" class="whitespace-nowrap">Wyślij</button>

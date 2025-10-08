@@ -6,20 +6,14 @@
     <nav #navigation class="flex flex-row justify-between items-center">
       @if(isLoginPage()){
         <a routerLink="/" class="block">
-          <app-button
-            variant="outline"
-            text="Strona główna"
-            iconName="home"
-            iconSize="outline"
-            iconPosition="before">
-          </app-button>
+          <button matButton="outlined">
+            <app-icon iconName="home" iconSize="outline"></app-icon>
+            <span>Strona główna</span>
+          </button>
         </a>
       } @else {
         <a routerLink="/login" class="block">
-          <app-button
-            variant="outline"
-            text="Zaloguj się">
-          </app-button>
+          <button matButton="filled">Zaloguj się</button>
         </a>
       }
     </nav>

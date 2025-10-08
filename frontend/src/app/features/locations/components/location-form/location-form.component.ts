@@ -4,14 +4,18 @@ import {FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {LocationService} from '../../../../core/services/locations/location.service';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
-import {InputComponent} from '../../../../shared/components/input/input.component';
+import {MatError, MatFormField, MatInput, MatLabel} from '@angular/material/input';
 
 @Component({
   selector: 'app-location-form',
   imports: [
     MatButton,
     ReactiveFormsModule,
-    InputComponent
+    MatError,
+    MatFormField,
+    MatInput,
+    MatLabel,
+    MatFormField,
   ],
   templateUrl: './location-form.component.html',
   styleUrl: './location-form.component.scss'

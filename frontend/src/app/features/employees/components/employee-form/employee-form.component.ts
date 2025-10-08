@@ -19,7 +19,6 @@ import {Location} from '../../../../core/services/locations/location.types';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
 import {TitleDisplayComponent} from '../../../../shared/components/title-display/title-display.component';
 import {MatStep, MatStepLabel, MatStepper, MatStepperPrevious} from '@angular/material/stepper';
-import {ButtonComponent} from '../../../../shared/components/button/button.component';
 import { MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 import { Employee } from '../../../../core/services/employees/employee.types';
 import {MatError, MatFormField, MatInput, MatInputModule, MatLabel} from '@angular/material/input';
@@ -48,7 +47,6 @@ import {IconComponent} from '../../../../shared/components/icon';
     MatStep,
     MatStepLabel,
     MatStepperPrevious,
-    ButtonComponent,
     MatFormField,
     MatInput,
     MatLabel,
