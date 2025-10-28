@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'backend.apps.employees',
     'backend.apps.locations',
     'backend.apps.holidays',
+    'backend.apps.forms',
     'backend.apps.core',
 
     'silk',

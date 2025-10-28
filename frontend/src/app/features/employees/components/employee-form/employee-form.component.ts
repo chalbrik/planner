@@ -161,16 +161,19 @@ export class EmployeeFormComponent implements OnInit {
   }
 
   onAddEmployee() {
-    //ta metoda jest do edycji - czyli trzeba bedzie ja przejzec i uproscic
-
     if (this.addEmployeeForm.invalid) {
-      // Oznacz wszystkie pola jako touched, żeby pokazać błędy
       this.addEmployeeForm.markAllAsTouched();
       this.snackBar.open('Wypełnij wszystkie wymagane pola!', 'OK', { duration: 3000 });
-      return; // Przerwij wysyłanie
+      return;
     }
 
     const formData = this.addEmployeeForm.getRawValue();
+
+    // ✅ DODAJ TO: Wyciągnij lokalizacje z FormArray
+    const locationsArray = this.addEmployeeForm.get('locations') as FormArray;
+    formData.locations = locationsArray.value; // To będzie tablica UUID-ów
+
+    console.log('Locations to send:', formData.locations); // Sprawdź co się wysyła
 
     // ✅ Formatuj daty lub usuń pole jeśli puste
     if (formData.birth_date) {
@@ -201,7 +204,6 @@ export class EmployeeFormComponent implements OnInit {
     if (formData.previous_employers && formData.previous_employers.length > 0) {
       formData.previous_employers = formData.previous_employers
         .filter((employer: any) => {
-          // Zostaw tylko wypełnionych pracodawców
           return employer.employer_name ||
             employer.employee_position ||
             employer.work_date_start ||
@@ -210,7 +212,6 @@ export class EmployeeFormComponent implements OnInit {
         .map((employer: any) => {
           const cleanEmployer: any = {};
 
-          // Dodaj tylko niepuste pola
           if (employer.employer_name) cleanEmployer.employer_name = employer.employer_name;
           if (employer.employee_position) cleanEmployer.employee_position = employer.employee_position;
 
@@ -225,21 +226,12 @@ export class EmployeeFormComponent implements OnInit {
           return cleanEmployer;
         });
 
-      // Jeśli po filtracji nie ma pracodawców, usuń pole
       if (formData.previous_employers.length === 0) {
         delete formData.previous_employers;
       }
     } else {
       delete formData.previous_employers;
     }
-
-    // ✅ Usuń puste pola tekstowe (ale zostaw liczby i booleany)
-    // Object.keys(formData).forEach(key => {
-    //   const value = formData[key];
-    //   if (value === '' || value === null || value === undefined) {
-    //     delete formData[key];
-    //   }
-    // });
 
     console.log("Wysłane dane:", formData);
 

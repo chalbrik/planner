@@ -17,12 +17,17 @@ class SchoolSerializer(serializers.ModelSerializer):
 class EmployeeSerializer(serializers.ModelSerializer):
     contract_date_start = serializers.DateField(required=False, allow_null=True)
     contract_date_end = serializers.DateField(required=False, allow_null=True)
-    locations = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    locations = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Location.objects.all(),  # ✅ ZMIANA: usuń read_only, dodaj queryset
+        required=False  # opcjonalne
+    )
 
     class Meta:
         model = Employee
-        fields = ['id', 'full_name', 'birth_date', 'phone', 'email', 'agreement_type', 'identification_number', 'job',
-                  'contract_date_start', 'contract_date_end', 'job_rate', 'hour_rate', 'locations']
+        fields = ['id', 'full_name', 'birth_date', 'phone', 'email', 'agreement_type',
+                  'identification_number', 'job', 'contract_date_start', 'contract_date_end',
+                  'job_rate', 'hour_rate', 'locations']
 
 class EmployeeDetailSerializer(serializers.ModelSerializer):
     school = SchoolSerializer(read_only=True)

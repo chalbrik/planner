@@ -23,6 +23,8 @@ export class NotificationPopUpComponent implements OnInit {
   readonly data = inject<NotificationData>(MAT_DIALOG_DATA);
 
   ngOnInit(): void {
+    console.log('NotificationPopUpComponent');
+
     setTimeout(() => {
       this.close();
     }, 5000);

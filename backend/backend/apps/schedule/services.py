@@ -131,7 +131,7 @@ class PDFGeneratorService:
             employees_schedule.append({
                 'name': employee.full_name,
                 'hours': employee_hours,
-                'total_hours': round(total_hours, 1)
+                'total_hours': round(total_hours, 2)
             })
 
         return employees_schedule

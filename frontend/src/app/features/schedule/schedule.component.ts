@@ -413,15 +413,17 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const current = this.currentMonthDate();
     const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 1);
     this.currentMonthDate.set(newDate);
-    this.loadWorkHoursForLocation();
 
     // Przelicz szerokość dla nowego miesiąca
     this.calculateDayColumnWidth();
+
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
 
-    // Pobierz dni robocze dla nowego miesiąca i przelicz godziny do dyspozycji
+    // ✅ Wyczyść i załaduj dane ponownie
+    this.clearConflicts();
+    this.loadDataForLocation(); // To już robi wszystko: ładuje employees, workHours, prepareTableData i checkConflicts
     this.loadWorkingDaysAndCalculateHours();
   }
 
@@ -950,44 +952,152 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return this.exceedingWorkHours().has(cellKey);
   }
 
+  // private validateAndShowErrors(updatedData: any): void {
+  //   const hoursString = updatedData.hours;
+  //   const employeeId = updatedData.employee;
+  //   const date = updatedData.date;
+  //
+  //
+  //   // 1. Walidacja przekroczenia 12h
+  //   const exceed12hError = this.conflictService.validateWorkHoursExceed12h(hoursString);
+  //
+  //   // 2. Walidacja konfliktów 11h
+  //   const selectedLocationId = this.selectedLocationId();
+  //   const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
+  //   const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
+  //   const hasConflict11h = conflicts.has(`${employeeId}-${date}`);
+  //
+  //   // 3. Walidacja 35h w tygodniu
+  //   const badWeeks = this.conflictService.validate35HourRest(locationWorkHours, this.employees, this.currentMonthDate());
+  //   const dayNumber = new Date(date).getDate();
+  //   const weekNumber = this.getWeekNumber(dayNumber);
+  //   const employeeBadWeeks = badWeeks.get(employeeId.toString());
+  //   const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
+  //
+  //
+  //   // Pokaż komunikat w kolejności priorytetów
+  //   if (exceed12hError) {
+  //     this.showNotification(exceed12hError);
+  //   }
+  //   if (hasConflict11h) {
+  //     this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
+  //   }
+  //   if (hasBadWeek35h) {
+  //     this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
+  //   }
+  // }
+  //
+
   private validateAndShowErrors(updatedData: any): void {
+    console.log('=== WALIDACJA START ===');
+    console.log('updatedData:', updatedData);
+
+    // Sprawdź czy to edycja wielu komórek
+    if (updatedData.multiple) {
+      console.log('Multiple edit detected - performing full validation');
+
+      // Przelicz wszystkie konflikty
+      this.checkAllConflictsForCurrentLocation();
+
+      // ✅ NOWE: Sprawdź czy są jakieś konflikty i pokaż powiadomienia
+      const hasExceeding12h = this.exceedingWorkHours().size > 0;
+      const hasConflict11h = this.conflictingCells().size > 0;
+      const hasBadWeek35h = this.badWeeks().size > 0;
+
+      if (hasExceeding12h) {
+        this.showNotification({
+          type: 'exceed12h',
+          message: 'Jedna lub więcej komórek przekracza 12h pracy'
+        });
+      }
+      if (hasConflict11h) {
+        this.showNotification({
+          type: 'conflict11h',
+          message: 'Wykryto brak przerwy 11h u pracowników'
+        });
+      }
+      if (hasBadWeek35h) {
+        this.showNotification({
+          type: 'badWeek35h',
+          message: 'Wykryto brak przerwy 35h w tygodniu'
+        });
+      }
+
+      return;
+    }
+
+    // Sprawdź czy mamy wymagane pola dla pojedynczej edycji
+    if (!updatedData.hours || !updatedData.employee || !updatedData.date) {
+      console.warn('Missing required fields for validation:', updatedData);
+      return;
+    }
+
     const hoursString = updatedData.hours;
     const employeeId = updatedData.employee;
     const date = updatedData.date;
 
+    console.log('Params:', { hoursString, employeeId, date });
 
     // 1. Walidacja przekroczenia 12h
     const exceed12hError = this.conflictService.validateWorkHoursExceed12h(hoursString);
+    console.log('exceed12hError:', exceed12hError);
+
+    if (exceed12hError) {
+      this.showNotification(exceed12hError);
+      return;
+    }
 
     // 2. Walidacja konfliktów 11h
     const selectedLocationId = this.selectedLocationId();
+    console.log('selectedLocationId:', selectedLocationId);
+
     const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
+    console.log('locationWorkHours count:', locationWorkHours.length);
+
     const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
-    const hasConflict11h = conflicts.has(`${employeeId}-${date}`);
+    console.log('conflicts:', conflicts);
 
-    // 3. Walidacja 35h w tygodniu
-    const badWeeks = this.conflictService.validate35HourRest(locationWorkHours, this.employees, this.currentMonthDate());
-    const dayNumber = new Date(date).getDate();
-    const weekNumber = this.getWeekNumber(dayNumber);
-    const employeeBadWeeks = badWeeks.get(employeeId.toString());
-    const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
+    const conflictKey = `${employeeId}-${date}`;
+    const hasConflict11h = conflicts.has(conflictKey);
+    console.log('Checking conflict key:', conflictKey, 'hasConflict:', hasConflict11h);
 
-
-    // Pokaż komunikat w kolejności priorytetów
-    if (exceed12hError) {
-      this.showNotification(exceed12hError);
-    }
     if (hasConflict11h) {
       this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
+      return;
     }
+
+    // 3. Walidacja 35h w tygodniu
+    const badWeeks = this.conflictService.validate35HourRest(
+      locationWorkHours,
+      this.employees,
+      this.currentMonthDate()
+    );
+    console.log('badWeeks:', badWeeks);
+
+    const dayNumber = new Date(date).getDate();
+    const weekNumber = this.getWeekNumber(dayNumber);
+    console.log('weekNumber:', weekNumber);
+
+    const employeeBadWeeks = badWeeks.get(employeeId.toString());
+    console.log('employeeBadWeeks:', employeeBadWeeks);
+
+    const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
+    console.log('hasBadWeek35h:', hasBadWeek35h);
+
     if (hasBadWeek35h) {
       this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
+      return;
     }
+
+    console.log('=== WALIDACJA ZAKOŃCZONA - BRAK BŁĘDÓW ===');
   }
+
 
   private showNotification(error: {type: string, message: string}): void {
     // Sprawdź ile dialogów jest już otwartych
     const openDialogs = this.dialog.openDialogs.length;
+
+    console.log("Powiadomienie wywolane");
 
     this.dialog.open(NotificationPopUpComponent, {
       data: error,
