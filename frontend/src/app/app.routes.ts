@@ -11,10 +11,6 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./features/landing/landing-home/landing-home.component').then(m => m.LandingHomeComponent),
-      },
-      {
-        path: 'login',
         loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
       }
     ]
@@ -39,6 +35,10 @@ export const routes: Routes = [
       {
         path: 'locations',
         loadChildren: () => import('./features/locations/locations.routes').then(m => m.LocationsRoutes),
+      },
+      {
+        path: 'disposal',
+        loadChildren: () => import('./features/disposal/disposal.routes').then(m => m.DisposalRoutes),
       },
       {
         path: '',

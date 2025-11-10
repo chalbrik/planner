@@ -19,6 +19,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-br4^m-yud-(bi(@ya!ew8avojwv%ai8pxx8iaj2=ql@_-1qn!)')
 
+RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
 
@@ -166,7 +168,7 @@ if not DEBUG:
     })
 
 # CORS Configuration - dynamiczne
-CORS_ALLOWED_ORIGINS_ENV = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:4200,http://134.209.230.53:4200,http://134.209.230.53')
+CORS_ALLOWED_ORIGINS_ENV = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:4200,http://134.209.230.53:4200,http://134.209.230.53,http://localhost:4300')
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_ENV.split(',')]
 
 CORS_ALLOW_CREDENTIALS = True

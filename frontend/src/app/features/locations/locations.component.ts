@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {IconComponent} from "../../shared/components/icon";
 import {MatButton, MatIconButton} from "@angular/material/button";
 import {
@@ -16,6 +16,9 @@ import {LocationService} from '../../core/services/locations/location.service';
 import { Location } from '../../core/services/locations/location.types';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
 import {LocationFormComponent} from './components/location-form/location-form.component';
+import {Employee} from '../../core/services/employees/employee.types';
+import {DialogComponent} from '../../shared/components/dialog/dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-locations',
@@ -44,6 +47,7 @@ import {LocationFormComponent} from './components/location-form/location-form.co
   templateUrl: './locations.component.html',
   styleUrl: './locations.component.scss',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LocationsComponent implements OnInit {
 
@@ -55,6 +59,8 @@ export class LocationsComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+
+  dialog: MatDialog = inject(MatDialog);
 
   constructor() {
     this.dataSource = new MatTableDataSource<Location>([]);
@@ -99,6 +105,39 @@ export class LocationsComponent implements OnInit {
       if (result) {
         this.loadLocations();
       }
+    });
+  }
+
+  onDeleteLocation(location: Location, event: Event): void {
+    // Zatrzymaj propagację - żeby nie otworzyć sidenav
+    event.stopPropagation();
+    const dialogRef = this.dialog.open(DialogComponent, {
+      data: {
+        title: 'Potwierdzenie usunięcia',
+        message: `Czy na pewno chcesz usunąć obiekt ${location.name}?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) {
+        return;
+      }
+
+      this.locationService.deleteLocation(location.id).subscribe({
+        next: () => {
+          // Usuń z dataSource
+          const currentData = this.dataSource.data;
+          this.dataSource.data = currentData.filter(loc => loc.id !== location.id);
+
+          // // Zamknij sidenav jeśli usuwany pracownik był wybrany
+          // if (this.selecteLocation()?.id === employee.id) {
+          //   this.closeSidenav();
+          // }
+        },
+        error: (error) => {
+          console.error("Błąd podczas usuwania obiektu: ", error);
+        }
+      });
     });
   }
 

@@ -30,6 +30,13 @@
           (click)="drawer.close()">
           Lista obiektów
         </a>
+        <a
+          routerLink="/app/disposal"
+          routerLinkActive="font-bold"
+          class="text-primary-800 text-base px-4 py-2 hover:bg-primary-400 rounded-md"
+          (click)="drawer.close()">
+          Dyspozycje
+        </a>
       </nav>
 
       <!-- User info w drawerze (mobile) -->
@@ -69,7 +76,7 @@
     <div class="h-full flex flex-col gap-2 overflow-y-auto">
       <app-header [drawer]="drawer" [currentUser]="currentUser" (logoutEvent)="logout()"></app-header>
 
-      <main class="flex-grow pt-20">
+      <main class="flex-grow pt-16">
         <div class="h-full overflow-y-auto">
           <ng-content></ng-content>
         </div>

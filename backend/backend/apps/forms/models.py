@@ -1,15 +1,8 @@
-from django.db import models
-
-# Create your models here.
-# backend/apps/forms/models.py
-
 import uuid
 from django.db import models
 
 
 class FormSubmission(models.Model):
-    """Prosta tabela przechowująca dane z publicznego formularza"""
-
     objects = models.Manager()
 
     id = models.UUIDField(

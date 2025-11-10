@@ -27,75 +27,75 @@
 
     </div>
 
-  <mat-accordion>
-    <mat-expansion-panel class="!shadow-none border border-primary-800">
-      <mat-expansion-panel-header class="bg-primary-100">
-        <mat-panel-title> Godziny urlopowe </mat-panel-title>
-        <mat-panel-description> </mat-panel-description>
-      </mat-expansion-panel-header>
-      <div class="flex flex-col gap-3 py-3">
-        <div class="w-full flex flex-row justify-between items-center">
-          <p class="text-base font-bold">Bieżący urlop pracownika</p>
-          <div class="bg-amber-300 h-12 px-5 rounded-2xl font-bold text-base flex items-center">   {{+employeeVacationLeaves().current_vacation_days}} dni | {{+employeeVacationLeaves().current_vacation_hours}} h</div>
-        </div>
-        <mat-divider class="!border-primary-800"></mat-divider>
+<!--  <mat-accordion>-->
+<!--    <mat-expansion-panel class="!shadow-none border border-primary-800">-->
+<!--      <mat-expansion-panel-header class="bg-primary-100">-->
+<!--        <mat-panel-title> Godziny urlopowe </mat-panel-title>-->
+<!--        <mat-panel-description> </mat-panel-description>-->
+<!--      </mat-expansion-panel-header>-->
+<!--      <div class="flex flex-col gap-3 py-3">-->
+<!--        <div class="w-full flex flex-row justify-between items-center">-->
+<!--          <p class="text-base font-bold">Bieżący urlop pracownika</p>-->
+<!--          <div class="bg-amber-300 h-12 px-5 rounded-2xl font-bold text-base flex items-center">   {{+employeeVacationLeaves().current_vacation_days}} dni | {{+employeeVacationLeaves().current_vacation_hours}} h</div>-->
+<!--        </div>-->
+<!--        <mat-divider class="!border-primary-800"></mat-divider>-->
 
-        <table mat-table [dataSource]="vacationTableData()" class="mat-elevation-z8 custom-table-styles">
+<!--        <table mat-table [dataSource]="vacationTableData()" class="mat-elevation-z8 custom-table-styles">-->
 
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let vacationRow"> {{vacationRow.type}} </td>
-          </ng-container>
+<!--          <ng-container matColumnDef="type">-->
+<!--            <th mat-header-cell *matHeaderCellDef></th>-->
+<!--            <td mat-cell *matCellDef="let vacationRow"> {{vacationRow.type}} </td>-->
+<!--          </ng-container>-->
 
-          <ng-container matColumnDef="remaining">
-            <th mat-header-cell *matHeaderCellDef> Zaległy urlop </th>
-            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.remaining}} </td>
-          </ng-container>
+<!--          <ng-container matColumnDef="remaining">-->
+<!--            <th mat-header-cell *matHeaderCellDef> Zaległy urlop </th>-->
+<!--            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.remaining}} </td>-->
+<!--          </ng-container>-->
 
-          <ng-container matColumnDef="used">
-            <th mat-header-cell *matHeaderCellDef> Wykorzystano </th>
-            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.used}} </td>
-          </ng-container>
+<!--          <ng-container matColumnDef="used">-->
+<!--            <th mat-header-cell *matHeaderCellDef> Wykorzystano </th>-->
+<!--            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.used}} </td>-->
+<!--          </ng-container>-->
 
-          <ng-container matColumnDef="total">
-            <th mat-header-cell *matHeaderCellDef> Pozostało </th>
-            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.current - +vacationRow.used}} </td>
-          </ng-container>
+<!--          <ng-container matColumnDef="total">-->
+<!--            <th mat-header-cell *matHeaderCellDef> Pozostało </th>-->
+<!--            <td mat-cell *matCellDef="let vacationRow"> {{+vacationRow.current - +vacationRow.used}} </td>-->
+<!--          </ng-container>-->
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+<!--          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>-->
+<!--          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>-->
+<!--        </table>-->
 
-        <mat-divider class="!border-primary-800"></mat-divider>
+<!--        <mat-divider class="!border-primary-800"></mat-divider>-->
 
-        <button matButton="outlined" class="px-2 !rounded-md !border-primary-800"><span class="font-geist text-base text-primary-800">Złóż wniosek</span></button>
-
-
-
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
+<!--        <button matButton="outlined" class="px-2 !rounded-md !border-primary-800"><span class="font-geist text-base text-primary-800">Złóż wniosek</span></button>-->
 
 
-  <mat-accordion>
-    <mat-expansion-panel class="!shadow-none border border-primary-800">
-      <mat-expansion-panel-header class="bg-primary-100">
-        <mat-panel-title> Niepełnosprawności </mat-panel-title>
-        <mat-panel-description> </mat-panel-description>
-      </mat-expansion-panel-header>
 
-    </mat-expansion-panel>
-  </mat-accordion>
+<!--      </div>-->
+<!--    </mat-expansion-panel>-->
+<!--  </mat-accordion>-->
 
-  <mat-accordion>
-    <mat-expansion-panel class="!shadow-none border border-primary-800">
-      <mat-expansion-panel-header class="bg-primary-100">
-        <mat-panel-title> Przypisane obiekty </mat-panel-title>
-        <mat-panel-description> </mat-panel-description>
-      </mat-expansion-panel-header>
 
-    </mat-expansion-panel>
-  </mat-accordion>
+<!--  <mat-accordion>-->
+<!--    <mat-expansion-panel class="!shadow-none border border-primary-800">-->
+<!--      <mat-expansion-panel-header class="bg-primary-100">-->
+<!--        <mat-panel-title> Niepełnosprawności </mat-panel-title>-->
+<!--        <mat-panel-description> </mat-panel-description>-->
+<!--      </mat-expansion-panel-header>-->
+
+<!--    </mat-expansion-panel>-->
+<!--  </mat-accordion>-->
+
+<!--  <mat-accordion>-->
+<!--    <mat-expansion-panel class="!shadow-none border border-primary-800">-->
+<!--      <mat-expansion-panel-header class="bg-primary-100">-->
+<!--        <mat-panel-title> Przypisane obiekty </mat-panel-title>-->
+<!--        <mat-panel-description> </mat-panel-description>-->
+<!--      </mat-expansion-panel-header>-->
+
+<!--    </mat-expansion-panel>-->
+<!--  </mat-accordion>-->
 
   <mat-divider class="!border-primary-800"></mat-divider>
 

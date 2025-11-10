@@ -81,55 +81,6 @@
             <mat-datepicker #contract_date_end_picker></mat-datepicker>
           </mat-form-field>
 
-        </div>
-      </div>
-
-      <div class="col-span-2 flex flex-col">
-        <app-title-display [name]="'Informacje dodatkowe'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>
-        <div class="grid grid-cols-2 gap-2">
-          <mat-form-field  appearance="fill" class="col-span-2">
-            <mat-label>Niepełnosprawności</mat-label>
-            <input type="text" matInput>
-          </mat-form-field>
-
-          <mat-form-field  appearance="fill" class="col-span-2">
-            <mat-label>KP-188</mat-label>
-            <input type="text" matInput>
-          </mat-form-field>
-
-        </div>
-      </div>
-
-      <div class="col-span-2 flex flex-col">
-        <app-title-display [name]="'Wykształcenie'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <mat-form-field>
-            <mat-label>Typ szkoły</mat-label>
-            <mat-select formControlName="school_type">
-              @for (option of schoolTypeOptions; track option) {
-                <mat-option [value]="option.value">{{option.label}}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field  appearance="fill">
-            <mat-label>Nazwa szkoły</mat-label>
-            <input type="text" matInput formControlName="school_name">
-          </mat-form-field>
-
-          <mat-form-field>
-            <mat-label>Rok ukończenia</mat-label>
-            <input matInput [matDatepicker]="graduation_year_picker" formControlName="graduation_year">
-            <mat-datepicker-toggle matIconSuffix [for]="graduation_year_picker"></mat-datepicker-toggle>
-            <mat-datepicker #graduation_year_picker></mat-datepicker>
-          </mat-form-field>
-
-        </div>
-      </div>
-
-      <div class="col-span-2 flex flex-col">
-        <div class="grid grid-cols-2 gap-2">
           @if(agreementType() == 'permanent'){
             <mat-form-field  appearance="fill">
               <mat-label>Etat</mat-label>
@@ -142,8 +93,71 @@
             </mat-form-field>
 
           }
+
+        </div>
+      </div>
+
+<!--      <div class="col-span-2 flex flex-col">-->
+<!--        <app-title-display [name]="'Informacje dodatkowe'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>-->
+<!--        <div class="grid grid-cols-2 gap-2">-->
+<!--          <mat-form-field  appearance="fill" class="col-span-2">-->
+<!--            <mat-label>Niepełnosprawności</mat-label>-->
+<!--            <input type="text" matInput>-->
+<!--          </mat-form-field>-->
+
+<!--          <mat-form-field  appearance="fill" class="col-span-2">-->
+<!--            <mat-label>KP-188</mat-label>-->
+<!--            <input type="text" matInput>-->
+<!--          </mat-form-field>-->
+
+<!--        </div>-->
+<!--      </div>-->
+
+<!--      <div class="col-span-2 flex flex-col">-->
+<!--        <app-title-display [name]="'Wykształcenie'" [iconName]="'academic-cap'" [iconSize]="'outline'"></app-title-display>-->
+
+<!--        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">-->
+<!--          <mat-form-field>-->
+<!--            <mat-label>Typ szkoły</mat-label>-->
+<!--            <mat-select formControlName="school_type">-->
+<!--              @for (option of schoolTypeOptions; track option) {-->
+<!--                <mat-option [value]="option.value">{{option.label}}</mat-option>-->
+<!--              }-->
+<!--            </mat-select>-->
+<!--          </mat-form-field>-->
+
+<!--          <mat-form-field  appearance="fill">-->
+<!--            <mat-label>Nazwa szkoły</mat-label>-->
+<!--            <input type="text" matInput formControlName="school_name">-->
+<!--          </mat-form-field>-->
+
+<!--          <mat-form-field>-->
+<!--            <mat-label>Rok ukończenia</mat-label>-->
+<!--            <input matInput [matDatepicker]="graduation_year_picker" formControlName="graduation_year">-->
+<!--            <mat-datepicker-toggle matIconSuffix [for]="graduation_year_picker"></mat-datepicker-toggle>-->
+<!--            <mat-datepicker #graduation_year_picker></mat-datepicker>-->
+<!--          </mat-form-field>-->
+
+<!--        </div>-->
+<!--      </div>-->
+
+      <div class="col-span-2 flex flex-col">
+        <app-title-display [name]="'Przypisz pracownika do obiektu'" [iconName]="'document-text'" [iconSize]="'outline'"></app-title-display>
+        <div class="grid grid-cols-2 gap-2">
+          <!--          @if(agreementType() == 'permanent'){-->
+<!--            <mat-form-field  appearance="fill">-->
+<!--              <mat-label>Etat</mat-label>-->
+<!--              <input type="text" matInput formControlName="job">-->
+<!--            </mat-form-field>-->
+
+<!--            <mat-form-field  appearance="fill">-->
+<!--              <mat-label>Stawka etatowa</mat-label>-->
+<!--              <input type="text" matInput formControlName="job_rate">-->
+<!--            </mat-form-field>-->
+
+<!--          }-->
           <div class="col-span-2 flex flex-col">
-            <label>Przypisz pracownika do obiektu</label>
+<!--            <label>Przypisz pracownika do obiektu</label>-->
             <div class="w-full bg--50 border border-primary-400 rounded-lg p-4">
               @for(location of locations(); track location.id){
                 <div class="flex flex-row items-center">
@@ -167,62 +181,62 @@
     </div>
 
 
-    <app-title-display [name]="'Przebieg dotychczasowego zatrudnienia'" [iconName]="'briefcase'" [iconSize]="'outline'"></app-title-display>
+<!--    <app-title-display [name]="'Przebieg dotychczasowego zatrudnienia'" [iconName]="'briefcase'" [iconSize]="'outline'"></app-title-display>-->
 
-    <div class="py-4">
-      <button matButton="outlined" (click)="addEmployer()">Dodaj pracodawcę</button>
-    </div>
+<!--    <div class="py-4">-->
+<!--      <button matButton="outlined" (click)="addEmployer()">Dodaj pracodawcę</button>-->
+<!--    </div>-->
 
-    @if (previousEmployers.length > 0) {
-      <div formArrayName="previous_employers">
-        <mat-vertical-stepper [linear]="false" #employerStepper>
-          @for (employer of previousEmployers.controls; track $index) {
-            <mat-step [stepControl]="$any(employer)">
-              <div [formGroup]="$any(employer)">
-                <ng-template matStepLabel>Pracodawca {{ $index + 1 }}</ng-template>
+<!--    @if (previousEmployers.length > 0) {-->
+<!--      <div formArrayName="previous_employers">-->
+<!--        <mat-vertical-stepper [linear]="false" #employerStepper>-->
+<!--          @for (employer of previousEmployers.controls; track $index) {-->
+<!--            <mat-step [stepControl]="$any(employer)">-->
+<!--              <div [formGroup]="$any(employer)">-->
+<!--                <ng-template matStepLabel>Pracodawca {{ $index + 1 }}</ng-template>-->
 
-                <div class="flex flex-row justify-start items-center mb-4">
-                  <p class="font-bold text-base">Dane pracodawcy {{ $index + 1 }}</p>
-                </div>
+<!--                <div class="flex flex-row justify-start items-center mb-4">-->
+<!--                  <p class="font-bold text-base">Dane pracodawcy {{ $index + 1 }}</p>-->
+<!--                </div>-->
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <mat-form-field  appearance="fill">
-                    <mat-label>Nazwa firmy</mat-label>
-                    <input type="text" matInput formControlName="employer_name">
-                  </mat-form-field>
+<!--                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">-->
+<!--                  <mat-form-field  appearance="fill">-->
+<!--                    <mat-label>Nazwa firmy</mat-label>-->
+<!--                    <input type="text" matInput formControlName="employer_name">-->
+<!--                  </mat-form-field>-->
 
-                  <mat-form-field  appearance="fill">
-                    <mat-label>Stanowisko</mat-label>
-                    <input type="text" matInput formControlName="employee_position">
-                  </mat-form-field>
+<!--                  <mat-form-field  appearance="fill">-->
+<!--                    <mat-label>Stanowisko</mat-label>-->
+<!--                    <input type="text" matInput formControlName="employee_position">-->
+<!--                  </mat-form-field>-->
 
-                  <mat-form-field  appearance="fill">
-                    <mat-label>Data rozpoczęcia pracy</mat-label>
-                    <input type="text" matInput formControlName="work_date_start">
-                  </mat-form-field>
+<!--                  <mat-form-field  appearance="fill">-->
+<!--                    <mat-label>Data rozpoczęcia pracy</mat-label>-->
+<!--                    <input type="text" matInput formControlName="work_date_start">-->
+<!--                  </mat-form-field>-->
 
-                  <mat-form-field  appearance="fill">
-                    <mat-label>Data zakończenia pracy</mat-label>
-                    <input type="text" matInput formControlName="work_date_end">
-                  </mat-form-field>
+<!--                  <mat-form-field  appearance="fill">-->
+<!--                    <mat-label>Data zakończenia pracy</mat-label>-->
+<!--                    <input type="text" matInput formControlName="work_date_end">-->
+<!--                  </mat-form-field>-->
 
-                </div>
+<!--                </div>-->
 
-                <div class="flex justify-end items-center mt-4">
-                  <button matButton="outlined" (click)="removeEmployer($index)">
-                    <app-icon iconName="trash" iconSize="mini"></app-icon>
-                    <span>Usuń pracodawcę</span>
-                  </button>
+<!--                <div class="flex justify-end items-center mt-4">-->
+<!--                  <button matButton="outlined" (click)="removeEmployer($index)">-->
+<!--                    <app-icon iconName="trash" iconSize="mini"></app-icon>-->
+<!--                    <span>Usuń pracodawcę</span>-->
+<!--                  </button>-->
 
-                  <button matButton="outlined" matStepperPrevious type="button">Poprzedni</button>
-                  <button matButton="filled" (click)="handleNextStep($index)" type="button">Następny</button>
-                </div>
-              </div>
-            </mat-step>
-          }
-        </mat-vertical-stepper>
-      </div>
-    }
+<!--                  <button matButton="outlined" matStepperPrevious type="button">Poprzedni</button>-->
+<!--                  <button matButton="filled" (click)="handleNextStep($index)" type="button">Następny</button>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </mat-step>-->
+<!--          }-->
+<!--        </mat-vertical-stepper>-->
+<!--      </div>-->
+<!--    }-->
 
     <div class="py-6 w-full flex flex-row justify-center items-center gap-6">
       <button matButton="filled" (click)="onAddEmployee()">Wyślij</button>

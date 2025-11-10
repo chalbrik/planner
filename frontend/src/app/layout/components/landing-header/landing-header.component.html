@@ -4,18 +4,12 @@
       <h1 class="text-xl font-bold text-primary-600 text-center">Planner</h1>
     </div>
     <nav #navigation class="flex flex-row justify-between items-center">
-      @if(isLoginPage()){
-        <a routerLink="/" class="block">
-          <button matButton="outlined">
-            <app-icon iconName="home" iconSize="outline"></app-icon>
-            <span>Strona główna</span>
-          </button>
-        </a>
-      } @else {
-        <a routerLink="/login" class="block">
-          <button matButton="filled">Zaloguj się</button>
-        </a>
-      }
+      <a routerLink="/" class="block">
+        <button matButton="outlined">
+          <app-icon iconName="home" iconSize="outline"></app-icon>
+          <span>Strona główna</span>
+        </button>
+      </a>
     </nav>
   </div>
 </header>

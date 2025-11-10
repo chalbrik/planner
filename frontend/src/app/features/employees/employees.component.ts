@@ -1,4 +1,13 @@
-import {Component, computed, inject, OnInit, signal, ViewChild, ViewEncapsulation} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {Employee} from '../../core/services/employees/employee.types';
 import {EmployeeInfoComponent} from './components/employee-info/employee-info.component';
@@ -20,6 +29,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {IconComponent} from '../../shared/components/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatBottomSheet} from '@angular/material/bottom-sheet';
+import {DialogComponent} from '../../shared/components/dialog/dialog.component';
 
 @Component({
   selector: 'app-employees',
@@ -51,11 +61,14 @@ import {MatBottomSheet} from '@angular/material/bottom-sheet';
   templateUrl: './employees.component.html',
   styleUrl: './employees.component.scss',
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmployeesComponent implements OnInit {
 
   private readonly employeesService = inject(EmployeesService);
   private readonly bottomSheet = inject(MatBottomSheet);
+
+  dialog: MatDialog = inject(MatDialog);
 
   displayedColumns: string[] = ['identification_number', 'name', 'job', 'agreement_type', 'actions'];
   dataSource: MatTableDataSource<Employee>;
@@ -138,21 +151,33 @@ export class EmployeesComponent implements OnInit {
   onDeleteEmployee(employee: Employee, event: Event): void {
     // Zatrzymaj propagację - żeby nie otworzyć sidenav
     event.stopPropagation();
-
-    this.employeesService.deleteEmployee(employee.id).subscribe({
-      next: () => {
-        // Usuń z dataSource
-        const currentData = this.dataSource.data;
-        this.dataSource.data = currentData.filter(emp => emp.id !== employee.id);
-
-        // Zamknij sidenav jeśli usuwany pracownik był wybrany
-        if (this.selectedEmployee()?.id === employee.id) {
-          this.closeSidenav();
-        }
-      },
-      error: (error) => {
-        console.error("Błąd podczas usuwania pracownika: ", error);
+    const dialogRef = this.dialog.open(DialogComponent, {
+      data: {
+        title: 'Potwierdzenie usunięcia',
+        message: `Czy na pewno chcesz usunąć pracownika ${employee.full_name}?`
       }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) {
+        return;
+      }
+
+      this.employeesService.deleteEmployee(employee.id).subscribe({
+        next: () => {
+          // Usuń z dataSource
+          const currentData = this.dataSource.data;
+          this.dataSource.data = currentData.filter(emp => emp.id !== employee.id);
+
+          // Zamknij sidenav jeśli usuwany pracownik był wybrany
+          if (this.selectedEmployee()?.id === employee.id) {
+            this.closeSidenav();
+          }
+        },
+        error: (error) => {
+          console.error("Błąd podczas usuwania pracownika: ", error);
+        }
+      });
     });
   }
 
