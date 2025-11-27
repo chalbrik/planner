@@ -14,7 +14,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {EmployeesService} from '../../core/services/employees/employees.service';
 import {IconComponent} from '../../shared/components/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { NotificationPopUpComponent } from './components/notification-pop-up/notification-pop-up.component'; // sprawdź ścieżkę!
+import { NotificationPopUpComponent } from './components/notification-pop-up/notification-pop-up.component';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {CellEditPopupComponent} from './components/cell-edit-popup/cell-edit-popup.component';
@@ -107,11 +107,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    // Pierwszy dzień miesiąca
-    const firstDay = new Date(year, month, 1);
-    // Ostatni dzień miesiąca
     const lastDay = new Date(year, month + 1, 0);
-
     const days: Day[] = [];
     const today = new Date();
 
@@ -150,8 +146,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   // Przygotowane dane dla tabeli
   dataSource: EmployeeRow[] = [];
 
-  tables = [0];
-
   selectedCell = signal<{
     employee: any;
     workHours: any;
@@ -186,6 +180,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
 
   private subscriptions = new Subject<void>();
+  private resizeHandler = () => this.calculateDayColumnWidth();
+  private readonly UUID_LENGTH = 36;
 
   constructor() {}
 
@@ -209,22 +205,58 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.subscriptions.next();
     this.subscriptions.complete();
     if (typeof window !== 'undefined') {
-      window.removeEventListener('resize', this.calculateDayColumnWidth.bind(this));
+      window.removeEventListener('resize', this.resizeHandler);
     }
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
   }
 
+  // ============ HELPER METHODS ============
+
+  private formatDateString(dayNumber: number): string {
+    const currentDate = this.currentMonthDate();
+    return `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+  }
+
+  private getCellKey(employeeId: string, dateString: string): string {
+    return `${employeeId}-${dateString}`;
+  }
+
+  private mapEmployeesToRows(employees: Employee[], selectedLocationId: string, workingDays: number): EmployeeRow[] {
+    return employees.map(employee => {
+      const workHoursMap: { [key: string]: string } = {};
+      let employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+
+      if (selectedLocationId) {
+        employeeWorkHours = employeeWorkHours.filter(wh => wh.location === selectedLocationId);
+      }
+
+      employeeWorkHours.forEach(wh => {
+        workHoursMap[wh.date] = wh.hours;
+        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date, employee.agreement_type);
+      });
+
+      const jobRate = parseFloat(employee.job) || 0;
+
+      return {
+        id: employee.id,
+        name: `${employee.full_name}`,
+        workHours: workHoursMap,
+        agreement_type: employee.agreement_type,
+        job: jobRate,
+        hoursToWork: this.calculateHoursToWorkForEmployee(jobRate, workingDays)
+      };
+    });
+  }
+
+  // ============ SETUP & INITIALIZATION ============
+
   private setupResponsiveColumns(): void {
-    // Oblicz szerokość przy inicjalizacji
     this.calculateDayColumnWidth();
 
-    // Nasłuchuj zmian rozmiaru okna
     if (typeof window !== 'undefined') {
-      window.addEventListener('resize', () => {
-        this.calculateDayColumnWidth();
-      });
+      window.addEventListener('resize', this.resizeHandler);
     }
   }
 
@@ -295,66 +327,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       );
     }
 
-    // Podziel przefiltrowanych pracowników na grupy
     const permanentEmployees = filteredEmployees.filter(emp => emp.agreement_type === 'permanent');
     const contractEmployees = filteredEmployees.filter(emp => emp.agreement_type === 'contract');
-
-    // Pobierz aktualną liczbę dni roboczych
     const workingDays = this.workingDaysInMonth();
 
-    // Przygotuj dane dla UoP (Umowa o Pracę)
-    const permanentRows = permanentEmployees.map(employee => {
-      const workHoursMap: { [key: string]: string } = {};
-      let employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
-
-      // Jeśli wybrana lokacja, filtruj też godziny pracy po lokacji
-      if (selectedLocationId) {
-        employeeWorkHours = employeeWorkHours.filter(wh => wh.location === selectedLocationId);
-      }
-
-      employeeWorkHours.forEach(wh => {
-        workHoursMap[wh.date] = wh.hours;
-        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date, employee.agreement_type);
-      });
-
-      const jobRate = parseFloat(employee.job) || 0;
-
-      return {
-        id: employee.id,
-        name: `${employee.full_name}`,
-        workHours: workHoursMap,
-        agreement_type: employee.agreement_type,
-        job: jobRate,
-        hoursToWork: this.calculateHoursToWorkForEmployee(jobRate, workingDays)
-      };
-    });
-
-    // Przygotuj dane dla UZ (Umowa na Zlecenie)
-    const contractRows = contractEmployees.map(employee => {
-      const workHoursMap: { [key: string]: string } = {};
-      let employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
-
-      // Jeśli wybrana lokacja, filtruj też godziny pracy po lokacji
-      if (selectedLocationId) {
-        employeeWorkHours = employeeWorkHours.filter(wh => wh.location === selectedLocationId);
-      }
-
-      employeeWorkHours.forEach(wh => {
-        workHoursMap[wh.date] = wh.hours;
-        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date, employee.agreement_type);
-      });
-
-      const jobRate = parseFloat(employee.job) || 0;
-
-      return {
-        id: employee.id,
-        name: `${employee.full_name}`,
-        workHours: workHoursMap,
-        agreement_type: employee.agreement_type,
-        job: jobRate,
-        hoursToWork: this.calculateHoursToWorkForEmployee(jobRate, workingDays)
-      };
-    });
+    const permanentRows = this.mapEmployeesToRows(permanentEmployees, selectedLocationId, workingDays);
+    const contractRows = this.mapEmployeesToRows(contractEmployees, selectedLocationId, workingDays);
 
     // Ustaw sygnały zamiast jednego dataSource
     this.permanentDataSource.set(permanentRows);
@@ -367,10 +345,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.check35HourRestInAllWeeks();
   }
 
-  // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
   getWorkHoursForDay(employee: EmployeeRow, dayNumber: number): string {
-    const currentDate = this.currentMonthDate();
-    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const dateString = this.formatDateString(dayNumber);
     return employee.workHours[dateString] || '';
   }
 
@@ -436,36 +412,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   }
 
-  // onCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
-  //   if (this.overlayRef) {
-  //     this.overlayRef.dispose();
-  //   }
-  //   // Przygotuj dane selectedCell
-  //   const currentDate = this.currentMonthDate();
-  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-  //
-  //   const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
-  //     wh.employee === employee.id && wh.date === dateString
-  //   );
-  //
-  //   const selectedCellData = {
-  //     employee: employee,
-  //     workHours: workHoursObject || null,
-  //     date: dateString
-  //   };
-  //
-  //   // Tylko zaznacz komórkę - zachowaj w sygnale
-  //   this.selectedCell.set(selectedCellData);
-  // }
-
   onCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
 
-    const currentDate = this.currentMonthDate();
-    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-    const cellKey = `${employee.id}-${dateString}`;
+    const dateString = this.formatDateString(dayNumber);
+    const cellKey = this.getCellKey(employee.id, dateString);
 
     // Ctrl/Cmd + Click = toggle pojedynczej komórki
     if (event.ctrlKey || event.metaKey) {
@@ -516,100 +469,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.lastClickedCell.set({ employeeId: employee.id, date: dateString });
   }
 
-  // onDbCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
-  //   // Zamknij poprzedni overlay jeśli istnieje
-  //   if (this.overlayRef) {
-  //     this.overlayRef.dispose();
-  //   }
-  //
-  //   // Przygotuj dane selectedCell (można też użyć this.selectedCell() jeśli była już zaznaczona)
-  //   const currentDate = this.currentMonthDate();
-  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-  //
-  //   const currentLocationId = this.selectedLocationId();
-  //
-  //   const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
-  //     wh.employee === employee.id &&
-  //     wh.date === dateString &&
-  //     wh.location === currentLocationId
-  //   );
-  //
-  //   const selectedCellData = {
-  //     employee: employee,
-  //     workHours: workHoursObject || null,
-  //     date: dateString,
-  //     location: currentLocationId
-  //   };
-  //
-  //   // Pobierz element komórki
-  //   const cellElement = event.target as HTMLElement;
-  //
-  //   // Stwórz strategię pozycjonowania
-  //   const positionStrategy = this.overlay.position()
-  //     .flexibleConnectedTo(cellElement)
-  //     .withPositions([
-  //       {
-  //         originX: 'center',
-  //         originY: 'top',
-  //         overlayX: 'center',
-  //         overlayY: 'bottom',
-  //         offsetY: -8
-  //       },
-  //       {
-  //         originX: 'center',
-  //         originY: 'bottom',
-  //         overlayX: 'center',
-  //         overlayY: 'top',
-  //         offsetY: 8
-  //       }
-  //     ]);
-  //
-  //   // Stwórz overlay
-  //   this.overlayRef = this.overlay.create({
-  //     positionStrategy,
-  //     hasBackdrop: false,
-  //     scrollStrategy: this.overlay.scrollStrategies.reposition()
-  //   });
-  //
-  //   this.overlayRef.backdropClick().subscribe(() => {
-  //     this.closePopup();
-  //   });
-  //
-  //   // Stwórz portal komponentu
-  //   const portal = new ComponentPortal(CellEditPopupComponent);
-  //
-  //   // Podłącz komponent do overlay
-  //   const componentRef = this.overlayRef.attach(portal);
-  //
-  //   // Przekaż selectedCell
-  //   componentRef.setInput('selectedCell', selectedCellData);
-  //
-  //   // Obsłuż eventy z komponentu
-  //   componentRef.instance.save.subscribe((data) => {
-  //     this.onPopupSave(data);
-  //   });
-  //
-  //   componentRef.instance.cancel.subscribe(() => {
-  //     this.onPopupCancel();
-  //   });
-  //
-  //   componentRef.instance.delete.subscribe((data) => {
-  //     this.onPopupDelete(data);
-  //   });
-  //
-  //   // Zaktualizuj sygnał
-  //   this.selectedCell.set(selectedCellData);
-  // }
-
   onDbCellClick(employee: EmployeeRow, dayNumber: number, event: MouseEvent) {
-    // Zamknij poprzedni overlay jeśli istnieje
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
 
-    const currentDate = this.currentMonthDate();
-    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-    const cellKey = `${employee.id}-${dateString}`;
+    const dateString = this.formatDateString(dayNumber);
+    const cellKey = this.getCellKey(employee.id, dateString);
 
     // Sprawdź czy kliknięta komórka jest w zaznaczeniu
     const selectedCells = this.selectedCells();
@@ -627,10 +493,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     // Przygotuj dane dla wszystkich zaznaczonych komórek
     const selectedCellsData = Array.from(currentSelection).map(key => {
-      // Klucz to "employeeId-YYYY-MM-DD"
-      // employeeId to UUID (36 znaków), np. "550e8400-e29b-41d4-a716-446655440000"
-      const empId = key.substring(0, 36); // Pierwsze 36 znaków to UUID
-      const date = key.substring(37); // Reszta po myślniku to data "YYYY-MM-DD"
+      const empId = key.substring(0, this.UUID_LENGTH);
+      const date = key.substring(this.UUID_LENGTH + 1);
 
       const workHoursObject: WorkHours | undefined = this.workHours.find(wh =>
         wh.employee === empId &&
@@ -713,64 +577,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.onPopupDeleteMultiple(validCellsData);
     });
 
-    // Zaktualizuj sygnał
     this.selectedCell.set(validCellsData[0]);
-  }
-
-  private onPopupSave(data: { hours: string; employee: string; date: string; id?: string }) {
-    if (data.id) {
-      // Update istniejących godzin
-      this.scheduleService.updateWorkHours(data.id, {
-        hours: data.hours,
-        employee: data.employee,
-        date: data.date,
-        location: this.selectedLocationId()
-      }).subscribe({
-        next: (updatedData) => {
-          this.scheduleService.emitScheduleUpdate(updatedData);
-          this.closePopup();
-        },
-        error: (error) => {
-          console.error('Błąd podczas aktualizacji godzin:', error);
-          // Tu możesz dodać obsługę błędów
-        }
-      });
-    } else {
-      // Dodaj nowe godziny
-      this.scheduleService.addWorkHours({
-        hours: data.hours,
-        employee: data.employee,
-        date: data.date,
-        location: this.selectedLocationId()
-      }).subscribe({
-        next: (newData) => {
-          this.scheduleService.emitScheduleUpdate(newData);
-          this.closePopup();
-        },
-        error: (error) => {
-          console.error('Błąd podczas dodawania godzin:', error);
-          // Tu możesz dodać obsługę błędów
-        }
-      });
-    }
   }
 
   private onPopupCancel() {
     this.closePopup();
-  }
-
-  private onPopupDelete(data: { id: string }) {
-    this.scheduleService.deleteWorkHours(data.id).subscribe({
-      next: () => {
-        // Emit schedule update z informacją o usunięciu
-        this.scheduleService.emitScheduleUpdate({ deleted: true, id: data.id });
-        this.closePopup();
-      },
-      error: (error) => {
-        console.error('Błąd podczas usuwania godzin:', error);
-        // Tu możesz dodać obsługę błędów
-      }
-    });
   }
 
   private onPopupSaveMultiple(data: { hours: string; employee: string; date: string; id?: string }, selectedCellsData: any[]) {
@@ -832,14 +643,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       });
   }
 
-  // private closePopup() {
-  //   if (this.overlayRef) {
-  //     this.overlayRef.dispose();
-  //     this.overlayRef = undefined;
-  //   }
-  //   this.selectedCell.set(undefined);
-  // }
-
   private closePopup() {
     if (this.overlayRef) {
       this.overlayRef.dispose();
@@ -867,12 +670,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.conflictingCells.set(conflicts);
   }
 
-  // Metoda do sprawdzania czy komórka jest konfliktowa
   isCellConflicting(employee: EmployeeRow, dayNumber: number): boolean {
-    const currentDate = this.currentMonthDate();
-    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-    const cellKey = `${employee.id}-${dateString}`;
-
+    const dateString = this.formatDateString(dayNumber);
+    const cellKey = this.getCellKey(employee.id, dateString);
     return this.conflictingCells().has(cellKey);
   }
 
@@ -896,21 +696,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.badWeeks.set(badWeeksMap);
   }
 
-  // isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
-  //   const selectedCell = this.selectedCell();
-  //   if (!selectedCell) return false;
-  //
-  //   const currentDate = this.currentMonthDate();
-  //   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-  //
-  //   return selectedCell.employee.id === employee.id && selectedCell.date === dateString;
-  // }
-
   isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
-    const currentDate = this.currentMonthDate();
-    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-    const cellKey = `${employee.id}-${dateString}`;
-
+    const dateString = this.formatDateString(dayNumber);
+    const cellKey = this.getCellKey(employee.id, dateString);
     return this.selectedCells().has(cellKey);
   }
 
@@ -945,57 +733,14 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   isCellExceeding12h(employee: EmployeeRow, dayNumber: number): boolean {
-    const currentDate = this.currentMonthDate();
-    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
-    const cellKey = `${employee.id}-${dateString}`;
-
+    const dateString = this.formatDateString(dayNumber);
+    const cellKey = this.getCellKey(employee.id, dateString);
     return this.exceedingWorkHours().has(cellKey);
   }
 
-  // private validateAndShowErrors(updatedData: any): void {
-  //   const hoursString = updatedData.hours;
-  //   const employeeId = updatedData.employee;
-  //   const date = updatedData.date;
-  //
-  //
-  //   // 1. Walidacja przekroczenia 12h
-  //   const exceed12hError = this.conflictService.validateWorkHoursExceed12h(hoursString);
-  //
-  //   // 2. Walidacja konfliktów 11h
-  //   const selectedLocationId = this.selectedLocationId();
-  //   const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
-  //   const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
-  //   const hasConflict11h = conflicts.has(`${employeeId}-${date}`);
-  //
-  //   // 3. Walidacja 35h w tygodniu
-  //   const badWeeks = this.conflictService.validate35HourRest(locationWorkHours, this.employees, this.currentMonthDate());
-  //   const dayNumber = new Date(date).getDate();
-  //   const weekNumber = this.getWeekNumber(dayNumber);
-  //   const employeeBadWeeks = badWeeks.get(employeeId.toString());
-  //   const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
-  //
-  //
-  //   // Pokaż komunikat w kolejności priorytetów
-  //   if (exceed12hError) {
-  //     this.showNotification(exceed12hError);
-  //   }
-  //   if (hasConflict11h) {
-  //     this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
-  //   }
-  //   if (hasBadWeek35h) {
-  //     this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
-  //   }
-  // }
-  //
-
   private validateAndShowErrors(updatedData: any): void {
-    console.log('=== WALIDACJA START ===');
-    console.log('updatedData:', updatedData);
-
     // Sprawdź czy to edycja wielu komórek
     if (updatedData.multiple) {
-      console.log('Multiple edit detected - performing full validation');
-
       // Przelicz wszystkie konflikty
       this.checkAllConflictsForCurrentLocation();
 
@@ -1028,7 +773,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     // Sprawdź czy mamy wymagane pola dla pojedynczej edycji
     if (!updatedData.hours || !updatedData.employee || !updatedData.date) {
-      console.warn('Missing required fields for validation:', updatedData);
       return;
     }
 
@@ -1036,11 +780,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const employeeId = updatedData.employee;
     const date = updatedData.date;
 
-    console.log('Params:', { hoursString, employeeId, date });
-
     // 1. Walidacja przekroczenia 12h
     const exceed12hError = this.conflictService.validateWorkHoursExceed12h(hoursString);
-    console.log('exceed12hError:', exceed12hError);
 
     if (exceed12hError) {
       this.showNotification(exceed12hError);
@@ -1049,17 +790,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     // 2. Walidacja konfliktów 11h
     const selectedLocationId = this.selectedLocationId();
-    console.log('selectedLocationId:', selectedLocationId);
-
     const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
-    console.log('locationWorkHours count:', locationWorkHours.length);
-
     const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
-    console.log('conflicts:', conflicts);
-
     const conflictKey = `${employeeId}-${date}`;
     const hasConflict11h = conflicts.has(conflictKey);
-    console.log('Checking conflict key:', conflictKey, 'hasConflict:', hasConflict11h);
 
     if (hasConflict11h) {
       this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
@@ -1072,32 +806,21 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.employees,
       this.currentMonthDate()
     );
-    console.log('badWeeks:', badWeeks);
 
     const dayNumber = new Date(date).getDate();
     const weekNumber = this.getWeekNumber(dayNumber);
-    console.log('weekNumber:', weekNumber);
-
     const employeeBadWeeks = badWeeks.get(employeeId.toString());
-    console.log('employeeBadWeeks:', employeeBadWeeks);
-
     const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
-    console.log('hasBadWeek35h:', hasBadWeek35h);
 
     if (hasBadWeek35h) {
       this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
       return;
     }
-
-    console.log('=== WALIDACJA ZAKOŃCZONA - BRAK BŁĘDÓW ===');
   }
 
 
   private showNotification(error: {type: string, message: string}): void {
-    // Sprawdź ile dialogów jest już otwartych
     const openDialogs = this.dialog.openDialogs.length;
-
-    console.log("Powiadomienie wywolane");
 
     this.dialog.open(NotificationPopUpComponent, {
       data: error,
@@ -1231,7 +954,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const selectedLocationId = this.selectedLocationId();
 
     if (!selectedLocationId) {
-      console.warn('Brak wybranej lokacji - pomijam sprawdzanie konfliktów');
       return;
     }
 
