@@ -6,10 +6,11 @@ from datetime import date
 from django.template.loader import render_to_string
 from weasyprint import HTML
 
-from backend.apps.locations.models import Location
-from backend.apps.employees.models import Employee
-from .models import WorkHours
-from .utils import calculate_hours, get_polish_weekday_name, get_polish_month_name
+
+from ..models import WorkHours
+from ..utils import calculate_hours, get_polish_weekday_name, get_polish_month_name
+from ...employees.models import Employee
+from ...locations.models import Location
 
 
 class PDFGeneratorService:

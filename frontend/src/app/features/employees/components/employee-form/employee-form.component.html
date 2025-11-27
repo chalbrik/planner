@@ -27,10 +27,14 @@
 
           <mat-form-field  appearance="fill">
             <mat-label>Telefon</mat-label>
-            <input type="tel" matInput formControlName="phone">
-            @if (shouldShowError('phone')) {
-              <mat-error>Telefon jest <strong>wymagany</strong></mat-error>
-            }
+            <input type="tel" matInput formControlName="phone" maxlength="9">
+
+              @if (addEmployeeForm.hasError('required', 'phone')) {
+                <mat-error>Telefon jest <strong>wymagany</strong></mat-error>
+              }
+              @if (addEmployeeForm.hasError('pattern', 'phone')) {
+                <mat-error>Telefon musi się składać z 9 <strong>cyfr</strong></mat-error>
+              }
           </mat-form-field>
 
           <mat-form-field  appearance="fill">

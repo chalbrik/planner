@@ -36,25 +36,66 @@
   </div>
 
   <!-- Główny kontener grafiku -->
-  <div class="flex-1 overflow-auto min-h-0 space-y-2">
+  <div class="flex-1 overflow-auto min-h-0">
 
-    <!-- Tabela dla Umowy o Pracę -->
-    @if (permanentDataSource().length > 0) {
-      <ng-container [ngTemplateOutlet]="PermanentScheduleTable"
-                    [ngTemplateOutletContext]="{
-                  dataSource: permanentDataSource()
-                }">
-      </ng-container>
-    }
+    <mat-tab-group [(selectedIndex)]="viewModeIndex">
 
-    <!-- Tabela dla Umowy na Zlecenie -->
-    @if (contractDataSource().length > 0) {
-      <ng-container [ngTemplateOutlet]="ContractScheduleTable"
-                    [ngTemplateOutletContext]="{
-                  dataSource: contractDataSource()
+      <!-- TAB 1: Podział na umowy -->
+      <mat-tab label="Podział na umowy">
+        <div class="space-y-2 pt-2">
+          <!-- Tabela dla Umowy o Pracę -->
+          @if (permanentDataSource().length > 0) {
+            <ng-container [ngTemplateOutlet]="PermanentScheduleTable"
+                          [ngTemplateOutletContext]="{
+                      dataSource: permanentDataSource()
+                    }">
+            </ng-container>
+          }
+
+          <!-- Tabela dla Umowy na Zlecenie -->
+          @if (contractDataSource().length > 0) {
+            <ng-container [ngTemplateOutlet]="ContractScheduleTable"
+                          [ngTemplateOutletContext]="{
+                      dataSource: contractDataSource()
+                    }">
+            </ng-container>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- TAB 2: Wszyscy pracownicy -->
+      <mat-tab label="Wszyscy pracownicy">
+        <div class="pt-2 space-y-2">
+
+          <!-- Search Input -->
+          <div class="bg-primary-100 border-2 border-primary-400 p-2 rounded-lg">
+            <mat-form-field class="w-full" appearance="outline">
+              <mat-label>Szukaj po nazwisku</mat-label>
+              <input matInput
+                     placeholder="Wpisz nazwisko..."
+                     [value]="searchQuery()"
+                     (input)="onSearchChange($event)">
+              <mat-icon matPrefix>search</mat-icon>
+            </mat-form-field>
+          </div>
+
+          <!-- Tabela wszystkich pracowników -->
+          @if (allEmployeesDataSource().length > 0) {
+            <ng-container [ngTemplateOutlet]="AllEmployeesScheduleTable"
+                          [ngTemplateOutletContext]="{
+                  dataSource: allEmployeesDataSource()
                 }">
-      </ng-container>
-    }
+            </ng-container>
+          } @else {
+            <div class="bg-primary-100 border-2 border-primary-400 p-4 rounded-lg text-center">
+              Brak pracowników spełniających kryteria wyszukiwania
+            </div>
+          }
+
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
 
   </div>
 </div>
@@ -102,7 +143,7 @@
                     [class.exceeding-12h-cell]="isCellExceeding12h(element, day.dayNumber)"
                     (click)="onCellClick(element, day.dayNumber, $event)"
                     (dblclick)="onDbCellClick(element, day.dayNumber, $event)">
-            <div class="work-hours-cell text-center">
+            <div class="work-hours-cell text-center w-full">
               {{ getWorkHoursForDay(element, day.dayNumber) }}
             </div>
           </mat-cell>
@@ -221,6 +262,92 @@
 
       <!-- Wiersze danych -->
       <mat-row *matRowDef="let row; columns: getColumnsForTable(false);"></mat-row>
+
+    </mat-table>
+  </section>
+</ng-template>
+
+<!-- ============================================ -->
+<!-- TABELA DLA WSZYSTKICH PRACOWNIKÓW -->
+<!-- ============================================ -->
+<ng-template #AllEmployeesScheduleTable let-dataSource="dataSource">
+  <section class="example-container mat-elevation-z8 border-2 border-primary-400 rounded-lg overflow-hidden" tabindex="0">
+    <div class="bg-primary-100 h-14 p-2 sticky left-0 font-medium text-sm flex flex-row items-center">
+      Wszyscy pracownicy
+    </div>
+
+    <mat-table [dataSource]="dataSource"
+               cdkDropList
+               (cdkDropListDropped)="onEmployeeDrop($event)">
+      <!-- Kolumna z pracownikami -->
+      <ng-container matColumnDef="employees" sticky="true">
+        <mat-header-cell *matHeaderCellDef class="!bg-primary-100"> Pracownicy </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="!bg-primary-100"> {{ element.name }} </mat-cell>
+      </ng-container>
+
+      <!-- Dynamiczne kolumny dla dni miesiąca -->
+      @for (day of monthDays(); track day.dayNumber) {
+        <ng-container [matColumnDef]="'day-' + day.dayNumber">
+          <mat-header-cell *matHeaderCellDef
+                           class="!bg-primary-100"
+                           [class.weekend-header]="day.isWeekend"
+                           [class.today-header]="day.isToday"
+                           [class.saturday-cell]="day.isSaturday"
+                           [class.sunday-cell]="day.isSunday">
+            <div class="day-header w-full text-center">
+              <div class="day-number text-center">{{ day.dayNumber }}</div>
+              <div class="day-name text-center">{{ day.date | date:'EEE':'pl' }}</div>
+            </div>
+          </mat-header-cell>
+
+          <mat-cell *matCellDef="let element"
+                    class="cursor-pointer w-2 !bg-primary-100"
+                    [class.weekend-cell]="day.isWeekend"
+                    [class.today-cell]="day.isToday"
+                    [class.saturday-cell]="day.isSaturday"
+                    [class.sunday-cell]="day.isSunday"
+                    [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
+                    [class.selected-cell]="isCellSelected(element, day.dayNumber)"
+                    [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"
+                    [class.exceeding-12h-cell]="isCellExceeding12h(element, day.dayNumber)"
+                    (click)="onCellClick(element, day.dayNumber, $event)"
+                    (dblclick)="onDbCellClick(element, day.dayNumber, $event)">
+            <div class="work-hours-cell text-center w-full">
+              {{ getWorkHoursForDay(element, day.dayNumber) }}
+            </div>
+          </mat-cell>
+
+          <mat-footer-cell *matFooterCellDef [class.weekend-footer]="day.isWeekend">
+            <!-- Tutaj możesz dodać podsumowanie dla dnia -->
+          </mat-footer-cell>
+        </ng-container>
+      }
+
+      <!-- Kolumna z podsumowaniem -->
+      <ng-container matColumnDef="summary" stickyEnd="true">
+        <mat-header-cell *matHeaderCellDef class="!bg-primary-100">
+          <div class="w-full flex flex-row justify-between">
+            <div class="w-fit">
+              Suma godzin
+            </div>
+          </div>
+        </mat-header-cell>
+        <mat-cell *matCellDef="let element" class="!bg-primary-100">
+          <div class="w-full h-full flex flex-row justify-between">
+            <div class="w-10 h-full flex items-center justify-center">
+              {{ getTotalHoursForEmployee(element) | hoursFormat }}
+            </div>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Wiersze nagłówka -->
+      <mat-header-row *matHeaderRowDef="getColumnsForTable(false); sticky: true"></mat-header-row>
+
+      <!-- Wiersze danych -->
+      <mat-row *matRowDef="let row; columns: getColumnsForTable(false);"
+               cdkDrag
+               [cdkDragData]="row"></mat-row>
 
     </mat-table>
   </section>

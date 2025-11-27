@@ -372,3 +372,22 @@ mat-table .mat-column-summary {
     z-index: -1;
   }
 }
+
+
+
+.cdk-drag-preview {
+  opacity: 0.8;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.cdk-drop-list-dragging mat-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

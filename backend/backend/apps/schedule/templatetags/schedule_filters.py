@@ -43,13 +43,37 @@ def hours_to_hm(hours):
     try:
         hours_float = float(hours)
         hours_int = int(hours_float)
-        minutes = round((hours_float - hours_int) * 60)  # <-- ZMIANA: round zamiast ceil
+        minutes = round((hours_float - hours_int) * 60)
 
         if minutes == 0:
             return f"{hours_int}h"
-        elif minutes == 60:  # <-- DODANE: obsługa 60 minut
+        elif minutes == 60:
             return f"{hours_int + 1}h"
         else:
             return f"{hours_int}h {minutes}min"
     except (ValueError, TypeError):
         return hours
+
+
+@register.filter
+def split_hours(value):
+    """
+    Dzieli godziny "8:00-16:00" na dwie linie.
+
+    Użycie w template:
+    {{ "8:00-16:00"|split_hours }}
+
+    Args:
+        value: String z godzinami w formacie "HH:MM-HH:MM"
+
+    Returns:
+        String z godzinami w dwóch liniach: "HH:MM\nHH:MM"
+    """
+    if not value or value == '-':
+        return '-'
+
+    # Sprawdź czy to format godzin z myślnikiem
+    if '-' in value:
+        return value.replace('-', '\n')
+
+    return value

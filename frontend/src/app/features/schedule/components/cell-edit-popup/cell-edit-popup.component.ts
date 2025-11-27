@@ -6,6 +6,7 @@ import {MatButton, MatIconButton} from '@angular/material/button';
 import {MAT_DATE_LOCALE, provideNativeDateAdapter} from '@angular/material/core';
 import {IconComponent} from '../../../../shared/components/icon';
 import {MatDivider, MatDividerModule} from '@angular/material/divider';
+import {MatChip, MatChipSet} from '@angular/material/chips';
 
 @Component({
   selector: 'app-cell-edit-popup',
@@ -23,7 +24,9 @@ import {MatDivider, MatDividerModule} from '@angular/material/divider';
     MatSuffix,
     IconComponent,
     MatDivider,
-    MatDividerModule
+    MatDividerModule,
+    MatChipSet,
+    MatChip
   ],
   templateUrl: './cell-edit-popup.component.html',
   styleUrl: './cell-edit-popup.component.scss',
@@ -42,6 +45,16 @@ export class CellEditPopupComponent {
   // Sygnały dla czasów
   timeFrom = signal<Date | null>(null);
   timeTo = signal<Date | null>(null);
+
+  daysOff: {id: number; value: string}[]  = [
+    { id: 1, value: 'DWH'},
+    { id: 2, value: 'DWN'},
+    { id: 3, value: 'NŚ'},
+    { id: 4, value: 'DWS'},
+    { id: 5, value: 'DW5'},
+    { id: 6, value: 'WYP'},
+    { id: 7, value: 'UŻ'},
+  ];
 
   // Output events
   readonly save = output<{ hours: string; employee: string; date: string; id?: string }>();
@@ -131,5 +144,17 @@ export class CellEditPopupComponent {
     if (cell?.workHours?.id) {
       this.delete.emit({ id: cell.workHours.id });
     }
+  }
+
+  onChipClick(chipValue: string) {
+    const cell = this.selectedCell();
+    if (!cell) return;
+
+    this.save.emit({
+      hours: chipValue,  // np. "DWH"
+      employee: cell.employee.id,
+      date: cell.date,
+      id: cell.workHours?.id
+    });
   }
 }

@@ -1,108 +1,165 @@
-import {inject, Injectable, signal} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+// core/services/schedule/schedule.service.ts
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, Subject } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { WorkHours } from './schedule.types';
 import { environment } from '../../../../environments/environment';
-import {tap} from 'rxjs/operators';
-import {WorkHours} from './schedule.types';
-import {EmployeesService} from '../employees/employees.service';
 
-interface ValidationResult {
-  type: 'exceed12h' | 'conflict11h' | 'badWeek35h';
-  message: string;
+// ✅ NOWY TYP - response z backendu
+export interface WorkHoursResponse {
+  work_hours: WorkHours[];
+  conflicts: ConflictData | null;
+}
+
+export interface ConflictData {
+  rest_11h: string[];  // ["employee-id-YYYY-MM-DD", ...]
+  rest_35h: { [employeeId: string]: number[] };  // {"employee-id": [1, 3], ...}
+  exceed_12h: string[];  // ["employee-id-YYYY-MM-DD", ...]
+}
+
+export interface WorkHoursWithConflicts extends WorkHours {
+  conflicts?: ConflictData;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScheduleService {
+  private readonly http = inject(HttpClient);
+  private apiUrl = environment.apiUrl + 'schedule'; // ← Bez slasha na końcu (jak w employees)
 
-  private static readonly REQUIRED_REST_HOURS = 35;
-  private static readonly HOURS_IN_DAY = 24;
-  private static readonly DAYS_IN_WEEK = 7;
-
-
-  http = inject(HttpClient);
-  _employeesService = inject(EmployeesService)
-
-  _workHours = signal<WorkHours[]>([])
-
-  private apiUrl = environment.apiUrl + 'schedule/';
-
-  private scheduleUpdatedSubject = new Subject<any>();
+  // Subject do komunikacji o zmianach
+  private scheduleUpdatedSubject = new Subject<WorkHoursWithConflicts>();
   public scheduleUpdated$ = this.scheduleUpdatedSubject.asObservable();
 
-  //zmienna ktora przechowuje parsowane WorkHours
-  private parseWorkHoursCache = new Map<string, {startTime: number, endTime: number}>();
+  /**
+   * Pobiera godziny pracy z filtrami
+   * Zwraca work_hours + conflicts
+   */
+  getWorkHours(filters?: {
+    month?: number;
+    year?: number;
+    location?: string;
+    employee_id?: string;
+  }): Observable<WorkHoursResponse> {
+    let params = new HttpParams();
 
-  private dayNumberCache = new Map<string, number>();
+    if (filters) {
+      if (filters.month) params = params.set('month', filters.month.toString());
+      if (filters.year) params = params.set('year', filters.year.toString());
+      if (filters.location) params = params.set('location', filters.location);
+      if (filters.employee_id) params = params.set('employee_id', filters.employee_id);
+    }
 
-  constructor() { }
+    return this.http.get<WorkHoursResponse>(`${this.apiUrl}/`, { params }); // ← Dodaj /
+  }
 
-  getWorkHours(filters?: any): Observable<WorkHours[]> {
-    return this.http.get<any[]>(`${this.apiUrl}work-hours/`, { params: filters }).pipe(
-      tap(responseData => {
-        this._workHours.set(responseData)
+  /**
+   * Dodaje nowe godziny pracy
+   * Zwraca zapisane dane + conflicts
+   */
+  addWorkHours(data: {
+    hours: string;
+    employee: string;
+    date: string;
+    location: string;
+  }): Observable<WorkHoursWithConflicts> {
+    return this.http.post<WorkHoursWithConflicts>(`${this.apiUrl}/`, data).pipe( // ← Dodaj /
+      tap((response) => {
+        this.scheduleUpdatedSubject.next(response);
       })
     );
   }
 
-  addWorkHours(workHours: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}work-hours/`, workHours);
+  /**
+   * Aktualizuje istniejące godziny pracy
+   * Zwraca zaktualizowane dane + conflicts
+   */
+  updateWorkHours(
+    id: string,
+    data: {
+      hours: string;
+      employee: string;
+      date: string;
+      location: string;
+    }
+  ): Observable<WorkHoursWithConflicts> {
+    return this.http.patch<WorkHoursWithConflicts>(`${this.apiUrl}/${id}/`, data).pipe( // ← Poprawny format
+      tap((response) => {
+        this.scheduleUpdatedSubject.next(response);
+      })
+    );
   }
 
-  updateWorkHours(id: string, workHours: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}work-hours/${id}/`, workHours);
+  /**
+   * Usuwa godziny pracy
+   * Zwraca conflicts dla pozostałych danych
+   */
+  deleteWorkHours(id: string): Observable<{ deleted: boolean; conflicts: ConflictData }> {
+    return this.http.delete<{ deleted: boolean; conflicts: ConflictData }>(`${this.apiUrl}/${id}/`).pipe( // ← Poprawny format
+      tap((response) => {
+        this.scheduleUpdatedSubject.next({
+          id,
+          deleted: true,
+          conflicts: response.conflicts
+        } as any);
+      })
+    );
   }
 
-  deleteWorkHours(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}work-hours/${id}/`);
-  }
-
-  // Metoda do emitowania aktualizacji
-  emitScheduleUpdate(data: any) {
+  /**
+   * Emituje event o aktualizacji (dla kompatybilności wstecznej)
+   */
+  emitScheduleUpdate(data: any): void {
     this.scheduleUpdatedSubject.next(data);
   }
 
-  generateSchedulePdf(locationId: string, month: number, year: number) {
-    // Zbuduj URL z parametrami
-    const params = `?location=${locationId}&month=${month}&year=${year}`;
+  /**
+   * Generuje PDF z grafikiem
+   */
+  generateSchedulePdf(locationId: string, month: number, year: number): Observable<Blob> {
+    const params = new HttpParams()
+      .set('location', locationId)
+      .set('month', month.toString())
+      .set('year', year.toString());
 
-    return this.http.get(`${this.apiUrl}work-hours/generate-schedule-pdf/${params}`, {
+    return this.http.get(`${this.apiUrl}/generate-schedule-pdf/`, { // ← Dodaj / na początku
+      params,
       responseType: 'blob'
     }).pipe(
-      tap(blob => {
-        // Utwórz URL do pobrania pliku
+      tap((blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `grafik_${month}_${year}_lokacja_${locationId}.pdf`;
+        link.download = `grafik_${locationId}_${month}_${year}.pdf`;
         link.click();
-
-        // Zwolnij pamięć
         window.URL.revokeObjectURL(url);
       })
     );
   }
 
-  generateAttendanceSheets(locationId: string, month: number, year: number) {
-    // Zbuduj URL z parametrami
-    const params = `?location=${locationId}&month=${month}&year=${year}`;
+  /**
+   * Generuje PDF z listami obecności
+   */
+  generateAttendanceSheets(locationId: string, month: number, year: number): Observable<Blob> {
+    const params = new HttpParams()
+      .set('location', locationId)
+      .set('month', month.toString())
+      .set('year', year.toString());
 
-    return this.http.get(`${this.apiUrl}work-hours/generate-attendance-sheets/${params}`, {
+    return this.http.get(`${this.apiUrl}/generate-attendance-sheets/`, { // ← Dodaj / na początku
+      params,
       responseType: 'blob'
     }).pipe(
-      tap(blob => {
-        // Utwórz URL do pobrania pliku
+      tap((blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `grafik_${month}_${year}_lokacja_${locationId}.pdf`;
+        link.download = `lista_obecnosci_${locationId}_${month}_${year}.pdf`;
         link.click();
-
-        // Zwolnij pamięć
         window.URL.revokeObjectURL(url);
       })
     );
   }
-
 }

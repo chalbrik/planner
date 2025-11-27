@@ -112,7 +112,7 @@ export class EmployeeFormComponent implements OnInit {
       //Pola wypełniane przez pracownika
       full_name: ['', Validators.required],
       birth_date: ['', Validators.required],
-      phone: ['', Validators.required],
+      phone: ['', [Validators.required, Validators.pattern(/^\d{9}$/)]],
       email: ['', [Validators.required,  Validators.email]],
 
       school_type: [''],

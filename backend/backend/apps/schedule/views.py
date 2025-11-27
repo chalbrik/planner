@@ -1,7 +1,7 @@
 """
 ViewSets dla modułu work_hours.
 """
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,7 +9,9 @@ from django.http import HttpResponse
 
 from .models import WorkHours
 from .serializers import WorkHoursSerializer
-from .services import PDFGeneratorService
+from .services.conflict_service import ConflictDetectionService
+from .services.pdf_service import PDFGeneratorService
+
 from .validators import ScheduleParamsValidator
 
 
@@ -66,6 +68,144 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
             except (ValueError, TypeError):
                 pass
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        """
+        GET /api/work-hours/?location=xxx&month=11&year=2025
+        Zwraca work_hours + konflikty
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+
+        # Pobierz parametry do obliczenia konfliktów
+        location_id = request.query_params.get('location')
+        month = request.query_params.get('month')
+        year = request.query_params.get('year')
+
+        # Oblicz konflikty jeśli są wymagane parametry
+        conflicts = None
+        if location_id and month and year:
+            try:
+                conflict_service = ConflictDetectionService(
+                    location_id=location_id,
+                    month=int(month),
+                    year=int(year)
+                )
+                conflicts = conflict_service.detect_all_conflicts()
+            except Exception as e:
+                # Loguj błąd ale nie przerywaj requestu
+                print(f"Błąd obliczania konfliktów: {e}")
+                conflicts = {
+                    'rest_11h': [],
+                    'rest_35h': {},
+                    'exceed_12h': []
+                }
+
+        return Response({
+            'work_hours': serializer.data,
+            'conflicts': conflicts
+        })
+
+    def create(self, request, *args, **kwargs):
+        """
+        POST /api/work-hours/
+        Zapisuje work_hours i zwraca je + konflikty
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        # Pobierz zapisany obiekt
+        instance = serializer.instance
+
+        # Oblicz konflikty dla tej lokacji i miesiąca
+        conflicts = self._calculate_conflicts_for_instance(instance)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response({
+            **serializer.data,
+            'conflicts': conflicts
+        }, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        """
+        PATCH/PUT /api/work-hours/{id}/
+        Aktualizuje work_hours i zwraca konflikty
+        """
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        # Oblicz konflikty dla zaktualizowanego obiektu
+        conflicts = self._calculate_conflicts_for_instance(serializer.instance)
+
+        return Response({
+            **serializer.data,
+            'conflicts': conflicts
+        })
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        DELETE /api/work-hours/{id}/
+        Usuwa work_hours i zwraca konflikty dla pozostałych
+        """
+        instance = self.get_object()
+
+        # Zapisz dane przed usunięciem (potrzebne do obliczenia konfliktów)
+        location_id = str(instance.location_id)
+        month = instance.date.month
+        year = instance.date.year
+
+        # Usuń obiekt
+        self.perform_destroy(instance)
+
+        # Oblicz konflikty po usunięciu
+        try:
+            conflict_service = ConflictDetectionService(
+                location_id=location_id,
+                month=month,
+                year=year
+            )
+            conflicts = conflict_service.detect_all_conflicts()
+        except Exception as e:
+            print(f"Błąd obliczania konfliktów: {e}")
+            conflicts = {
+                'rest_11h': [],
+                'rest_35h': {},
+                'exceed_12h': []
+            }
+
+        return Response({
+            'deleted': True,
+            'conflicts': conflicts
+        }, status=status.HTTP_200_OK)
+
+    def _calculate_conflicts_for_instance(self, instance):
+        """
+        Pomocnicza metoda do obliczania konfliktów dla danego WorkHours.
+
+        Args:
+            instance: Instancja WorkHours
+
+        Returns:
+            Dict z konfliktami
+        """
+        try:
+            conflict_service = ConflictDetectionService(
+                location_id=str(instance.location_id),
+                month=instance.date.month,
+                year=instance.date.year
+            )
+            return conflict_service.detect_all_conflicts()
+        except Exception as e:
+            print(f"Błąd obliczania konfliktów: {e}")
+            return {
+                'rest_11h': [],
+                'rest_35h': {},
+                'exceed_12h': []
+            }
 
     @action(detail=False, methods=['get'], url_path='generate-schedule-pdf')
     def generate_schedule_pdf(self, request):

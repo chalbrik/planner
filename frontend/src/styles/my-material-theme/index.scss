@@ -1,0 +1,21 @@
+// src/styles/my-material-theme/index.scss
+@use '@angular/material' as mat;
+@use './config';
+@use './palettes';
+@use './overrides/button';
+
+@mixin apply-theme {
+  // Aplikuj podstawowy theme z paletami
+  @include mat.theme((
+    color: (
+      primary: palettes.$my-primary-palette,
+      tertiary: palettes.$my-tertiary-palette,
+      theme-type: color-scheme,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+
+  // Nadpisz tokeny buttonów
+  @include button.button-overrides();
+}

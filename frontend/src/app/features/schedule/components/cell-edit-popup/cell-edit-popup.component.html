@@ -1,100 +1,64 @@
-<!--<div class="popup-container bg-primary-100 shadow-lg rounded-lg flex flex-row items-center justify-between gap-1 p-2">-->
+<div class="popup-container bg-primary-100 shadow-lg rounded-lg flex flex-col gap-2 p-2">
+  <div class="flex flex-row items-center justify-between gap-1">
 
-<!--  <button mat-icon-button class="delete-button" (click)="onDelete()">-->
-<!--    <div class="flex justify-center items-center">-->
-<!--      <app-icon iconName="trash" iconSize="outline"></app-icon>-->
-<!--    </div>-->
-<!--  </button>-->
+    <!-- Informacja o liczbie zaznaczonych komórek -->
+    <!--  @if (selectedCellsCount() > 1) {-->
+    <!--    <div class="text-xs text-primary-800 px-2">-->
+    <!--      {{ selectedCellsCount() }} komórek-->
+    <!--    </div>-->
+    <!--  }-->
 
-<!--    <mat-form-field appearance="fill" class="time-field">-->
-<!--      &lt;!&ndash;            <mat-label>Od</mat-label>&ndash;&gt;-->
-<!--      <input matInput-->
-<!--             [matTimepicker]="fromTimePicker"-->
-<!--             (valueChange)="onTimeFromChange($event)"-->
-<!--             [value]="timeFrom()"-->
-<!--      >-->
-<!--      <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>-->
-<!--      <mat-timepicker interval="15min" #fromTimePicker/>-->
-<!--    </mat-form-field>-->
+    <button mat-icon-button class="delete-button" (click)="onDelete()">
+      <div class="flex justify-center items-center">
+        <app-icon iconName="trash" iconSize="outline"></app-icon>
+      </div>
+    </button>
 
-<!--    <mat-form-field appearance="fill" class="time-field">-->
-<!--      &lt;!&ndash;            <mat-label>Do</mat-label>&ndash;&gt;-->
-<!--      <input matInput-->
-<!--             [matTimepicker]="toTimePicker"-->
-<!--             [value]="timeTo()"-->
-<!--             (valueChange)="onTimeToChange($event)"-->
-<!--      >-->
-<!--      <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>-->
-<!--      <mat-timepicker interval="15min" #toTimePicker/>-->
-<!--    </mat-form-field>-->
+    <!-- Reszta bez zmian -->
+    <mat-form-field appearance="fill" class="time-field">
+      <input matInput
+             [matTimepicker]="fromTimePicker"
+             (valueChange)="onTimeFromChange($event)"
+             [value]="timeFrom()"
+      >
+      <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>
+      <mat-timepicker interval="15min" #fromTimePicker/>
+    </mat-form-field>
 
+    <mat-form-field appearance="fill" class="time-field">
+      <input matInput
+             [matTimepicker]="toTimePicker"
+             [value]="timeTo()"
+             (valueChange)="onTimeToChange($event)"
+      >
+      <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>
+      <mat-timepicker interval="15min" #toTimePicker/>
+    </mat-form-field>
 
+    <div class="flex flex-row items-center justify-between gap-1 ">
+      <button mat-icon-button color="primary" (click)="onSave()">
+        <div class="flex items-center justify-center">
+          <app-icon iconName="check" iconSize="outline" ></app-icon>
+        </div>
+      </button>
 
-<!--    <button mat-icon-button color="primary" (click)="onSave()">-->
-<!--      <div class="flex items-center justify-center">-->
-<!--        <app-icon iconName="check" iconSize="outline" ></app-icon>-->
-<!--      </div>-->
-<!--    </button>-->
+      <mat-divider [vertical]="true" class="h-8 border-primary-800"></mat-divider>
 
-<!--    <mat-divider [vertical]="true" class="h-8 border-primary-800"></mat-divider>-->
-
-<!--    <button mat-icon-button (click)="onCancel()">-->
-<!--      <div class="flex items-center justify-center">-->
-<!--        <app-icon iconName="x-mark" iconSize="outline"></app-icon>-->
-<!--      </div>-->
-<!--    </button>-->
-
-<!--</div>-->
-
-
-<div class="popup-container bg-primary-100 shadow-lg rounded-lg flex flex-row items-center justify-between gap-1 p-2">
-
-  <!-- Informacja o liczbie zaznaczonych komórek -->
-  @if (selectedCellsCount() > 1) {
-    <div class="text-xs text-primary-800 px-2">
-      {{ selectedCellsCount() }} komórek
+      <button mat-icon-button (click)="onCancel()">
+        <div class="flex items-center justify-center">
+          <app-icon iconName="x-mark" iconSize="outline"></app-icon>
+        </div>
+      </button>
     </div>
-  }
 
-  <button mat-icon-button class="delete-button" (click)="onDelete()">
-    <div class="flex justify-center items-center">
-      <app-icon iconName="trash" iconSize="outline"></app-icon>
-    </div>
-  </button>
+  </div>
 
-  <!-- Reszta bez zmian -->
-  <mat-form-field appearance="fill" class="time-field">
-    <input matInput
-           [matTimepicker]="fromTimePicker"
-           (valueChange)="onTimeFromChange($event)"
-           [value]="timeFrom()"
-    >
-    <mat-timepicker-toggle matIconSuffix [for]="fromTimePicker"/>
-    <mat-timepicker interval="15min" #fromTimePicker/>
-  </mat-form-field>
-
-  <mat-form-field appearance="fill" class="time-field">
-    <input matInput
-           [matTimepicker]="toTimePicker"
-           [value]="timeTo()"
-           (valueChange)="onTimeToChange($event)"
-    >
-    <mat-timepicker-toggle matIconSuffix [for]="toTimePicker" [disabled]="!timeFrom()"/>
-    <mat-timepicker interval="15min" #toTimePicker/>
-  </mat-form-field>
-
-  <button mat-icon-button color="primary" (click)="onSave()">
-    <div class="flex items-center justify-center">
-      <app-icon iconName="check" iconSize="outline" ></app-icon>
-    </div>
-  </button>
-
-  <mat-divider [vertical]="true" class="h-8 border-primary-800"></mat-divider>
-
-  <button mat-icon-button (click)="onCancel()">
-    <div class="flex items-center justify-center">
-      <app-icon iconName="x-mark" iconSize="outline"></app-icon>
-    </div>
-  </button>
-
+  <div class="">
+    <mat-chip-set aria-label="Days off selection">
+      @for(dayOff of daysOff; track dayOff.id){
+        <mat-chip class="!cursor-pointer" [style.cursor]="'pointer'" (click)="onChipClick(dayOff.value)">{{ dayOff.value }}</mat-chip>
+      }
+    </mat-chip-set>
+  </div>
 </div>
+

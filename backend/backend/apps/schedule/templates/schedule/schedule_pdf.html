@@ -67,14 +67,12 @@
         }
 
         .hours-cell {
-            font-size: 7px;
-            white-space: normal;
-            word-break: normal;
+            font-size: 8px;
             overflow-wrap: break-word;
             width: 15px;
             hyphens: none;
             word-spacing: normal;
-            padding: 1px;
+            padding: 2px;
         }
 
         .total-column {
@@ -118,11 +116,17 @@
     {% for employee_data in employees_schedule %}
     <tr>
         <td class="employee-name">{{ employee_data.name }}</td>
-        {% for day in days %}
-        <td class="hours-cell {% if day.is_weekend %}weekend{% endif %}">
-            {{ employee_data.hours|get_item:day.day|default:"-" }}
-        </td>
-        {% endfor %}
+            {% for day in days %}
+               <td class="hours-cell {% if day.is_weekend %}weekend{% endif %}">
+                    {% with hours=employee_data.hours|get_item:day.day %}
+                        {% if hours %}
+                            {{ hours|split_hours }}
+                        {% else %}
+
+                        {% endif %}
+                    {% endwith %}
+                </td>
+            {% endfor %}
         <td class="total-cell">{{ employee_data.total_hours|hours_to_hm }}</td>
 
     </tr>

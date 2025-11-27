@@ -1,5 +1,5 @@
 import {Component, OnInit, signal, computed, ViewEncapsulation, inject, OnDestroy} from '@angular/core';
-import {ScheduleService} from '../../core/services/schedule/schedule.service';
+import {ConflictData, ScheduleService} from '../../core/services/schedule/schedule.service';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
@@ -23,12 +23,14 @@ import {LocationService} from '../../core/services/locations/location.service';
 import {Location} from '../../core/services/locations/location.types';
 import {Employee} from '../../core/services/employees/employee.types';
 import {WorkHours} from '../../core/services/schedule/schedule.types';
-import {ConflictService} from '../../core/services/conflicts/conflict.service';
 import {HolidayService} from '../../core/services/holiday/holiday.service';
 import {HoursFormatPipe} from '../../shared/pipes/hours-format.pipe';
-import {MatFormField, MatLabel} from '@angular/material/input';
+import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import {MatOption} from '@angular/material/core';
 import {MatSelect} from '@angular/material/select';
+import {MatTab, MatTabsModule} from '@angular/material/tabs';
+import {MatIcon} from '@angular/material/icon';
+import {CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray} from '@angular/cdk/drag-drop';
 
 
 interface Day {
@@ -77,6 +79,12 @@ interface EmployeeRow {
     MatHeaderCellDef,
     MatFooterCellDef,
     MatButton,
+    MatTab,
+    MatTabsModule,
+    MatIcon,
+    MatInput,
+    CdkDropList,
+    CdkDrag
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.scss',
@@ -90,7 +98,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private readonly employeesService = inject(EmployeesService);
   private readonly overlay = inject(Overlay);
   private readonly locationService = inject(LocationService);
-  private readonly conflictService = inject(ConflictService);
   private holidayService = inject(HolidayService);
 
   employees: Employee[] = [];
@@ -187,6 +194,44 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subject<void>();
 
+  viewMode = signal<'split' | 'all'>('split');
+  searchQuery = signal<string>('');
+
+  viewModeIndex = signal<number>(0);
+
+  customEmployeeOrder = signal<any[]>([]);
+
+  allEmployeesDataSource = computed(() => {
+    // Sprawdź czy jest custom order
+    const customOrder = this.customEmployeeOrder();
+    if (customOrder.length > 0) {
+      // Użyj custom order i przefiltruj po search
+      const query = this.searchQuery().toLowerCase().trim();
+      if (query) {
+        return customOrder.filter(employee =>
+          employee.name.toLowerCase().includes(query)
+        );
+      }
+      return customOrder;
+    }
+
+    // Domyślnie połącz obie listy
+    const allEmployees = [
+      ...this.permanentDataSource(),
+      ...this.contractDataSource()
+    ];
+
+    // Filtruj po nazwisku
+    const query = this.searchQuery().toLowerCase().trim();
+    if (query) {
+      return allEmployees.filter(employee =>
+        employee.name.toLowerCase().includes(query)
+      );
+    }
+
+    return allEmployees;
+  });
+
   constructor() {}
 
   ngOnInit(): void {
@@ -216,6 +261,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
+  onSearchChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.searchQuery.set(input.value);
+  }
+
   private setupResponsiveColumns(): void {
     // Oblicz szerokość przy inicjalizacji
     this.calculateDayColumnWidth();
@@ -226,6 +276,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         this.calculateDayColumnWidth();
       });
     }
+  }
+
+  onEmployeeDrop(event: CdkDragDrop<any[]>) {
+    const data = [...this.allEmployeesDataSource()];
+    moveItemInArray(data, event.previousIndex, event.currentIndex);
+    this.customEmployeeOrder.set(data);
   }
 
   private calculateDayColumnWidth(): void {
@@ -314,7 +370,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
       employeeWorkHours.forEach(wh => {
         workHoursMap[wh.date] = wh.hours;
-        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date, employee.agreement_type);
       });
 
       const jobRate = parseFloat(employee.job) || 0;
@@ -341,7 +396,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
       employeeWorkHours.forEach(wh => {
         workHoursMap[wh.date] = wh.hours;
-        this.checkWorkHoursExceed12h(wh.hours, wh.employee, wh.date, employee.agreement_type);
       });
 
       const jobRate = parseFloat(employee.job) || 0;
@@ -363,8 +417,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Zachowaj stary dataSource dla kompatybilności
     this.dataSource = [...permanentRows, ...contractRows];
 
-    this.checkRestTimeConflicts();
-    this.check35HourRestInAllWeeks();
   }
 
   // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
@@ -414,16 +466,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 1);
     this.currentMonthDate.set(newDate);
 
-    // Przelicz szerokość dla nowego miesiąca
     this.calculateDayColumnWidth();
 
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
 
-    // ✅ Wyczyść i załaduj dane ponownie
+    // Wyczyść i załaduj dane ponownie
     this.clearConflicts();
-    this.loadDataForLocation(); // To już robi wszystko: ładuje employees, workHours, prepareTableData i checkConflicts
+    this.loadDataForLocation(); // To już pobierze konflikty z backendu
     this.loadWorkingDaysAndCalculateHours();
   }
 
@@ -854,18 +905,18 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.selectedCell.set(undefined);
   }
 
-  private checkRestTimeConflicts(): void {
-    const selectedLocationId = this.selectedLocationId();
-    if (!selectedLocationId) return;
-
-    const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
-
-    // ✅ FILTRUJ - tylko pracownicy na umowie o pracę
-    const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
-
-    const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, permanentEmployees);
-    this.conflictingCells.set(conflicts);
-  }
+  // private checkRestTimeConflicts(): void {
+  //   const selectedLocationId = this.selectedLocationId();
+  //   if (!selectedLocationId) return;
+  //
+  //   const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
+  //
+  //   // ✅ FILTRUJ - tylko pracownicy na umowie o pracę
+  //   const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
+  //
+  //   const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, permanentEmployees);
+  //   this.conflictingCells.set(conflicts);
+  // }
 
   // Metoda do sprawdzania czy komórka jest konfliktowa
   isCellConflicting(employee: EmployeeRow, dayNumber: number): boolean {
@@ -883,18 +934,18 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
 // Główna metoda sprawdzająca
 
-  private check35HourRestInAllWeeks(): void {
-    const selectedLocationId = this.selectedLocationId();
-    if (!selectedLocationId) return;
-
-    const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
-
-    // ✅ FILTRUJ - tylko pracownicy na umowie o pracę
-    const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
-
-    const badWeeksMap = this.conflictService.validate35HourRest(locationWorkHours, permanentEmployees, this.currentMonthDate());
-    this.badWeeks.set(badWeeksMap);
-  }
+  // private check35HourRestInAllWeeks(): void {
+  //   const selectedLocationId = this.selectedLocationId();
+  //   if (!selectedLocationId) return;
+  //
+  //   const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
+  //
+  //   // ✅ FILTRUJ - tylko pracownicy na umowie o pracę
+  //   const permanentEmployees = this.employees.filter(emp => emp.agreement_type === 'permanent');
+  //
+  //   const badWeeksMap = this.conflictService.validate35HourRest(locationWorkHours, permanentEmployees, this.currentMonthDate());
+  //   this.badWeeks.set(badWeeksMap);
+  // }
 
   // isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
   //   const selectedCell = this.selectedCell();
@@ -921,28 +972,28 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
   }
 
-  private checkWorkHoursExceed12h(hoursString: string, employeeId: string, date: string, agreementType?: 'permanent' | 'contract'): void {
-    // ✅ Pomiń walidację dla zleceniobiorców
-    if (agreementType === 'contract') return;
-
-    // Użyj metody z serwisu zamiast lokalnej logiki
-    const validationResult = this.conflictService.validateWorkHoursExceed12h(hoursString);
-    const cellKey = `${employeeId}-${date}`;
-
-    if (validationResult) {
-      // Dodaj do sygnału
-      const currentExceeding = this.exceedingWorkHours();
-      currentExceeding.add(cellKey);
-      this.exceedingWorkHours.set(new Set(currentExceeding));
-    } else {
-      // Usuń z sygnału jeśli nie przekracza już 12h
-      const currentExceeding = this.exceedingWorkHours();
-      if (currentExceeding.has(cellKey)) {
-        currentExceeding.delete(cellKey);
-        this.exceedingWorkHours.set(new Set(currentExceeding));
-      }
-    }
-  }
+  // private checkWorkHoursExceed12h(hoursString: string, employeeId: string, date: string, agreementType?: 'permanent' | 'contract'): void {
+  //   // ✅ Pomiń walidację dla zleceniobiorców
+  //   if (agreementType === 'contract') return;
+  //
+  //   // Użyj metody z serwisu zamiast lokalnej logiki
+  //   const validationResult = this.conflictService.validateWorkHoursExceed12h(hoursString);
+  //   const cellKey = `${employeeId}-${date}`;
+  //
+  //   if (validationResult) {
+  //     // Dodaj do sygnału
+  //     const currentExceeding = this.exceedingWorkHours();
+  //     currentExceeding.add(cellKey);
+  //     this.exceedingWorkHours.set(new Set(currentExceeding));
+  //   } else {
+  //     // Usuń z sygnału jeśli nie przekracza już 12h
+  //     const currentExceeding = this.exceedingWorkHours();
+  //     if (currentExceeding.has(cellKey)) {
+  //       currentExceeding.delete(cellKey);
+  //       this.exceedingWorkHours.set(new Set(currentExceeding));
+  //     }
+  //   }
+  // }
 
   isCellExceeding12h(employee: EmployeeRow, dayNumber: number): boolean {
     const currentDate = this.currentMonthDate();
@@ -951,147 +1002,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     return this.exceedingWorkHours().has(cellKey);
   }
-
-  // private validateAndShowErrors(updatedData: any): void {
-  //   const hoursString = updatedData.hours;
-  //   const employeeId = updatedData.employee;
-  //   const date = updatedData.date;
-  //
-  //
-  //   // 1. Walidacja przekroczenia 12h
-  //   const exceed12hError = this.conflictService.validateWorkHoursExceed12h(hoursString);
-  //
-  //   // 2. Walidacja konfliktów 11h
-  //   const selectedLocationId = this.selectedLocationId();
-  //   const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
-  //   const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
-  //   const hasConflict11h = conflicts.has(`${employeeId}-${date}`);
-  //
-  //   // 3. Walidacja 35h w tygodniu
-  //   const badWeeks = this.conflictService.validate35HourRest(locationWorkHours, this.employees, this.currentMonthDate());
-  //   const dayNumber = new Date(date).getDate();
-  //   const weekNumber = this.getWeekNumber(dayNumber);
-  //   const employeeBadWeeks = badWeeks.get(employeeId.toString());
-  //   const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
-  //
-  //
-  //   // Pokaż komunikat w kolejności priorytetów
-  //   if (exceed12hError) {
-  //     this.showNotification(exceed12hError);
-  //   }
-  //   if (hasConflict11h) {
-  //     this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
-  //   }
-  //   if (hasBadWeek35h) {
-  //     this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
-  //   }
-  // }
-  //
-
-  private validateAndShowErrors(updatedData: any): void {
-    console.log('=== WALIDACJA START ===');
-    console.log('updatedData:', updatedData);
-
-    // Sprawdź czy to edycja wielu komórek
-    if (updatedData.multiple) {
-      console.log('Multiple edit detected - performing full validation');
-
-      // Przelicz wszystkie konflikty
-      this.checkAllConflictsForCurrentLocation();
-
-      // ✅ NOWE: Sprawdź czy są jakieś konflikty i pokaż powiadomienia
-      const hasExceeding12h = this.exceedingWorkHours().size > 0;
-      const hasConflict11h = this.conflictingCells().size > 0;
-      const hasBadWeek35h = this.badWeeks().size > 0;
-
-      if (hasExceeding12h) {
-        this.showNotification({
-          type: 'exceed12h',
-          message: 'Jedna lub więcej komórek przekracza 12h pracy'
-        });
-      }
-      if (hasConflict11h) {
-        this.showNotification({
-          type: 'conflict11h',
-          message: 'Wykryto brak przerwy 11h u pracowników'
-        });
-      }
-      if (hasBadWeek35h) {
-        this.showNotification({
-          type: 'badWeek35h',
-          message: 'Wykryto brak przerwy 35h w tygodniu'
-        });
-      }
-
-      return;
-    }
-
-    // Sprawdź czy mamy wymagane pola dla pojedynczej edycji
-    if (!updatedData.hours || !updatedData.employee || !updatedData.date) {
-      console.warn('Missing required fields for validation:', updatedData);
-      return;
-    }
-
-    const hoursString = updatedData.hours;
-    const employeeId = updatedData.employee;
-    const date = updatedData.date;
-
-    console.log('Params:', { hoursString, employeeId, date });
-
-    // 1. Walidacja przekroczenia 12h
-    const exceed12hError = this.conflictService.validateWorkHoursExceed12h(hoursString);
-    console.log('exceed12hError:', exceed12hError);
-
-    if (exceed12hError) {
-      this.showNotification(exceed12hError);
-      return;
-    }
-
-    // 2. Walidacja konfliktów 11h
-    const selectedLocationId = this.selectedLocationId();
-    console.log('selectedLocationId:', selectedLocationId);
-
-    const locationWorkHours = this.workHours.filter(wh => wh.location === selectedLocationId);
-    console.log('locationWorkHours count:', locationWorkHours.length);
-
-    const conflicts = this.conflictService.validateRestTimeConflicts(locationWorkHours, this.employees);
-    console.log('conflicts:', conflicts);
-
-    const conflictKey = `${employeeId}-${date}`;
-    const hasConflict11h = conflicts.has(conflictKey);
-    console.log('Checking conflict key:', conflictKey, 'hasConflict:', hasConflict11h);
-
-    if (hasConflict11h) {
-      this.showNotification({ type: 'conflict11h', message: 'Brak przerwy u pracownika 11h' });
-      return;
-    }
-
-    // 3. Walidacja 35h w tygodniu
-    const badWeeks = this.conflictService.validate35HourRest(
-      locationWorkHours,
-      this.employees,
-      this.currentMonthDate()
-    );
-    console.log('badWeeks:', badWeeks);
-
-    const dayNumber = new Date(date).getDate();
-    const weekNumber = this.getWeekNumber(dayNumber);
-    console.log('weekNumber:', weekNumber);
-
-    const employeeBadWeeks = badWeeks.get(employeeId.toString());
-    console.log('employeeBadWeeks:', employeeBadWeeks);
-
-    const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.has(weekNumber) : false;
-    console.log('hasBadWeek35h:', hasBadWeek35h);
-
-    if (hasBadWeek35h) {
-      this.showNotification({ type: 'badWeek35h', message: 'Brak przerwy 35h w tygodniu' });
-      return;
-    }
-
-    console.log('=== WALIDACJA ZAKOŃCZONA - BRAK BŁĘDÓW ===');
-  }
-
 
   private showNotification(error: {type: string, message: string}): void {
     // Sprawdź ile dialogów jest już otwartych
@@ -1167,10 +1077,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     Promise.all([
       this.loadEmployeesForLocation(),
-      this.loadWorkHoursForLocation()
+      this.loadWorkHoursForLocation()  // To już załaduje konflikty
     ]).then(() => {
       this.prepareTableData();
-      this.checkAllConflictsForCurrentLocation();
       this.isLoading = false;
     }).catch((error) => {
       this.errorMessage = 'Nie udało się załadować danych dla lokacji';
@@ -1210,50 +1119,152 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       const filters = {
         month: currentDate.getMonth() + 1,
         year: currentDate.getFullYear(),
-        // ✅ KLUCZOWA ZMIANA: Dodaj filtrowanie według lokacji
         location: selectedLocationId
       };
 
       this.scheduleService.getWorkHours(filters).subscribe({
-        next: (data) => {
-          this.workHours = data;
-          resolve(data);
+        next: (response) => {
+          console.log('✅ Backend response:', response);
+
+          // ✅ ZABEZPIECZENIE: Jeśli work_hours jest undefined, ustaw pustą tablicę
+          this.workHours = response.work_hours || [];
+
+          console.log('📊 Work hours loaded:', this.workHours.length);
+
+          // Zaktualizuj konflikty z backendu
+          if (response.conflicts) {
+            this.updateConflictsFromBackend(response.conflicts);
+          }
+
+          resolve(this.workHours);
         },
         error: (error) => {
-          console.error('Błąd ładowania harmonogramu:', error);
+          console.error('❌ Błąd ładowania harmonogramu:', error);
+          this.workHours = []; // ✅ Ustaw pustą tablicę w przypadku błędu
           reject(error);
         }
       });
     });
   }
 
-  private checkAllConflictsForCurrentLocation(): void {
-    const selectedLocationId = this.selectedLocationId();
+  /**
+   * Aktualizuje sygnały konfliktów na podstawie danych z backendu
+   */
+  private updateConflictsFromBackend(conflicts: ConflictData): void {
+    // 1. Konflikty 11h
+    this.conflictingCells.set(new Set(conflicts.rest_11h || []));
 
-    if (!selectedLocationId) {
-      console.warn('Brak wybranej lokacji - pomijam sprawdzanie konfliktów');
-      return;
-    }
+    // 2. Konflikty 35h (bad weeks)
+    const badWeeksMap = new Map<string, Set<number>>();
+    Object.entries(conflicts.rest_35h || {}).forEach(([empId, weeks]) => {
+      badWeeksMap.set(empId, new Set(weeks as number[]));
+    });
+    this.badWeeks.set(badWeeksMap);
 
-    // Sprawdź konflikty używając nowych metod serwisu z filtrowaniem
-    this.checkRestTimeConflicts();
-    this.check35HourRestInAllWeeks();
+    // 3. Konflikty przekroczenia 12h
+    this.exceedingWorkHours.set(new Set(conflicts.exceed_12h || []));
   }
+
+  // private checkAllConflictsForCurrentLocation(): void {
+  //   const selectedLocationId = this.selectedLocationId();
+  //
+  //   if (!selectedLocationId) {
+  //     console.warn('Brak wybranej lokacji - pomijam sprawdzanie konfliktów');
+  //     return;
+  //   }
+  //
+  //   // Sprawdź konflikty używając nowych metod serwisu z filtrowaniem
+  //   this.checkRestTimeConflicts();
+  //   this.check35HourRestInAllWeeks();
+  // }
 
 
   private setupSubscriptions(): void {
+    console.log("Zostalem wywolany");
     this.scheduleService.scheduleUpdated$.pipe(takeUntil(this.subscriptions)).subscribe((updatedData) => {
-      this.loadWorkHoursForLocation().then(() => {
-        this.prepareTableData();
+        // 1. Przeładuj work hours (to automatycznie pobierze też konflikty)
+        this.loadWorkHoursForLocation().then(() => {
+          this.prepareTableData();
 
-        timer(800).subscribe(() => {
-          this.checkAllConflictsForCurrentLocation();
-          this.validateAndShowErrors(updatedData);
+          // 2. Konflikty już są zaktualizowane w loadWorkHoursForLocation()
+          // więc możemy od razu pokazać powiadomienia
+          timer(300).subscribe(() => {
+            if (updatedData.conflicts) {
+              this.showConflictNotifications(updatedData.conflicts, updatedData.employee, updatedData.date);
+            }
+          });
         });
-      });
 
-      this.selectedCell.set(undefined);
+        this.selectedCell.set(undefined);
+      });
+  }
+
+  /**
+   * Pokazuje powiadomienia o konfliktach TYLKO dla konkretnej komórki
+   */
+  private showConflictNotifications(
+    conflicts: ConflictData,
+    employeeId?: string,
+    date?: string
+  ): void {
+    if (!conflicts) return;
+
+    // Jeśli nie ma employeeId/date (np. przy multiple edit) - nie pokazuj powiadomień
+    if (!employeeId || !date) {
+      console.log('⏭️ Pomijam powiadomienia - brak employeeId lub date');
+      return;
+    }
+
+    // Stwórz klucz dla edytowanej komórki
+    const cellKey = `${employeeId}-${date}`;
+
+    console.log('🔍 Sprawdzam konflikty dla:', cellKey);
+
+    // Sprawdź czy WŁAŚNIE TA komórka ma konflikty
+    const hasExceeding12h = (conflicts.exceed_12h || []).includes(cellKey);
+    const hasConflict11h = (conflicts.rest_11h || []).includes(cellKey);
+
+    // Dla 35h musimy sprawdzić czy employeeId jest w bad weeks i obliczyć tydzień
+    const dayNumber = new Date(date).getDate();
+    const weekNumber = Math.ceil(dayNumber / 7);
+    const employeeBadWeeks = conflicts.rest_35h?.[employeeId];
+    const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.includes(weekNumber) : false;
+
+    console.log('📊 Konflikty dla komórki:', {
+      cellKey,
+      hasExceeding12h,
+      hasConflict11h,
+      hasBadWeek35h,
+      weekNumber,
+      employeeBadWeeks
     });
+
+    // Pokaż powiadomienia TYLKO jeśli ta konkretna komórka ma problem
+    if (hasExceeding12h) {
+      this.showNotification({
+        type: 'exceed12h',
+        message: 'Uwzględnij odbiór nadgodzin dla pracownika.'
+      });
+    }
+
+    if (hasConflict11h) {
+      this.showNotification({
+        type: 'conflict11h',
+        message: 'Brak przerwy 11h u pracownika'
+      });
+    }
+
+    if (hasBadWeek35h) {
+      this.showNotification({
+        type: 'badWeek35h',
+        message: 'Brak przerwy 35h w tygodniu'
+      });
+    }
+
+    // Jeśli nie ma konfliktów dla tej komórki
+    if (!hasExceeding12h && !hasConflict11h && !hasBadWeek35h) {
+      console.log('✅ Brak konfliktów dla tej komórki');
+    }
   }
 
   private loadWorkingDaysAndCalculateHours(): void {
