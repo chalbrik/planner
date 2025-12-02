@@ -26,6 +26,9 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
         """Filtrowanie queryset na podstawie parametrów."""
         queryset = super().get_queryset()
 
+        # ✅ OPTYMALIZACJA: select_related w metodzie, nie w atrybucie klasy!
+        queryset = queryset.select_related('employee', 'location')
+
         # Filtrowanie po miesiącu i roku
         queryset = self._filter_by_month_year(queryset)
 

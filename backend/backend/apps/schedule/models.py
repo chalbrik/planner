@@ -16,5 +16,19 @@ class WorkHours(models.Model):
         verbose_name = "Godziny pracy"
         verbose_name_plural = "Godziny pracy"
 
+        indexes = [
+            # Indeks dla zapytań po lokacji i dacie (najczęstsze zapytanie)
+            models.Index(fields=['location', 'date'], name='workhours_loc_date_idx'),
+
+            # Indeks dla zapytań po pracowniku i dacie
+            models.Index(fields=['employee', 'date'], name='workhours_emp_date_idx'),
+
+            # Indeks dla sortowania po dacie
+            models.Index(fields=['date'], name='workhours_date_idx'),
+        ]
+
+        # Kolejność domyślna
+        ordering = ['date', 'employee']
+
     def __str__(self):
         return f"{self.employee} - {self.date} - {self.hours}"
