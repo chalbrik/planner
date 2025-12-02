@@ -4,13 +4,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from .serializers import UserSerializer, RegisterSerializer
-
-from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import datetime, timedelta
 from django.conf import settings
+from .services import AuthenticationService
 
 User = get_user_model()
-
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -46,9 +44,7 @@ class TokenObtainPairWithCookieView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Używaj Django authenticate zamiast ręcznego wyszukiwania
-        from django.contrib.auth import authenticate
-        user = authenticate(username=username, password=password)
+        user = AuthenticationService.authenticate_user(username, password)
 
         if user is None:
             return Response(
@@ -56,20 +52,17 @@ class TokenObtainPairWithCookieView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        # Generowanie tokenów
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
+        tokens = AuthenticationService.generate_tokens(user)
+        access_token = tokens['access']
 
-        # Ustawianie odpowiedzi
         response = Response({'access': access_token})
 
         # Obliczamy czas wygaśnięcia cookie
         expires = datetime.now() + timedelta(days=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].days)
 
-        # Ustawiamy cookie z refresh tokenem
         response.set_cookie(
             key='refresh_token',
-            value=str(refresh),
+            value=tokens['refresh'],
             httponly=True,
             secure=settings.SESSION_COOKIE_SECURE,  # Używaj wartości z konfiguracji Django
             samesite='Strict',
@@ -93,47 +86,45 @@ class TokenRefreshWithCookieView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
+        # ← JEDEN try-except wystarczy!
         try:
-            refresh = RefreshToken(refresh_token)
-            access_token = str(refresh.access_token)
-
-            # Pobierz użytkownika z tokenu
-            user_id = refresh.payload.get('user_id')
-            user = User.objects.get(id=user_id)
-
-            # Generujemy nowy refresh token
-            new_refresh = RefreshToken.for_user(user)
-
-            # Tworzymy odpowiedź z nowym access tokenem
-            response = Response({'access': access_token})
-
-            # Obliczamy czas wygaśnięcia cookie
-            expires = datetime.now() + timedelta(days=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].days)
-
-            # Ustawiamy cookie z nowym refresh tokenem
-            response.set_cookie(
-                key='refresh_token',
-                value=str(new_refresh),
-                httponly=True,
-                secure=settings.SESSION_COOKIE_SECURE,
-                samesite='Strict',
-                expires=expires.timestamp(),
-                path='/api/auth/token/refresh/'
-            )
-
-            return response
-
-        except Exception as e:
+            tokens = AuthenticationService.refresh_access_token(refresh_token)
+            access_token = tokens['access']
+        except ValueError as e:
             return Response(
                 {'detail': f'Invalid refresh token: {str(e)}'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+
+        # Tworzymy odpowiedź z nowym access tokenem
+        response = Response({'access': access_token})
+
+        # Obliczamy czas wygaśnięcia cookie
+        expires = datetime.now() + timedelta(days=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].days)
+
+        # Ustawiamy cookie z nowym refresh tokenem
+        response.set_cookie(
+            key='refresh_token',
+            value=tokens['refresh'],
+            httponly=True,
+            secure=settings.SESSION_COOKIE_SECURE,
+            samesite='Strict',
+            expires=expires.timestamp(),
+            path='/api/auth/token/refresh/'
+        )
+
+        return response
 
 
 class LogoutView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
+        # Blacklist token jeśli istnieje
+        refresh_token = request.COOKIES.get('refresh_token')
+        if refresh_token:
+            AuthenticationService.blacklist_token(refresh_token)
+
         response = Response({'detail': 'Wylogowano pomyślnie.'})
         response.delete_cookie('refresh_token', path='/api/auth/token/refresh/')
         return response

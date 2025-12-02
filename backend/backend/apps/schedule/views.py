@@ -9,7 +9,7 @@ from django.http import HttpResponse
 
 from .models import WorkHours
 from .serializers import WorkHoursSerializer
-from .services.conflict_service import ConflictDetectionService
+from .services.conflict_detection_service import ConflictDetectionService
 from .services.pdf_service import PDFGeneratorService
 
 from .validators import ScheduleParamsValidator

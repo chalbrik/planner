@@ -3,29 +3,18 @@
 
 @mixin button-overrides {
   @include mat.button-overrides((
-    // ❌ USUŃ prefix "button-"
-    // ✅ Używaj tylko nazw z błędu
-
     // KSZTAŁTY
     filled-container-shape: config.$button-border-radius,
     outlined-container-shape: config.$button-border-radius,
     text-container-shape: config.$button-border-radius,
-    tonal-container-shape: config.$button-border-radius,
 
     // PADDING
     filled-horizontal-padding: config.$button-padding-horizontal,
     outlined-horizontal-padding: config.$button-padding-horizontal,
-    tonal-horizontal-padding: config.$button-padding-horizontal,
 
     // TYPOGRAPHY
     filled-label-text-weight: config.$button-font-weight,
     outlined-label-text-weight: config.$button-font-weight,
     text-label-text-weight: config.$button-font-weight,
-    tonal-label-text-weight: config.$button-font-weight,
-
-    //filled-label-text-transform: config.$button-text-transform,
-    //outlined-label-text-transform: config.$button-text-transform,
-    //text-label-text-transform: config.$button-text-transform,
-    //tonal-label-text-transform: config.$button-text-transform,
   ));
 }

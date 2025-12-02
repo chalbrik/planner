@@ -1,0 +1,4 @@
+"""
+Reużywalne walidatory
+
+"""

@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
 
-$my-primary-palette: mat.$cyan-palette;
-$my-tertiary-palette: mat.$orange-palette;
+// Używamy gotowych palet Material które mają wszystkie wymagane kolory
+$primary-palette: mat.$cyan-palette;
+$tertiary-palette: mat.$orange-palette;

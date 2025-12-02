@@ -3,21 +3,26 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .models import Employee, VacationLeave
 from .serializers import EmployeeSerializer, VacationLeaveSerializer, EmployeeCreateSerializer, EmployeeDetailSerializer
+from ...common.mixins import QueryOptimizationMixin
+from ...common.permissions import IsEmployeeOwner
+from ...common.viewsets import BaseUserOwnedViewSet
 
 
-class EmployeeViewSet(viewsets.ModelViewSet):
-    queryset = Employee.objects.all()  # Bazowy queryset dla DRF Router
-    permission_classes = [IsAuthenticated]
+class EmployeeViewSet(QueryOptimizationMixin, BaseUserOwnedViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+    select_related_fields = ['user']
+    prefetch_related_fields = ['locations', 'vacation_leaves', 'school', 'previous_employers']
 
     def get_queryset(self):
-        """Zwraca tylko pracowników należących do zalogowanego użytkownika"""
-        # Filtruj po właścicielu
-        queryset = Employee.objects.filter(user=self.request.user)
+        """Dodatkowe filtrowanie (oprócz user)"""
+        queryset = super().get_queryset()
 
-        # Filtruj tylko pracowników z przypisanymi lokacjami
+        # Filtruj tylko z lokacjami
         queryset = queryset.filter(locations__isnull=False).distinct()
 
-        # Dodatkowe filtrowanie po konkretnej lokacji (opcjonalne)
+        # Filtruj po konkretnej lokacji
         location_id = self.request.query_params.get('location')
         if location_id:
             queryset = queryset.filter(locations=location_id)
@@ -38,16 +43,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         return EmployeeSerializer
 
 
-class VacationLeaveViewSet(viewsets.ModelViewSet):
+class VacationLeaveViewSet(QueryOptimizationMixin, viewsets.ModelViewSet):
     queryset = VacationLeave.objects.all()
     serializer_class = VacationLeaveSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsEmployeeOwner]
+
+    select_related_fields = ['employee', 'employee__user']
 
     def get_queryset(self):
-        """Zwraca tylko urlopy pracowników należących do zalogowanego użytkownika"""
-        queryset = VacationLeave.objects.filter(employee__user=self.request.user)
+        queryset = super().get_queryset()
+        queryset = queryset.filter(employee__user=self.request.user)
 
-        # Filtrowanie po pracowniku
         employee_id = self.request.query_params.get('employee_id')
         if employee_id:
             queryset = queryset.filter(employee_id=employee_id)
