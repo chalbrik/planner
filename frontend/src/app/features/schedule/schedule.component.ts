@@ -1,5 +1,6 @@
-import {Component, OnInit, signal, computed, ViewEncapsulation, inject, OnDestroy} from '@angular/core';
-import {ConflictData, ScheduleService} from '../../core/services/schedule/schedule.service';
+import {Component, OnInit, signal, computed, ViewEncapsulation, inject, OnDestroy, ChangeDetectionStrategy} from '@angular/core';
+import {ConflictData} from '../../core/services/schedule/schedule.service';
+import {ScheduleFacade} from '../../core/services/schedule/schedule.facade';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
@@ -11,19 +12,16 @@ import {
   MatTable
 } from '@angular/material/table';
 import {MatButton, MatIconButton} from '@angular/material/button';
-import {EmployeesService} from '../../core/services/employees/employees.service';
 import {IconComponent} from '../../shared/components/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { NotificationPopUpComponent } from './components/notification-pop-up/notification-pop-up.component'; // sprawdź ścieżkę!
+import { NotificationPopUpComponent } from './components/notification-pop-up/notification-pop-up.component';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import {CellEditPopupComponent} from './components/cell-edit-popup/cell-edit-popup.component';
 import {Subject, takeUntil, timer} from 'rxjs';
-import {LocationService} from '../../core/services/locations/location.service';
 import {Location} from '../../core/services/locations/location.types';
 import {Employee} from '../../core/services/employees/employee.types';
 import {WorkHours} from '../../core/services/schedule/schedule.types';
-import {HolidayService} from '../../core/services/holiday/holiday.service';
 import {HoursFormatPipe} from '../../shared/pipes/hours-format.pipe';
 import {MatFormField, MatInput, MatLabel} from '@angular/material/input';
 import {MatOption} from '@angular/material/core';
@@ -90,23 +88,20 @@ interface EmployeeRow {
   styleUrl: './schedule.component.scss',
   standalone: true,
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScheduleComponent implements OnInit, OnDestroy {
 
   private readonly dialog = inject(MatDialog);
-  private readonly scheduleService = inject(ScheduleService);
-  private readonly employeesService = inject(EmployeesService);
   private readonly overlay = inject(Overlay);
-  private readonly locationService = inject(LocationService);
-  private holidayService = inject(HolidayService);
+  protected readonly facade = inject(ScheduleFacade);
 
-  employees: Employee[] = [];
-  workHours: WorkHours[] = [];
-  isLoading = false;
-  errorMessage: string | null = null;
-
-  // Sygnały dla zarządzania datami
-  currentMonthDate = signal<Date>(new Date());
+  // Deleguj sygnały z facade (dla łatwiejszego dostępu w template)
+  employees = this.facade.employees;
+  workHours = this.facade.workHours;
+  isLoading = this.facade.isLoading;
+  errorMessage = this.facade.error;
+  currentMonthDate = this.facade.currentMonthDate;
 
   // Obliczony sygnał dla dni miesiąca
   monthDays = computed(() => {
@@ -165,12 +160,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     date: string
   } | undefined>(undefined);
 
-  selectedCells = signal<Set<string>>(new Set()); // klucze: "employeeId-date"
+  selectedCells = this.facade.selectedCells;
   lastClickedCell = signal<{ employeeId: string; date: string } | null>(null); // dla Shift+click
 
-  conflictingCells = signal<Set<string>>(new Set());
-  badWeeks = signal<Map<string, Set<number>>>(new Map());
-  exceedingWorkHours = signal<Set<string>>(new Set());
+  conflictingCells = this.facade.conflictingCells;
+  badWeeks = this.facade.badWeeks;
+  exceedingWorkHours = this.facade.exceedingWorkHours;
 
   private overlayRef?: OverlayRef;
 
@@ -179,17 +174,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   permanentDataSource = signal<EmployeeRow[]>([]);
   contractDataSource = signal<EmployeeRow[]>([]);
 
-  locations = signal<Location[]>([]);
-  locationOptions = computed(() =>
-    this.locations().map(location => ({
-      value: location.id,
-      label: location.name
-    }))
-  );
-  selectedLocationId = signal<string>('');
+  locations = this.facade.locations;
+  locationOptions = this.facade.locationOptions;
+  selectedLocationId = this.facade.selectedLocationId;
   locationControl = new FormControl<string>('');
 
-  workingDaysInMonth = signal<number>(0);
+  workingDaysInMonth = this.facade.workingDaysInMonth;
 
 
   private subscriptions = new Subject<void>();
@@ -235,11 +225,14 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   constructor() {}
 
   ngOnInit(): void {
-    this.loadLocations();
+    // Załaduj lokacje przez facade
+    this.facade.loadLocations().subscribe();
+
     this.setupResponsiveColumns();
     this.setupSubscriptions();
 
-    this.loadWorkingDaysAndCalculateHours();
+    // Załaduj dni robocze
+    this.facade.loadWorkingDays();
 
     this.locationControl.valueChanges
       .pipe(takeUntil(this.subscriptions))
@@ -315,38 +308,23 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadLocations(): void {
-    this.locationService.getLocations().subscribe({
-      next: (locations) => {
-        this.locations.set(locations);
-
-        if (locations && locations.length > 0) {
-          const firstLocationId = locations[0].id;
-          this.locationControl.setValue(firstLocationId);
-        } else {
-          this.errorMessage = 'Brak dostępnych lokacji';
-        }
-      },
-      error: (error) => {
-        console.error('❌ Błąd ładowania lokacji:', error);
-        this.errorMessage = 'Nie udało się załadować lokacji';
-      }
-    });
-  }
 
   prepareTableData() {
-    if (this.employees.length === 0) {
+    const employees = this.employees();
+    const workHours = this.workHours();
+
+    if (employees.length === 0) {
       this.permanentDataSource.set([]);
       this.contractDataSource.set([]);
       return;
     }
 
     // Filtruj pracowników po wybranej lokacji
-    let filteredEmployees = this.employees;
+    let filteredEmployees = employees;
     const selectedLocationId = this.selectedLocationId();
 
     if (selectedLocationId) {
-      filteredEmployees = this.employees.filter(emp =>
+      filteredEmployees = employees.filter(emp =>
         emp.locations && emp.locations.includes(selectedLocationId)
       );
     }
@@ -361,7 +339,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Przygotuj dane dla UoP (Umowa o Pracę)
     const permanentRows = permanentEmployees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
-      let employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+      let employeeWorkHours = workHours.filter(wh => wh.employee === employee.id);
 
       // Jeśli wybrana lokacja, filtruj też godziny pracy po lokacji
       if (selectedLocationId) {
@@ -387,7 +365,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Przygotuj dane dla UZ (Umowa na Zlecenie)
     const contractRows = contractEmployees.map(employee => {
       const workHoursMap: { [key: string]: string } = {};
-      let employeeWorkHours = this.workHours.filter(wh => wh.employee === employee.id);
+      let employeeWorkHours = workHours.filter(wh => wh.employee === employee.id);
 
       // Jeśli wybrana lokacja, filtruj też godziny pracy po lokacji
       if (selectedLocationId) {
@@ -462,20 +440,18 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   // Metoda do zmiany miesiąca
   changeMonth(direction: number) {
-    const current = this.currentMonthDate();
-    const newDate = new Date(current.getFullYear(), current.getMonth() + direction, 1);
-    this.currentMonthDate.set(newDate);
-
     this.calculateDayColumnWidth();
 
     if (this.overlayRef) {
       this.overlayRef.dispose();
     }
 
-    // Wyczyść i załaduj dane ponownie
-    this.clearConflicts();
-    this.loadDataForLocation(); // To już pobierze konflikty z backendu
-    this.loadWorkingDaysAndCalculateHours();
+    // Użyj facade do zmiany miesiąca (facade automatycznie wyczyści state i przeładuje dane)
+    this.facade.changeMonth(direction);
+    this.facade.loadWorkingDays();
+
+    // Przeładuj dane tabeli po zmianie
+    this.prepareTableData();
   }
 
   getMonthName(): string {
@@ -528,7 +504,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         current.add(cellKey);
       }
 
-      this.selectedCells.set(current);
+      this.facade.setSelectedCells(current);
       this.lastClickedCell.set({ employeeId: employee.id, date: dateString });
       return;
     }
@@ -556,14 +532,14 @@ export class ScheduleComponent implements OnInit, OnDestroy {
           tempDate.setDate(tempDate.getDate() + 1);
         }
 
-        this.selectedCells.set(current);
+        this.facade.setSelectedCells(current);
         return;
       }
     }
 
     // Zwykłe kliknięcie = wyczyść zaznaczenie i zaznacz tylko tę komórkę
     const newSelection = new Set([cellKey]);
-    this.selectedCells.set(newSelection);
+    this.facade.setSelectedCells(newSelection);
     this.lastClickedCell.set({ employeeId: employee.id, date: dateString });
   }
 
@@ -669,7 +645,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // ZMIANA: Jeśli NIE ma Shift/Ctrl i komórka nie jest zaznaczona, reset
     if (!isClickedCellSelected && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
       const newSelection = new Set([cellKey]);
-      this.selectedCells.set(newSelection);
+      this.facade.setSelectedCells(newSelection);
     }
 
     // Teraz pracujemy z aktualnym zaznaczeniem (może być 1 lub więcej komórek)
@@ -771,36 +747,34 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private onPopupSave(data: { hours: string; employee: string; date: string; id?: string }) {
     if (data.id) {
       // Update istniejących godzin
-      this.scheduleService.updateWorkHours(data.id, {
+      this.facade.updateWorkHours(data.id, {
         hours: data.hours,
         employee: data.employee,
         date: data.date,
         location: this.selectedLocationId()
       }).subscribe({
         next: (updatedData) => {
-          this.scheduleService.emitScheduleUpdate(updatedData);
+          this.facade.emitScheduleUpdate(updatedData);
           this.closePopup();
         },
         error: (error) => {
           console.error('Błąd podczas aktualizacji godzin:', error);
-          // Tu możesz dodać obsługę błędów
         }
       });
     } else {
       // Dodaj nowe godziny
-      this.scheduleService.addWorkHours({
+      this.facade.addWorkHours({
         hours: data.hours,
         employee: data.employee,
         date: data.date,
         location: this.selectedLocationId()
       }).subscribe({
         next: (newData) => {
-          this.scheduleService.emitScheduleUpdate(newData);
+          this.facade.emitScheduleUpdate(newData);
           this.closePopup();
         },
         error: (error) => {
           console.error('Błąd podczas dodawania godzin:', error);
-          // Tu możesz dodać obsługę błędów
         }
       });
     }
@@ -811,15 +785,14 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   private onPopupDelete(data: { id: string }) {
-    this.scheduleService.deleteWorkHours(data.id).subscribe({
+    this.facade.deleteWorkHours(data.id).subscribe({
       next: () => {
         // Emit schedule update z informacją o usunięciu
-        this.scheduleService.emitScheduleUpdate({ deleted: true, id: data.id });
+        this.facade.emitScheduleUpdate({ deleted: true, id: data.id });
         this.closePopup();
       },
       error: (error) => {
         console.error('Błąd podczas usuwania godzin:', error);
-        // Tu możesz dodać obsługę błędów
       }
     });
   }
@@ -831,7 +804,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
       if (existingWorkHours?.id) {
         // Update istniejących godzin
-        return this.scheduleService.updateWorkHours(existingWorkHours.id, {
+        return this.facade.updateWorkHours(existingWorkHours.id, {
           hours: data.hours,
           employee: cellData.employee.id,
           date: cellData.date,
@@ -839,7 +812,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         });
       } else {
         // Dodaj nowe godziny
-        return this.scheduleService.addWorkHours({
+        return this.facade.addWorkHours({
           hours: data.hours,
           employee: cellData.employee.id,
           date: cellData.date,
@@ -851,7 +824,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Wykonaj wszystkie operacje równolegle
     Promise.all(saveOperations.map(obs => obs.toPromise()))
       .then(() => {
-        this.scheduleService.emitScheduleUpdate({ multiple: true });
+        this.facade.emitScheduleUpdate({ multiple: true });
         this.closePopup();
       })
       .catch((error) => {
@@ -864,7 +837,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const deleteOperations = selectedCellsData
       .filter(cellData => cellData.workHours?.id)
       .map(cellData =>
-        this.scheduleService.deleteWorkHours(cellData.workHours.id)
+        this.facade.deleteWorkHours(cellData.workHours.id)
       );
 
     if (deleteOperations.length === 0) {
@@ -875,7 +848,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Wykonaj wszystkie operacje równolegle
     Promise.all(deleteOperations.map(obs => obs.toPromise()))
       .then(() => {
-        this.scheduleService.emitScheduleUpdate({ multiple: true, deleted: true });
+        this.facade.emitScheduleUpdate({ multiple: true, deleted: true });
         this.closePopup();
       })
       .catch((error) => {
@@ -898,7 +871,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }
     this.selectedCell.set(undefined);
     // Wyczyść zaznaczenie po zamknięciu popupu
-    this.selectedCells.set(new Set());
+    this.facade.clearSelectedCells();
   }
 
   onCancelSelection() {
@@ -1022,33 +995,18 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   onLocationChange(locationId: string): void {
+    if (!locationId) return;
 
-    if (!locationId) {
-      const firstLocation = this.locations()[0];
-      if (firstLocation) {
-        this.selectedLocationId.set(firstLocation.id);
-        this.onLocationChange(firstLocation.id);
-      }
-      return;
-    }
+    // Użyj facade do zmiany lokacji (facade automatycznie wyczyści state i przeładuje dane)
+    this.facade.changeLocation(locationId);
 
-    this.clearConflicts();
+    // Wyczyść UI state
     this.clearTableState();
-    this.selectedLocationId.set(locationId);
-    this.loadDataForLocation();
+
+    // Przeładuj dane tabeli po zmianie
+    this.prepareTableData();
   }
 
-  /**
-   * Czyści wszystkie sygnały związane z konfliktami
-   */
-  private clearConflicts(): void {
-    this.conflictingCells.set(new Set());
-    this.badWeeks.set(new Map());
-    this.exceedingWorkHours.set(new Set());
-
-    // Opcjonalnie - wyczyść cache jeśli używasz
-    // this.scheduleService.clearConflictCache(); // jeśli będziemy dodawać cache
-  }
 
   /**
    * Czyści stan tabeli i interfejsu użytkownika
@@ -1072,98 +1030,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.dialog.closeAll();
   }
 
-  private loadDataForLocation(): void {
-    this.isLoading = true;
-
-    Promise.all([
-      this.loadEmployeesForLocation(),
-      this.loadWorkHoursForLocation()  // To już załaduje konflikty
-    ]).then(() => {
-      this.prepareTableData();
-      this.isLoading = false;
-    }).catch((error) => {
-      this.errorMessage = 'Nie udało się załadować danych dla lokacji';
-      this.isLoading = false;
-      console.error('Błąd ładowania danych dla lokacji:', error);
-    });
-  }
-
-  private loadEmployeesForLocation(): Promise<Employee[]> {
-    return new Promise((resolve, reject) => {
-      const selectedLocationId = this.selectedLocationId();
-      const params = selectedLocationId ? { location: selectedLocationId } : {};
-
-      this.employeesService.getEmployees(params).subscribe({
-        next: (data) => {
-          if (Array.isArray(data)) {
-            this.employees = data;
-            resolve(data);
-          } else {
-            this.employees = [];
-            resolve([]);
-          }
-        },
-        error: (error) => {
-          console.error('Błąd ładowania pracowników:', error);
-          reject(error);
-        }
-      });
-    });
-  }
-
-  private loadWorkHoursForLocation(): Promise<WorkHours[]> {
-    return new Promise((resolve, reject) => {
-      const currentDate = this.currentMonthDate();
-      const selectedLocationId = this.selectedLocationId();
-
-      const filters = {
-        month: currentDate.getMonth() + 1,
-        year: currentDate.getFullYear(),
-        location: selectedLocationId
-      };
-
-      this.scheduleService.getWorkHours(filters).subscribe({
-        next: (response) => {
-          console.log('✅ Backend response:', response);
-
-          // ✅ ZABEZPIECZENIE: Jeśli work_hours jest undefined, ustaw pustą tablicę
-          this.workHours = response.work_hours || [];
-
-          console.log('📊 Work hours loaded:', this.workHours.length);
-
-          // Zaktualizuj konflikty z backendu
-          if (response.conflicts) {
-            this.updateConflictsFromBackend(response.conflicts);
-          }
-
-          resolve(this.workHours);
-        },
-        error: (error) => {
-          console.error('❌ Błąd ładowania harmonogramu:', error);
-          this.workHours = []; // ✅ Ustaw pustą tablicę w przypadku błędu
-          reject(error);
-        }
-      });
-    });
-  }
-
-  /**
-   * Aktualizuje sygnały konfliktów na podstawie danych z backendu
-   */
-  private updateConflictsFromBackend(conflicts: ConflictData): void {
-    // 1. Konflikty 11h
-    this.conflictingCells.set(new Set(conflicts.rest_11h || []));
-
-    // 2. Konflikty 35h (bad weeks)
-    const badWeeksMap = new Map<string, Set<number>>();
-    Object.entries(conflicts.rest_35h || {}).forEach(([empId, weeks]) => {
-      badWeeksMap.set(empId, new Set(weeks as number[]));
-    });
-    this.badWeeks.set(badWeeksMap);
-
-    // 3. Konflikty przekroczenia 12h
-    this.exceedingWorkHours.set(new Set(conflicts.exceed_12h || []));
-  }
 
   // private checkAllConflictsForCurrentLocation(): void {
   //   const selectedLocationId = this.selectedLocationId();
@@ -1181,18 +1047,18 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
   private setupSubscriptions(): void {
     console.log("Zostalem wywolany");
-    this.scheduleService.scheduleUpdated$.pipe(takeUntil(this.subscriptions)).subscribe((updatedData) => {
-        // 1. Przeładuj work hours (to automatycznie pobierze też konflikty)
-        this.loadWorkHoursForLocation().then(() => {
+    this.facade.scheduleUpdated$.pipe(takeUntil(this.subscriptions)).subscribe((updatedData) => {
+        // Przeładuj dane schedule przez facade
+        this.facade.loadScheduleData();
+
+        // Przeładuj tabelę
+        timer(300).subscribe(() => {
           this.prepareTableData();
 
-          // 2. Konflikty już są zaktualizowane w loadWorkHoursForLocation()
-          // więc możemy od razu pokazać powiadomienia
-          timer(300).subscribe(() => {
-            if (updatedData.conflicts) {
-              this.showConflictNotifications(updatedData.conflicts, updatedData.employee, updatedData.date);
-            }
-          });
+          // Pokaż powiadomienia o konfliktach
+          if (updatedData.conflicts) {
+            this.showConflictNotifications(updatedData.conflicts, updatedData.employee, updatedData.date);
+          }
         });
 
         this.selectedCell.set(undefined);
@@ -1267,66 +1133,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadWorkingDaysAndCalculateHours(): void {
-    const currentDate = this.currentMonthDate();
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
-
-    this.holidayService.calculateWorkingDaysInMonth(year, month).subscribe({
-      next: (workingDays) => {
-        this.workingDaysInMonth.set(workingDays);
-
-        // Po pobraniu dni roboczych, przelicz godziny dla każdego pracownika
-        this.recalculateHoursToWork(workingDays);
-      },
-      error: (error) => {
-        console.error('Błąd podczas pobierania dni roboczych:', error);
-        // W przypadku błędu, oblicz bez świąt
-        const fallbackWorkingDays = this.calculateWorkingDaysWithoutHolidays();
-        this.workingDaysInMonth.set(fallbackWorkingDays);
-        this.recalculateHoursToWork(fallbackWorkingDays);
-      }
-    });
-  }
-
-  private calculateWorkingDaysWithoutHolidays(): number {
-    const currentDate = this.currentMonthDate();
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    let workingDays = 0;
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dayOfWeek = date.getDay();
-
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        workingDays++;
-      }
-    }
-
-    return workingDays;
-  }
-
-  private recalculateHoursToWork(workingDays: number): void {
-    // Przelicz dla stałych pracowników
-    const updatedPermanent = this.permanentDataSource().map(employee => ({
-      ...employee,
-      hoursToWork: this.calculateHoursToWorkForEmployee(employee.job, workingDays)
-    }));
-    this.permanentDataSource.set(updatedPermanent);
-
-    // Przelicz dla pracowników na zlecenie
-    const updatedContract = this.contractDataSource().map(employee => ({
-      ...employee,
-      hoursToWork: this.calculateHoursToWorkForEmployee(employee.job, workingDays)
-    }));
-    this.contractDataSource.set(updatedContract);
-
-    // Aktualizuj główny dataSource dla kompatybilności
-    this.dataSource = [...updatedPermanent, ...updatedContract];
-  }
 
   private calculateHoursToWorkForEmployee(jobRate: number, workingDays: number): number {
     // job * dni robocze * 8h
@@ -1342,32 +1148,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   testPdf() {
-    const locationId = this.selectedLocationId(); // Twoja wybrana lokacja
-    const currentDate = this.currentMonthDate();
-    const month = currentDate.getMonth() + 1;
-    const year = currentDate.getFullYear();
-
-    this.scheduleService.generateSchedulePdf(locationId, month, year).subscribe({
-      next: () => {
-      },
-      error: (error) => {
-        console.error('Błąd pobierania PDF:', error);
-      }
-    });
+    this.facade.downloadSchedulePdf();
   }
 
   testAttendance() {
-    const locationId = this.selectedLocationId(); // Twoja wybrana lokacja
-    const currentDate = this.currentMonthDate();
-    const month = currentDate.getMonth() + 1;
-    const year = currentDate.getFullYear();
+    this.facade.downloadAttendanceSheets();
+  }
 
-    this.scheduleService.generateAttendanceSheets(locationId, month, year).subscribe({
-      next: () => {
-      },
-      error: (error) => {
-        console.error('Błąd pobierania PDF:', error);
-      }
-    });
+  // TrackBy functions for performance optimization
+  trackByEmployeeId(index: number, employee: EmployeeRow): string {
+    return employee.id;
   }
 }
