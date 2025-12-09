@@ -34,11 +34,24 @@ class Rest11hValidator(BaseConflictValidator):
                 next_shift = sorted_shifts[i + 1]
 
                 # Pobierz godziny zakończenia obecnej zmiany
-                try:
-                    _, current_end_str = self.parse_shift_hours(current_shift.hours)
-                    next_start_str, _ = self.parse_shift_hours(next_shift.hours)
-                except (ValueError, AttributeError):
+                parsed_current = self.parse_shift_hours(current_shift.hours)
+                parsed_next = self.parse_shift_hours(next_shift.hours)
+
+                # Pomiń jeśli którykolwiek jest None (np. "dwh", "dwn", inne string wartości)
+                if not parsed_current or not parsed_next:
                     continue
+
+                # Rozpakuj tuple
+                try:
+                    current_start_h, current_start_m, current_end_h, current_end_m = parsed_current
+                    next_start_h, next_start_m, next_end_h, next_end_m = parsed_next
+                except (ValueError, TypeError):
+                    continue
+
+                # Konwertuj na stringi HH:MM
+                current_start_str = f"{current_start_h:02d}:{current_start_m:02d}"
+                current_end_str = f"{current_end_h:02d}:{current_end_m:02d}"
+                next_start_str = f"{next_start_h:02d}:{next_start_m:02d}"
 
                 # Parsuj do datetime
                 current_end = datetime.strptime(
@@ -52,8 +65,7 @@ class Rest11hValidator(BaseConflictValidator):
 
                 # Obsługa nocnych zmian (np. 22:00 - 06:00)
                 # Jeśli koniec < początek, to zmiana przechodzi przez północ
-                current_shift_start_str, _ = self.parse_shift_hours(current_shift.hours)
-                current_shift_start_time = datetime.strptime(current_shift_start_str, "%H:%M").time()
+                current_shift_start_time = datetime.strptime(current_start_str, "%H:%M").time()
                 current_shift_end_time = datetime.strptime(current_end_str, "%H:%M").time()
 
                 if current_shift_end_time < current_shift_start_time:

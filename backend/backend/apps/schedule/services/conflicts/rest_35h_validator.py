@@ -57,8 +57,20 @@ class Rest35hValidator(BaseConflictValidator):
         # Tworzymy listę wszystkich okresów pracy (start, end)
         work_periods = []
         for shift in sorted_shifts:
+            # Parsuj godziny
+            parsed = self.parse_shift_hours(shift.hours)
+
+            # Pomiń jeśli nie można sparsować (np. "dwh", "dwn", inne string wartości)
+            if not parsed:
+                continue
+
             try:
-                start_str, end_str = self.parse_shift_hours(shift.hours)
+                # Rozpakuj tuple
+                start_h, start_m, end_h, end_m = parsed
+
+                # Konwertuj na stringi HH:MM
+                start_str = f"{start_h:02d}:{start_m:02d}"
+                end_str = f"{end_h:02d}:{end_m:02d}"
 
                 start = datetime.strptime(
                     f"{shift.date} {start_str}",
@@ -78,7 +90,7 @@ class Rest35hValidator(BaseConflictValidator):
                     end += timedelta(days=1)
 
                 work_periods.append((start, end))
-            except (ValueError, AttributeError):
+            except (ValueError, AttributeError, TypeError):
                 continue
 
         if not work_periods:
