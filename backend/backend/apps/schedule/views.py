@@ -1,11 +1,14 @@
 """
 ViewSets dla modułu work_hours.
 """
+import logging
 from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.http import HttpResponse
+
+from django.core.exceptions import ValidationError
 
 from .models import WorkHours
 from .serializers import WorkHoursSerializer
@@ -14,6 +17,7 @@ from .services.pdf_service import PDFGeneratorService
 
 from .validators import ScheduleParamsValidator
 
+logger = logging.getLogger(__name__)
 
 class WorkHoursViewSet(viewsets.ModelViewSet):
     """ViewSet dla zarządzania grafikami pracy."""
@@ -95,9 +99,15 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
                     year=int(year)
                 )
                 conflicts = conflict_service.detect_all_conflicts()
-            except Exception as e:
-                # Loguj błąd ale nie przerywaj requestu
-                print(f"Błąd obliczania konfliktów: {e}")
+            except (ValueError, TypeError) as e:
+                logger.error(f"Błędne parametry przy obliczaniu konfliktów: {e}", exc_info=True)
+                conflicts = {
+                    'rest_11h': [],
+                    'rest_35h': {},
+                    'exceed_12h': []
+                }
+            except ValidationError as e:
+                logger.error(f"Błąd walidacji przy obliczaniu konfliktów: {e}", exc_info=True)
                 conflicts = {
                     'rest_11h': [],
                     'rest_35h': {},
@@ -172,8 +182,15 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
                 year=year
             )
             conflicts = conflict_service.detect_all_conflicts()
-        except Exception as e:
-            print(f"Błąd obliczania konfliktów: {e}")
+        except (ValueError, TypeError) as e:
+            logger.error(f"Błędne parametry przy obliczaniu konfliktów po usunięciu: {e}", exc_info=True)
+            conflicts = {
+                'rest_11h': [],
+                'rest_35h': {},
+                'exceed_12h': []
+            }
+        except ValidationError as e:
+            logger.error(f"Błąd walidacji przy obliczaniu konfliktów po usunięciu: {e}", exc_info=True)
             conflicts = {
                 'rest_11h': [],
                 'rest_35h': {},
@@ -202,8 +219,15 @@ class WorkHoursViewSet(viewsets.ModelViewSet):
                 year=instance.date.year
             )
             return conflict_service.detect_all_conflicts()
-        except Exception as e:
-            print(f"Błąd obliczania konfliktów: {e}")
+        except (ValueError, TypeError) as e:
+            logger.error(f"Błędne parametry przy obliczaniu konfliktów dla instancji {instance.id}: {e}", exc_info=True)
+            return {
+                'rest_11h': [],
+                'rest_35h': {},
+                'exceed_12h': []
+            }
+        except ValidationError as e:
+            logger.error(f"Błąd walidacji przy obliczaniu konfliktów dla instancji {instance.id}: {e}", exc_info=True)
             return {
                 'rest_11h': [],
                 'rest_35h': {},

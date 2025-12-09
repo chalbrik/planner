@@ -48,16 +48,8 @@ def verify_recaptcha(token, remote_ip=None):
     if remote_ip:
         data['remoteip'] = remote_ip
     try:
-        logger.info(f"🔍 Sending to Google: secret={secret_key[:10]}..., token={token[:50]}...")
         response = requests.post(url, data=data, timeout=5)
         result = response.json()
-
-        # ✅ LOGUJ WSZYSTKO
-        logger.info("=" * 60)
-        logger.info("📩 GOOGLE RECAPTCHA RESPONSE:")
-        import json
-        logger.info(json.dumps(result, indent=2))
-        logger.info("=" * 60)
 
         return result
     except requests.RequestException as e:
@@ -80,10 +72,6 @@ class FormSubmissionView(APIView):
     def post(self, request):
         recaptcha_token = request.data.get('recaptchaToken')
 
-        logger.info("=" * 60)
-        logger.info("📨 FORM SUBMISSION REQUEST RECEIVED")
-        logger.info(f"Request data: {request.data}")
-
         if not recaptcha_token:
             return Response(
                 {'error': 'Token reCAPTCHA jest wymagany'},
@@ -92,7 +80,6 @@ class FormSubmissionView(APIView):
 
         client_ip = get_client_ip(request)
         recaptcha_result = verify_recaptcha(recaptcha_token, client_ip)
-        logger.info(f"reCAPTCHA token: {recaptcha_token[:50] if recaptcha_token else 'NONE'}...")
 
         if not recaptcha_result.get('success'):
             return Response(

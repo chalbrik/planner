@@ -20,7 +20,7 @@ class HolidayService:
             year: Rok (np. 2025)
             month: Miesiąc (1-12)
 
-        Returns:
+        Returns:d
             Lista słowników z datami świąt w danym miesiącu:
             [
                 {
@@ -48,7 +48,6 @@ class HolidayService:
 
                     month_holidays.append(holiday)
 
-            logger.info(f"📅 Znaleziono {len(month_holidays)} świąt w {month}/{year}")
             return month_holidays
 
         except Exception as e:

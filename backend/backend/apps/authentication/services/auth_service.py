@@ -3,6 +3,7 @@ Business logic for authentication operations.
 """
 from typing import Dict, Optional
 from django.contrib.auth import authenticate, get_user_model
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
@@ -70,7 +71,7 @@ class AuthenticationService:
                 'access': str(refresh.access_token),
                 'refresh': str(refresh)
             }
-        except Exception as e:
+        except (TokenError, InvalidToken) as e:
             raise Exception(f"Invalid refresh token: {str(e)}")
 
     @staticmethod
@@ -84,6 +85,6 @@ class AuthenticationService:
         try:
             token = RefreshToken(refresh_token)
             token.blacklist()
-        except Exception:
+        except (TokenError, InvalidToken):
             # Token już invalid lub blacklisted
             pass

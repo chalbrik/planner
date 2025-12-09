@@ -3,8 +3,6 @@ from django.db import models
 
 
 class FormSubmission(models.Model):
-    objects = models.Manager()
-
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,

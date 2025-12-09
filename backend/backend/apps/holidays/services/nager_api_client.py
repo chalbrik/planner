@@ -36,14 +36,10 @@ class NagerApiClient:
         url = f"{self.BASE_URL}/PublicHolidays/{year}/{self.COUNTRY_CODE}"
 
         try:
-            logger.info(f"📅 Pobieranie świąt dla Polski, rok {year}")
-
             response = self.session.get(url, timeout=self.timeout)
             response.raise_for_status()
 
             holidays = response.json()
-            logger.info(f"✅ Pobrano {len(holidays)} świąt dla roku {year}")
-
             return holidays
 
         except requests.RequestException as e:

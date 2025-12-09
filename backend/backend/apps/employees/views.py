@@ -18,22 +18,13 @@ class EmployeeViewSet(QueryOptimizationMixin, BaseUserOwnedViewSet):
     def get_queryset(self):
         """Dodatkowe filtrowanie (oprócz user)"""
         queryset = super().get_queryset()
-
-        # Filtruj tylko z lokacjami
         queryset = queryset.filter(locations__isnull=False).distinct()
 
-        # Filtruj po konkretnej lokacji
         location_id = self.request.query_params.get('location')
         if location_id:
             queryset = queryset.filter(locations=location_id)
 
         return queryset
-
-    def get_serializer_context(self):
-        """Dodaj user do kontekstu serializatora"""
-        context = super().get_serializer_context()
-        context['user'] = self.request.user
-        return context
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -59,3 +50,13 @@ class VacationLeaveViewSet(QueryOptimizationMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(employee_id=employee_id)
 
         return queryset
+
+    def perform_create(self, serializer):
+        """
+        Walidacja: employee musi należeć do zalogowanego użytkownika.
+        """
+        employee = serializer.validated_data.get('employee')
+        if employee and employee.user != self.request.user:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Nie możesz tworzyć urlopu dla cudzego pracownika.")
+        serializer.save()

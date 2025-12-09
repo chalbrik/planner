@@ -109,7 +109,7 @@
       Pracownicy zatrudnieni na podstawie umowy o pracę
     </div>
 
-    <mat-table [dataSource]="dataSource">
+    <mat-table [dataSource]="dataSource" [trackBy]="trackByEmployeeId">
       <!-- Kolumna z pracownikami -->
       <ng-container matColumnDef="employees" sticky="true">
         <mat-header-cell *matHeaderCellDef class="!bg-primary-100"> Pracownicy </mat-header-cell>
@@ -197,7 +197,7 @@
       Pracownicy zatrudnieni na podstawie umowy na zlecenie
     </div>
 
-    <mat-table [dataSource]="dataSource">
+    <mat-table [dataSource]="dataSource" [trackBy]="trackByEmployeeId">
       <!-- Kolumna z pracownikami -->
       <ng-container matColumnDef="employees" sticky="true">
         <mat-header-cell *matHeaderCellDef class="!bg-primary-100"> Pracownicy </mat-header-cell>
@@ -277,6 +277,7 @@
     </div>
 
     <mat-table [dataSource]="dataSource"
+               [trackBy]="trackByEmployeeId"
                cdkDropList
                (cdkDropListDropped)="onEmployeeDrop($event)">
       <!-- Kolumna z pracownikami -->
@@ -345,7 +346,7 @@
       <mat-header-row *matHeaderRowDef="getColumnsForTable(false); sticky: true"></mat-header-row>
 
       <!-- Wiersze danych -->
-      <mat-row *matRowDef="let row; columns: getColumnsForTable(false);"
+      <mat-row *matRowDef="let row; columns: getColumnsForTable(false); trackBy: trackByEmployeeId"
                cdkDrag
                [cdkDragData]="row"></mat-row>
 

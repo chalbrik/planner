@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Employee, VacationLeave, PreviousEmployers, School
 from .services import EmployeeService
 from ..locations.models import Location
+import logging
 
 
 class PreviousEmployerSerializer(serializers.ModelSerializer):
@@ -19,7 +20,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
     contract_date_end = serializers.DateField(required=False, allow_null=True)
     locations = serializers.PrimaryKeyRelatedField(
         many=True,
-        queryset=Location.objects.all(),  # ✅ ZMIANA: usuń read_only, dodaj queryset
+        queryset=Location.objects.all(),
         required=False  # opcjonalne
     )
 
@@ -65,25 +66,11 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Tworzy pracownika z powiązanymi danymi przy użyciu EmployeeService.
-        Pobiera user z kontekstu serializatora.
+        Tworzy pracownika z relacjami używając EmployeeService.
+        User jest już w validated_data dzięki BaseUserOwnedViewSet.perform_create()
         """
-        import logging
-        logger = logging.getLogger(__name__)
+        return EmployeeService.create_employee_with_relations(validated_data)
 
-        logger.info(f"🚀 SERIALIZER CREATE CALLED with: {validated_data.keys()}")
-
-        # Pobierz user z kontekstu (przekazany przez ViewSet)
-        user = self.context.get('user')
-        logger.info(f"🚀 USER from context: {user}")
-
-        if user:
-            validated_data['user'] = user
-
-        # Użyj serwisu do tworzenia z relacjami
-        result = EmployeeService.create_employee_with_relations(validated_data)
-        logger.info(f"🚀 SERIALIZER FINISHED, returning: {result.id}")
-        return result
 
 class VacationLeaveSerializer(serializers.ModelSerializer):
     employee_name = serializers.CharField(source='employee.__str__', read_only=True)

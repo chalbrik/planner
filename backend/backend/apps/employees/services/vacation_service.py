@@ -52,11 +52,6 @@ class VacationService:
 
        total_experience = education_experience + int(employment_experience)
 
-       # logger.info(f"📊 PODSUMOWANIE STAŻU:")
-       # logger.info(f"   - Wykształcenie: {education_experience} lat")
-       # logger.info(f"   - Doświadczenie zawodowe: {employment_experience:.2f} lat")
-       # logger.info(f"   - CAŁKOWITY STAŻ: {total_experience} lat")
-
        return total_experience
 
    @staticmethod
@@ -65,7 +60,6 @@ class VacationService:
        """Oblicza urlop na podstawie stażu pracy"""
 
        if agreement_type != 'permanent':
-           # logger.info("📝 Umowa zlecenie - brak urlopu")
            # Umowa zlecenie - brak urlopu
            return {
                'current_vacation_days': Decimal('0'),
@@ -86,7 +80,6 @@ class VacationService:
            vacation_days = Decimal('20')  # 20 dni dla stażu poniżej 10 lat
 
        vacation_hours = vacation_days * Decimal('8')  # 8h = dzień pracy
-       # logger.info(f"⏰ {vacation_days} dni × 8h = {vacation_hours}h urlopu")
 
        return {
            'current_vacation_days': vacation_days,
@@ -100,8 +93,6 @@ class VacationService:
    @staticmethod
    def create_vacation_leave(employee: Employee, vacation_data: dict) -> VacationLeave:
        """Tworzy rekord urlopu dla pracownika"""
-       # logger.info(f"💾 Tworzę urlop dla pracownika: {employee}")
-       # logger.info(f"💾 Dane urlopu: {vacation_data}")
 
        return VacationLeave.objects.create(
            employee=employee,

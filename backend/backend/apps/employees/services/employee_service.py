@@ -13,7 +13,6 @@ class EmployeeService:
     @transaction.atomic
     def create_employee_with_relations(validated_data: Dict[str, Any]) -> Employee:
         """Tworzy pracownika wraz z powiązanymi danymi."""
-        logger.info(f"🔥 EMPLOYEE SERVICE CALLED with data: {validated_data.keys()}")
 
         # Sprawdź czy user został przekazany
         user = validated_data.get('user')
@@ -40,12 +39,8 @@ class EmployeeService:
         if birth_date:
             validated_data['birth_date'] = birth_date
 
-        logger.info(f"🔥 CREATING EMPLOYEE with: {validated_data}")
-
         # Utwórz pracownika (user jest już w validated_data)
         employee = Employee.objects.create(**validated_data)
-
-        logger.info(f"🔥 EMPLOYEE CREATED: {employee.id} - {employee.full_name}")
 
         # Utwórz szkołę
         if school_data.get('school_type') and school_data['school_type'] != '':

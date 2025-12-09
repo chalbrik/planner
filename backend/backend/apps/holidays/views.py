@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from .services.holiday_service import HolidayService
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +17,7 @@ class MonthHolidaysView(APIView):
     Endpoint do pobierania świąt w konkretnym miesiącu
     GET /api/holidays/{year}/{month}/
     """
-    permission_classes = [IsAuthenticated]  # Wymaga logowania
-    # permission_classes = []
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, year: int, month: int):
         """Pobiera święta dla konkretnego miesiąca"""
@@ -36,11 +36,8 @@ class MonthHolidaysView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Pobierz święta przez serwis
             holiday_service = HolidayService()
             holidays = holiday_service.get_holidays_for_month(year, month)
-
-            logger.info(f"📅 Zwracam {len(holidays)} świąt dla {month}/{year}")
 
             return Response({
                 'year': year,
@@ -48,9 +45,16 @@ class MonthHolidaysView(APIView):
                 'holidays': holidays
             })
 
-        except Exception as e:
-            logger.error(f"❌ Błąd endpoint holidays/{year}/{month}/: {e}")
+        except requests.RequestException as e:
+            logger.error(f"❌ Błąd API w endpoint holidays/{year}/{month}/: {e}", exc_info=True)
             return Response(
-                {'error': 'Błąd podczas pobierania świąt'},
+                {'error': 'Błąd komunikacji z API świąt'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        except (ValueError, KeyError) as e:
+            logger.error(f"❌ Błąd parsowania w endpoint holidays/{year}/{month}/: {e}", exc_info=True)
+            return Response(
+                {'error': 'Błąd przetwarzania danych świąt'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

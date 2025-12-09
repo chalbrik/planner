@@ -5,7 +5,6 @@ from ..locations.models import Location
 
 
 class WorkHours(models.Model):
-    objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='work_hours', verbose_name="Pracownik")
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name="Lokacja", null=True, blank=True)

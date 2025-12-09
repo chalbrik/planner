@@ -10,7 +10,6 @@ User = get_user_model()
 
 
 class Employee(models.Model):
-    objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         User,
@@ -40,7 +39,8 @@ class Employee(models.Model):
         max_length=50,
         verbose_name="Numer ewidencyjny",
         null=True,
-        blank=True
+        blank=True,
+        db_index = True
     )
     job = models.CharField(
         max_length=20,
@@ -88,7 +88,6 @@ class Employee(models.Model):
 
 
 class VacationLeave(models.Model):
-    objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     employee = models.ForeignKey(
         Employee,
@@ -142,7 +141,6 @@ class VacationLeave(models.Model):
 
 
 class School(models.Model):
-    objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     employee = models.OneToOneField(
         Employee,
@@ -176,7 +174,6 @@ class School(models.Model):
         verbose_name_plural = "Szkoły"
 
 class PreviousEmployers(models.Model):
-    objects = models.Manager()
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     employee = models.ForeignKey(
         Employee,
