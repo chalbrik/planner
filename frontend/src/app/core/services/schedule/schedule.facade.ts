@@ -49,6 +49,7 @@ export class ScheduleFacade {
 
   // Z ScheduleStore
   public readonly workHours = this.scheduleStore.workHours;
+  public readonly allWorkHoursInMonth = this.scheduleStore.allWorkHoursInMonth;
   public readonly conflicts = this.scheduleStore.conflicts;
   public readonly currentMonthDate = this.scheduleStore.currentDate;
   public readonly currentMonth = this.scheduleStore.currentMonth;
@@ -143,7 +144,8 @@ export class ScheduleFacade {
 
     Promise.all([
       this.loadEmployees(locationId),
-      this.loadWorkHours(locationId, month, year)
+      this.loadWorkHours(locationId, month, year),
+      this.loadAllWorkHoursForMonth(month, year)
     ])
       .then(() => {
         this.scheduleStore.setLoading(false);
@@ -180,12 +182,32 @@ export class ScheduleFacade {
         next: (response: WorkHoursResponse) => {
           this.scheduleStore.setWorkHours(response.work_hours || []);
           this.scheduleStore.setConflicts(response.conflicts || null);
+          console.log('Conflicts', response.conflicts);
           resolve(response.work_hours || []);
         },
         error: (error) => {
           console.error('❌ Błąd ładowania harmonogramu:', error);
           this.scheduleStore.setWorkHours([]);
           this.scheduleStore.setConflicts(null);
+          reject(error);
+        }
+      });
+    });
+  }
+
+  private loadAllWorkHoursForMonth(month: number, year: number): Promise<WorkHours[]> {
+    return new Promise((resolve, reject) => {
+      // Pobierz wszystkie workHours dla miesiąca, bez filtra lokacji
+      const filters = { month, year };
+
+      this.scheduleApi.getWorkHours(filters).subscribe({
+        next: (response: WorkHoursResponse) => {
+          this.scheduleStore.setAllWorkHoursInMonth(response.work_hours || []);
+          resolve(response.work_hours || []);
+        },
+        error: (error) => {
+          console.error('❌ Błąd ładowania wszystkich godzin pracy:', error);
+          this.scheduleStore.setAllWorkHoursInMonth([]);
           reject(error);
         }
       });

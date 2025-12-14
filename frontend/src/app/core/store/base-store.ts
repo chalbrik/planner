@@ -58,10 +58,10 @@ export abstract class BaseStore<T extends StoreState> {
       enableLogging: false, // Domyślnie wyłączone
       ...config
     };
-
-    if (this.config.enableLogging) {
-      this.log('🏪 Store initialized', this.state());
-    }
+    //
+    // if (this.config.enableLogging) {
+    //   this.log('🏪 Store initialized', this.state());
+    // }
   }
 
   /**
@@ -79,13 +79,13 @@ export abstract class BaseStore<T extends StoreState> {
     const currentState = this.state();
     const newState = { ...currentState, ...partial };
 
-    if (this.config.enableLogging) {
-      this.log('📝 State update', {
-        previous: currentState,
-        changes: partial,
-        new: newState
-      });
-    }
+    // if (this.config.enableLogging) {
+    //   this.log('📝 State update', {
+    //     previous: currentState,
+    //     changes: partial,
+    //     new: newState
+    //   });
+    // }
 
     this.state.set(newState);
   }
@@ -103,12 +103,12 @@ export abstract class BaseStore<T extends StoreState> {
     const currentState = this.state();
     const newState = updateFn(currentState);
 
-    if (this.config.enableLogging) {
-      this.log('🔄 State update (function)', {
-        previous: currentState,
-        new: newState
-      });
-    }
+    // if (this.config.enableLogging) {
+    //   this.log('🔄 State update (function)', {
+    //     previous: currentState,
+    //     new: newState
+    //   });
+    // }
 
     this.state.set(newState);
   }
@@ -139,9 +139,9 @@ export abstract class BaseStore<T extends StoreState> {
    */
   public reset(): void {
     const initial = this.initialState();
-    if (this.config.enableLogging) {
-      this.log('🔄 Store reset', initial);
-    }
+    // if (this.config.enableLogging) {
+    //   this.log('🔄 Store reset', initial);
+    // }
     this.state.set(initial);
   }
 
@@ -156,9 +156,9 @@ export abstract class BaseStore<T extends StoreState> {
    * Logging helper
    */
   private log(message: string, data?: any): void {
-    if (this.config.enableLogging) {
-      console.log(`[${this.config.storeName}] ${message}`, data || '');
-    }
+    // if (this.config.enableLogging) {
+    //   console.log(`[${this.config.storeName}] ${message}`, data || '');
+    // }
   }
 }
 ``

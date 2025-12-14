@@ -124,7 +124,8 @@
                            [class.weekend-header]="day.isWeekend"
                            [class.today-header]="day.isToday"
                            [class.saturday-cell]="day.isSaturday"
-                           [class.sunday-cell]="day.isSunday">
+                           [class.sunday-cell]="day.isSunday"
+                           [class.holiday-cell]="day.isHoliday">
             <div class="day-header w-full text-center">
               <div class="day-number text-center">{{ day.dayNumber }}</div>
               <div class="day-name text-center">{{ day.date | date:'EEE':'pl' }}</div>
@@ -137,6 +138,8 @@
                     [class.today-cell]="day.isToday"
                     [class.saturday-cell]="day.isSaturday"
                     [class.sunday-cell]="day.isSunday"
+                    [class.holiday-cell]="day.isHoliday"
+                    [class.busy-other-location-cell]="isCellBusyInOtherLocation(element, day.dayNumber)"
                     [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
                     [class.selected-cell]="isCellSelected(element, day.dayNumber)"
                     [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"
@@ -212,7 +215,8 @@
                            [class.weekend-header]="day.isWeekend"
                            [class.today-header]="day.isToday"
                            [class.saturday-cell]="day.isSaturday"
-                           [class.sunday-cell]="day.isSunday">
+                           [class.sunday-cell]="day.isSunday"
+                           [class.holiday-cell]="day.isHoliday">
             <div class="day-header w-full text-center">
               <div class="day-number text-center">{{ day.dayNumber }}</div>
               <div class="day-name text-center">{{ day.date | date:'EEE':'pl' }}</div>
@@ -225,6 +229,8 @@
                     [class.today-cell]="day.isToday"
                     [class.saturday-cell]="day.isSaturday"
                     [class.sunday-cell]="day.isSunday"
+                    [class.holiday-cell]="day.isHoliday"
+                    [class.busy-other-location-cell]="isCellBusyInOtherLocation(element, day.dayNumber)"
                     [class.selected-cell]="isCellSelected(element, day.dayNumber)"
                     (click)="onCellClick(element, day.dayNumber, $event)"
                     (dblclick)="onDbCellClick(element, day.dayNumber, $event)">
@@ -294,7 +300,8 @@
                            [class.weekend-header]="day.isWeekend"
                            [class.today-header]="day.isToday"
                            [class.saturday-cell]="day.isSaturday"
-                           [class.sunday-cell]="day.isSunday">
+                           [class.sunday-cell]="day.isSunday"
+                           [class.holiday-cell]="day.isHoliday">
             <div class="day-header w-full text-center">
               <div class="day-number text-center">{{ day.dayNumber }}</div>
               <div class="day-name text-center">{{ day.date | date:'EEE':'pl' }}</div>
@@ -307,6 +314,8 @@
                     [class.today-cell]="day.isToday"
                     [class.saturday-cell]="day.isSaturday"
                     [class.sunday-cell]="day.isSunday"
+                    [class.holiday-cell]="day.isHoliday"
+                    [class.busy-other-location-cell]="isCellBusyInOtherLocation(element, day.dayNumber)"
                     [class.conflict-cell]="isCellConflicting(element, day.dayNumber)"
                     [class.selected-cell]="isCellSelected(element, day.dayNumber)"
                     [class.bad-week-cell]="isCellInBadWeek(element, day.dayNumber)"

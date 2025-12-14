@@ -19,6 +19,7 @@ import { ConflictData } from '../services/schedule/schedule.service';
 interface ScheduleState extends StoreState {
   // Dane
   workHours: WorkHours[];
+  allWorkHoursInMonth: WorkHours[]; // Wszystkie godziny pracy w miesiącu (ze wszystkich lokacji)
   conflicts: ConflictData | null;
 
   // Filtry/parametry
@@ -41,9 +42,14 @@ export class ScheduleStore extends BaseStore<ScheduleState> {
   // ========================================
 
   /**
-   * Wszystkie godziny pracy
+   * Wszystkie godziny pracy (dla bieżącej lokacji)
    */
   public readonly workHours = computed(() => this.state().workHours);
+
+  /**
+   * Wszystkie godziny pracy w miesiącu (ze wszystkich lokacji)
+   */
+  public readonly allWorkHoursInMonth = computed(() => this.state().allWorkHoursInMonth);
 
   /**
    * Konflikty
@@ -121,6 +127,7 @@ export class ScheduleStore extends BaseStore<ScheduleState> {
     const now = new Date();
     return {
       workHours: [],
+      allWorkHoursInMonth: [],
       conflicts: null,
       selectedLocationId: '',
       currentMonth: now.getMonth() + 1,
@@ -137,10 +144,17 @@ export class ScheduleStore extends BaseStore<ScheduleState> {
   // ========================================
 
   /**
-   * Ustaw godziny pracy
+   * Ustaw godziny pracy (dla bieżącej lokacji)
    */
   setWorkHours(workHours: WorkHours[]): void {
     this.setState({ workHours });
+  }
+
+  /**
+   * Ustaw wszystkie godziny pracy w miesiącu (ze wszystkich lokacji)
+   */
+  setAllWorkHoursInMonth(workHours: WorkHours[]): void {
+    this.setState({ allWorkHoursInMonth: workHours });
   }
 
   /**
@@ -190,6 +204,7 @@ export class ScheduleStore extends BaseStore<ScheduleState> {
       selectedLocationId: locationId,
       workHours: [], // Wyczyść dane przy zmianie lokacji
       conflicts: null
+      // allWorkHoursInMonth nie czyszczę - pozostaje dla całego miesiąca
     });
   }
 
@@ -204,6 +219,7 @@ export class ScheduleStore extends BaseStore<ScheduleState> {
       currentMonth: newDate.getMonth() + 1,
       currentYear: newDate.getFullYear(),
       workHours: [], // Wyczyść dane przy zmianie miesiąca
+      allWorkHoursInMonth: [], // Wyczyść wszystkie godziny przy zmianie miesiąca
       conflicts: null
     });
   }
@@ -216,6 +232,7 @@ export class ScheduleStore extends BaseStore<ScheduleState> {
       currentMonth: month,
       currentYear: year,
       workHours: [],
+      allWorkHoursInMonth: [],
       conflicts: null
     });
   }

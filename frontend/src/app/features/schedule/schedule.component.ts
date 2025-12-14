@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import {ConflictData} from '../../core/services/schedule/schedule.service';
 import {ScheduleFacade} from '../../core/services/schedule/schedule.facade';
+import {HolidayService} from '../../core/services/holiday/holiday.service';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
@@ -47,6 +48,7 @@ interface Day {
   isWeekend: boolean;
   isSaturday: boolean;
   isSunday: boolean;
+  isHoliday: boolean;
 }
 
 interface EmployeeRow {
@@ -103,10 +105,12 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly overlay = inject(Overlay);
   protected readonly facade = inject(ScheduleFacade);
+  private readonly holidayService = inject(HolidayService);
 
   // Deleguj sygnały z facade (dla łatwiejszego dostępu w template)
   employees = this.facade.employees;
   workHours = this.facade.workHours;
+  allWorkHoursInMonth = this.facade.allWorkHoursInMonth;
   isLoading = this.facade.isLoading;
   errorMessage = this.facade.error;
   currentMonthDate = this.facade.currentMonthDate;
@@ -130,6 +134,10 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       const date = new Date(year, month, day);
       const dayOfWeek = date.getDay(); // 0 = niedziela, 6 = sobota
 
+      // Format daty do sprawdzenia świąt (YYYY-MM-DD)
+      const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isHoliday = this.holidayService.isHoliday(dateString);
+
       days.push({
         date: date,
         dayNumber: day,
@@ -138,6 +146,7 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
         isSaturday: dayOfWeek === 6,
         isSunday: dayOfWeek === 0,
+        isHoliday: isHoliday,
       });
     }
 
@@ -226,15 +235,13 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Załaduj lokacje przez facade
-    this.facade.loadLocations().subscribe();
-
     this.setupResponsiveColumns();
     this.setupSubscriptions();
 
     // Załaduj dni robocze
     this.facade.loadWorkingDays();
 
+    // Najpierw setup valueChanges listener
     this.locationControl.valueChanges
       .pipe(takeUntil(this.subscriptions))
       .subscribe((locationId) => {
@@ -242,6 +249,18 @@ export class ScheduleComponent implements OnInit, OnDestroy {
           this.onLocationChange(locationId);
         }
       });
+
+    // Następnie załaduj lokacje - facade automatycznie wybierze pierwszą
+    this.facade.loadLocations().subscribe({
+      next: () => {
+        // Po załadowaniu lokacji, zsynchronizuj locationControl z wybraną lokacją
+        const selectedId = this.selectedLocationId();
+        if (selectedId && !this.locationControl.value) {
+          // Ustaw wartość bez emitowania eventu (aby uniknąć podwójnego ładowania)
+          this.locationControl.setValue(selectedId, { emitEvent: false });
+        }
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -276,6 +295,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     const data = [...this.allEmployeesDataSource()];
     moveItemInArray(data, event.previousIndex, event.currentIndex);
     this.customEmployeeOrder.set(data);
+
+    // Zapisz kolejność do localStorage
+    this.saveEmployeeOrderToLocalStorage(data);
   }
 
   private calculateDayColumnWidth(): void {
@@ -396,6 +418,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Zachowaj stary dataSource dla kompatybilności
     this.dataSource = [...permanentRows, ...contractRows];
 
+    // Wczytaj zapisaną kolejność pracowników z localStorage
+    this.loadEmployeeOrderFromLocalStorage();
+
   }
 
   // Metoda do pobierania godzin pracy dla konkretnego dnia i pracownika
@@ -447,12 +472,15 @@ export class ScheduleComponent implements OnInit, OnDestroy {
       this.overlayRef.dispose();
     }
 
+    // Wyczyść custom order pracowników przy zmianie miesiąca
+    this.customEmployeeOrder.set([]);
+
     // Użyj facade do zmiany miesiąca (facade automatycznie wyczyści state i przeładuje dane)
     this.facade.changeMonth(direction);
     this.facade.loadWorkingDays();
 
-    // Przeładuj dane tabeli po zmianie
-    this.prepareTableData();
+    // prepareTableData() zostanie wywołane automatycznie przez effect w konstruktorze
+    // gdy załadują się nowe dane (employees + workHours + selectedLocationId)
   }
 
   getMonthName(): string {
@@ -720,9 +748,24 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return this.conflictingCells().has(cellKey);
   }
 
-  // Metoda pomocnicza - oblicz numer tygodnia dla dnia
+  // Metoda pomocnicza - oblicz ISO numer tygodnia dla dnia
   private getWeekNumber(dayNumber: number): number {
-    return Math.ceil(dayNumber / 7);
+    const currentDate = this.currentMonthDate();
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber);
+
+    // ISO week number - tydzień zaczyna się w poniedziałek
+    // Algorytm zgodny z Python's date.isocalendar()[1]
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+
+    // Ustaw na najbliższy czwartek (obecny tydzień)
+    const dayNum = d.getUTCDay() || 7; // Niedziela = 7, Poniedziałek = 1
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+
+    // Oblicz liczbę tygodni od początku roku
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const weekNumber = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+
+    return weekNumber;
   }
 
   isCellSelected(employee: EmployeeRow, dayNumber: number): boolean {
@@ -748,11 +791,26 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     return this.exceedingWorkHours().has(cellKey);
   }
 
+  // Sprawdź czy pracownik ma już zmianę w innej lokacji tego dnia
+  isCellBusyInOtherLocation(employee: EmployeeRow, dayNumber: number): boolean {
+    const currentDate = this.currentMonthDate();
+    const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(dayNumber).padStart(2, '0')}`;
+    const currentLocationId = this.selectedLocationId();
+
+    if (!currentLocationId) return false;
+
+    // Sprawdź czy istnieje workHours dla tego pracownika i daty w INNEJ lokacji
+    const allWorkHours = this.allWorkHoursInMonth();
+    return allWorkHours.some(wh =>
+      wh.employee === employee.id &&
+      wh.date === dateString &&
+      wh.location !== currentLocationId
+    );
+  }
+
   private showNotification(error: {type: string, message: string}): void {
     // Sprawdź ile dialogów jest już otwartych
     const openDialogs = this.dialog.openDialogs.length;
-
-    console.log("Powiadomienie wywolane");
 
     this.dialog.open(NotificationPopUpComponent, {
       data: error,
@@ -775,8 +833,8 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     // Wyczyść UI state
     this.clearTableState();
 
-    // Przeładuj dane tabeli po zmianie
-    this.prepareTableData();
+    // prepareTableData() zostanie wywołane automatycznie przez effect w konstruktorze
+    // gdy załadują się nowe dane (employees + workHours + selectedLocationId)
   }
 
 
@@ -792,6 +850,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
     this.permanentDataSource.set([]);
     this.contractDataSource.set([]);
 
+    // Wyczyść custom order pracowników
+    this.customEmployeeOrder.set([]);
+
     // Zamknij popup edycji jeśli jest otwarty
     if (this.overlayRef) {
       this.overlayRef.dispose();
@@ -803,22 +864,21 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   }
 
   private setupSubscriptions(): void {
-    console.log("Zostalem wywolany");
     this.facade.scheduleUpdated$.pipe(takeUntil(this.subscriptions)).subscribe((updatedData) => {
       // Przeładuj dane schedule przez facade
       this.facade.loadScheduleData();
 
-      // Przeładuj tabelę
+      // Pokaż powiadomienia o konfliktach po krótkiej chwili (żeby dane zdążyły się załadować)
       timer(300).subscribe(() => {
-        this.prepareTableData();
-
-        // Pokaż powiadomienia o konfliktach
         if (updatedData.conflicts) {
           this.showConflictNotifications(updatedData.conflicts, updatedData.employee, updatedData.date);
         }
       });
 
       this.selectedCell.set(undefined);
+
+      // prepareTableData() zostanie wywołane automatycznie przez effect w konstruktorze
+      // gdy facade.loadScheduleData() zaktualizuje employees i workHours
     });
   }
 
@@ -834,14 +894,11 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     // Jeśli nie ma employeeId/date (np. przy multiple edit) - nie pokazuj powiadomień
     if (!employeeId || !date) {
-      console.log('⏭️ Pomijam powiadomienia - brak employeeId lub date');
       return;
     }
 
     // Stwórz klucz dla edytowanej komórki
     const cellKey = `${employeeId}-${date}`;
-
-    console.log('🔍 Sprawdzam konflikty dla:', cellKey);
 
     // Sprawdź czy WŁAŚNIE TA komórka ma konflikty
     const hasExceeding12h = (conflicts.exceed_12h || []).includes(cellKey);
@@ -849,18 +906,9 @@ export class ScheduleComponent implements OnInit, OnDestroy {
 
     // Dla 35h musimy sprawdzić czy employeeId jest w bad weeks i obliczyć tydzień
     const dayNumber = new Date(date).getDate();
-    const weekNumber = Math.ceil(dayNumber / 7);
+    const weekNumber = this.getWeekNumber(dayNumber); // Użyj ISO week number
     const employeeBadWeeks = conflicts.rest_35h?.[employeeId];
     const hasBadWeek35h = employeeBadWeeks ? employeeBadWeeks.includes(weekNumber) : false;
-
-    console.log('📊 Konflikty dla komórki:', {
-      cellKey,
-      hasExceeding12h,
-      hasConflict11h,
-      hasBadWeek35h,
-      weekNumber,
-      employeeBadWeeks
-    });
 
     // Pokaż powiadomienia TYLKO jeśli ta konkretna komórka ma problem
     if (hasExceeding12h) {
@@ -882,11 +930,6 @@ export class ScheduleComponent implements OnInit, OnDestroy {
         type: 'badWeek35h',
         message: 'Brak przerwy 35h w tygodniu'
       });
-    }
-
-    // Jeśli nie ma konfliktów dla tej komórki
-    if (!hasExceeding12h && !hasConflict11h && !hasBadWeek35h) {
-      console.log('✅ Brak konfliktów dla tej komórki');
     }
   }
 
@@ -914,5 +957,100 @@ export class ScheduleComponent implements OnInit, OnDestroy {
   // TrackBy functions for performance optimization
   trackByEmployeeId(index: number, employee: EmployeeRow): string {
     return employee.id;
+  }
+
+  // ============================================
+  // LOCALSTORAGE HELPERS - ZAPAMIĘTYWANIE KOLEJNOŚCI PRACOWNIKÓW
+  // ============================================
+
+  /**
+   * Generuje klucz localStorage dla bieżącej lokacji
+   */
+  private getLocalStorageKey(): string {
+    const locationId = this.selectedLocationId();
+    return `schedule_employee_order_${locationId}`;
+  }
+
+  /**
+   * Zapisuje kolejność pracowników do localStorage
+   */
+  private saveEmployeeOrderToLocalStorage(employees: EmployeeRow[]): void {
+    if (typeof window === 'undefined') return;
+
+    const locationId = this.selectedLocationId();
+    if (!locationId) return;
+
+    try {
+      // Zapisz tylko ID pracowników w kolejności
+      const employeeIds = employees.map(emp => emp.id);
+      const key = this.getLocalStorageKey();
+      localStorage.setItem(key, JSON.stringify(employeeIds));
+    } catch (error) {
+      console.error('Błąd zapisu kolejności pracowników do localStorage:', error);
+    }
+  }
+
+  /**
+   * Wczytuje kolejność pracowników z localStorage
+   */
+  private loadEmployeeOrderFromLocalStorage(): void {
+    if (typeof window === 'undefined') return;
+
+    const locationId = this.selectedLocationId();
+    if (!locationId) return;
+
+    try {
+      const key = this.getLocalStorageKey();
+      const stored = localStorage.getItem(key);
+
+      if (!stored) {
+        return;
+      }
+
+      const employeeIds: string[] = JSON.parse(stored);
+
+      // Pobierz wszystkich pracowników
+      const allEmployees = [
+        ...this.permanentDataSource(),
+        ...this.contractDataSource()
+      ];
+
+      // Sortuj według zapisanej kolejności
+      const orderedEmployees: EmployeeRow[] = [];
+      employeeIds.forEach(id => {
+        const employee = allEmployees.find(emp => emp.id === id);
+        if (employee) {
+          orderedEmployees.push(employee);
+        }
+      });
+
+      // Dodaj pracowników, którzy nie byli w zapisanej kolejności (np. nowi pracownicy)
+      allEmployees.forEach(emp => {
+        if (!employeeIds.includes(emp.id)) {
+          orderedEmployees.push(emp);
+        }
+      });
+
+      // Ustaw kolejność tylko jeśli znaleziono jakichś pracowników
+      if (orderedEmployees.length > 0) {
+        this.customEmployeeOrder.set(orderedEmployees);
+      }
+    } catch (error) {
+      console.error('Błąd wczytywania kolejności pracowników z localStorage:', error);
+    }
+  }
+
+  /**
+   * Czyści zapisaną kolejność dla bieżącej lokacji
+   */
+  private clearEmployeeOrderFromLocalStorage(): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const key = this.getLocalStorageKey();
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Błąd czyszczenia kolejności pracowników z localStorage:', error);
+    }
   }
 }

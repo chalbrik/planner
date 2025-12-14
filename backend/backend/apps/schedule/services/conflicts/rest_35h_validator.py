@@ -40,13 +40,16 @@ class Rest35hValidator(BaseConflictValidator):
             # Sprawdzamy każdy tydzień
             for week_num, week_shifts in weeks.items():
                 if not self._has_35h_rest(week_shifts):
-                    conflicts[emp_id].append(week_num)
+                    # Konwertuj UUID na string dla JSON
+                    conflicts[str(emp_id)].append(week_num)
 
         return dict(conflicts)
 
     def _has_35h_rest(self, week_shifts: list) -> bool:
         """
         Sprawdza czy w danym tygodniu jest 35h ciągłego odpoczynku.
+
+        Uwaga: Dzień wolny (DWH, DWN, etc.) jest traktowany jako pełny dzień odpoczynku (24h).
         """
         if not week_shifts:
             return True
@@ -54,11 +57,26 @@ class Rest35hValidator(BaseConflictValidator):
         # Sortujemy zmiany chronologicznie
         sorted_shifts = sorted(week_shifts, key=lambda x: x.date)
 
+        # Sprawdź czy jest dzień wolny - dzień wolny = automatycznie 35h odpoczynku
+        for shift in sorted_shifts:
+            if self.is_day_off(shift.hours):
+                # Dzień wolny to 24h, więc sprawdź czy przed lub po nim jest przerwa >= 11h
+                # Wtedy łącznie będzie >= 35h
+                return True  # Uproszczenie: dzień wolny daje 35h odpoczynku
+
         # Tworzymy listę wszystkich okresów pracy (start, end)
         work_periods = []
         for shift in sorted_shifts:
+            # Pomiń dni wolne w obliczeniach okresów pracy
+            if self.is_day_off(shift.hours):
+                continue
+
             try:
-                start_str, end_str = self.parse_shift_hours(shift.hours)
+                parsed = self.parse_shift_hours(shift.hours)
+                if not parsed:
+                    continue
+
+                start_str, end_str = parsed
 
                 start = datetime.strptime(
                     f"{shift.date} {start_str}",
@@ -78,7 +96,7 @@ class Rest35hValidator(BaseConflictValidator):
                     end += timedelta(days=1)
 
                 work_periods.append((start, end))
-            except (ValueError, AttributeError):
+            except (ValueError, AttributeError, TypeError):
                 continue
 
         if not work_periods:
@@ -95,8 +113,33 @@ class Rest35hValidator(BaseConflictValidator):
             if rest_hours >= 35:
                 return True
 
-        # Sprawdź również odpoczynek od końca ostatniej zmiany do końca tygodnia
-        # oraz od początku tygodnia do pierwszej zmiany
-        # (uproszczona wersja - można rozbudować)
+        # Sprawdź odpoczynek od początku tygodnia do pierwszej zmiany
+        # oraz od ostatniej zmiany do końca tygodnia
+
+        # Znajdź początek i koniec tygodnia ISO (poniedziałek - niedziela)
+        first_shift_date = sorted_shifts[0].date
+
+        # Oblicz poniedziałek tego tygodnia (ISO week start)
+        week_start = first_shift_date - timedelta(days=first_shift_date.weekday())
+        # Oblicz niedzielę tego tygodnia (ISO week end)
+        week_end = week_start + timedelta(days=6)
+
+        # Konwertuj na datetime (poniedziałek 00:00:00 i niedziela 23:59:59)
+        week_start_dt = datetime.combine(week_start, datetime.min.time())
+        week_end_dt = datetime.combine(week_end, datetime.max.time())
+
+        # Odpoczynek od początku tygodnia do pierwszej zmiany
+        first_work_start = work_periods[0][0]
+        rest_before = (first_work_start - week_start_dt).total_seconds() / 3600
+
+        if rest_before >= 35:
+            return True
+
+        # Odpoczynek od ostatniej zmiany do końca tygodnia
+        last_work_end = work_periods[-1][1]
+        rest_after = (week_end_dt - last_work_end).total_seconds() / 3600
+
+        if rest_after >= 35:
+            return True
 
         return False

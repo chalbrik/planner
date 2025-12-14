@@ -356,6 +356,26 @@ mat-table .mat-column-summary {
   }
 }
 
+// ŚWIĘTA
+.holiday-cell {
+  background-color: #DBEAFE !important;
+
+  &:hover {
+    background-color: #DBEAFE !important;
+    border-radius: 0 !important;
+  }
+}
+
+// ZAJĘTY W INNEJ LOKACJI
+.busy-other-location-cell {
+  background-color: #FED7AA !important; // Pomarańczowy brzoskwiniowy
+
+  &:hover {
+    background-color: #FDBA74 !important; // Ciemniejszy pomarańczowy na hover
+    border-radius: 0 !important;
+  }
+}
+
 .sticky-separator {
   position: sticky !important;
   top: 55px !important;

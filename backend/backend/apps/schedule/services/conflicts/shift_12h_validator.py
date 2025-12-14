@@ -11,20 +11,28 @@ class Shift12hValidator(BaseConflictValidator):
     def validate(self) -> List[str]:
         """
         Zwraca listę konfliktów w formacie: ["employee-id-YYYY-MM-DD", ...]
+
+        Sprawdza czy zmiany nie przekraczają 12 godzin.
+        Dni wolne (DWH, DWN, etc.) są ignorowane.
         """
         conflicts = []
 
         for wh in self.work_hours:
             try:
+                # Pomiń dni wolne (nie podlegają limitowi 12h)
+                if self.is_day_off(wh.hours):
+                    continue
+
                 # Oblicz długość zmiany
                 shift_length = self.calculate_shift_length(wh.hours)
 
                 # Jeśli przekracza 12h
                 if shift_length > 12:
-                    conflict_key = f"{wh.employee.id}-{wh.date}"
+                    # Konwertuj UUID na string dla JSON
+                    conflict_key = f"{str(wh.employee.id)}-{wh.date}"
                     if conflict_key not in conflicts:
                         conflicts.append(conflict_key)
-            except (ValueError, AttributeError):
+            except (ValueError, AttributeError, TypeError):
                 # Ignoruj błędne formaty godzin
                 continue
 
